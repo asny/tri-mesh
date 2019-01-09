@@ -9,3 +9,5 @@ pub use crate::mesh::traversal::Walker;
 pub use crate::mesh::iterators::*;
 
 pub use crate::mesh::Mesh;
+
+pub use crate::mesh_builder::MeshBuilder;
