@@ -12,8 +12,8 @@ pub enum Error {
 ///
 /// Build from indices and positions:
 /// ```
-/// # use geo_proc::mesh_builder::{MeshBuilder, Error};
-/// # use geo_proc::test_utility::*;
+/// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
+/// # use tri_mesh::test_utility::*;
 /// #
 /// # fn main() -> Result<(), Box<Error>> {
 /// let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
@@ -31,8 +31,8 @@ pub enum Error {
 /// Build from positions (note: Use [merge_overlapping_primitives](../mesh/struct.Mesh.html#method.merge_overlapping_primitives) if you want to merge
 /// unconnected but overlapping parts of the mesh):
 /// ```
-/// # use geo_proc::mesh_builder::{MeshBuilder, Error};
-/// # use geo_proc::test_utility::*;
+/// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
+/// # use tri_mesh::test_utility::*;
 /// #
 /// # fn main() -> Result<(), Box<Error>> {
 /// let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
@@ -50,8 +50,8 @@ pub enum Error {
 ///
 /// Build a cube:
 /// ```
-/// # use geo_proc::mesh_builder::{MeshBuilder, Error};
-/// # use geo_proc::test_utility::*;
+/// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
+/// # use tri_mesh::test_utility::*;
 /// #
 /// # fn main() -> Result<(), Box<Error>> {
 /// let mesh = MeshBuilder::new().cube().build()?;

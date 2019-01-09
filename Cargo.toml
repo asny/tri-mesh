@@ -1,9 +1,8 @@
 [package]
-name = "geo-proc"
+name = "tri-mesh"
 version = "0.1.0"
 authors = ["Asger Nyman Christiansen <asgernyman@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 cgmath = "0.16.1"
-tobj = "0.1.6"
