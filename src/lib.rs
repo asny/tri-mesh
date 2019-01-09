@@ -17,7 +17,7 @@
 //!
 //! To construct a new mesh, use the [Mesh builder](mesh_builder/struct.MeshBuilder.html).
 
-
+#![warn(missing_docs)]
 
 pub mod mesh;
 pub mod mesh_builder;
