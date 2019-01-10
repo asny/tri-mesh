@@ -1,5 +1,5 @@
 //!
-//! Module containing [MeshBuilder](mesh_builder/struct.MeshBuilder.html) which has functionality to build a new [Mesh](mesh/struct.Mesh.html) instance.
+//! Module containing [MeshBuilder](crate::mesh_builder::MeshBuilder) which has functionality to build a new [Mesh](crate::mesh::Mesh) instance.
 //!
 
 use crate::mesh::Mesh;
@@ -36,7 +36,7 @@ pub enum Error {
 /// # }
 /// ```
 ///
-/// Build from positions (note: Use [merge_overlapping_primitives](../mesh/struct.Mesh.html#method.merge_overlapping_primitives) if you want to merge
+/// Build from positions (note: Use [merge_overlapping_primitives](crate::mesh::Mesh::merge_overlapping_primitives) if you want to merge
 /// unconnected but overlapping parts of the mesh):
 /// ```
 /// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
@@ -77,7 +77,7 @@ pub struct MeshBuilder {
 
 impl MeshBuilder {
 
-    /// Creates a new MeshBuilder instance. See [here](struct.MeshBuilder.html) for examples of use.
+    /// Creates a new [MeshBuilder](crate::mesh_builder::MeshBuilder) instance.
     pub fn new() -> Self
     {
         MeshBuilder {indices: None, positions: None}
@@ -102,7 +102,7 @@ impl MeshBuilder {
     ///
     /// # Errors
     ///
-    /// If no positions are specified, [NoPositionsSpecified](enum.Error.html#variant.NoPositionsSpecified) error is returned.
+    /// If no positions are specified, [NoPositionsSpecified](crate::mesh_builder::Error::NoPositionsSpecified) error is returned.
     ///
     pub fn build(self) -> Result<Mesh, Error>
     {

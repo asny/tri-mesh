@@ -1,5 +1,5 @@
 //!
-//! Module containing the [Mesh](mesh/struct.Mesh.html) definition and functionality.
+//! Module containing the [Mesh](crate::mesh::Mesh) definition and functionality.
 //!
 
 pub mod math {
@@ -49,13 +49,18 @@ pub enum Error {
         /// Error reason.
         message: String
     },
-    /// Returned from [is_valid](struct.Mesh.html#method.is_valid) method when the mesh has ended up in an invalid state.
+    /// Returned from [is_valid](crate::mesh::Mesh::is_valid) method when the mesh has ended up in an invalid state.
     MeshIsInvalid {
         /// Error reason.
         message: String
     }
 }
 
+///
+/// # Overview:
+/// - [Traversal](#traversal)
+/// - [Validity](#validity)
+///
 #[derive(Debug)]
 pub struct Mesh {
     positions: HashMap<VertexID, Vec3>,

@@ -5,7 +5,7 @@
 //! then `tri-mesh` is probably something for you!
 //!
 //! ## Features
-//! - An implementation of the [halfedge mesh data structure](mesh/struct.Mesh.html)
+//! - An implementation of the [halfedge mesh data structure](crate::mesh::Mesh)
 //! - [Iterators](mesh/struct.Mesh.html#iterators) over primitives (vertices, halfedges, faces)
 //! - Halfedge [walker](mesh/struct.Mesh.html#traversal) to efficiently traverse the mesh
 //! - Convenient [connectivity](mesh/struct.Mesh.html#connectivity-functionality) functionality (e.g. vertices of a face, edge between two vertices)
@@ -13,9 +13,9 @@
 //! - [Edit](mesh/struct.Mesh.html#edit-functionality) functionality (e.g. split edge, collapse edge, flip edge)
 //! - [Orientation](mesh/struct.Mesh.html#orientation-functionality) functionality (e.g. flip orientation of all faces)
 //! - [Quality](mesh/struct.Mesh.html#quality-functionality) functionality (e.g. flip edges recursively to improve triangle quality, collapse small faces)
-//! - And more! Most functionality is implemented as methods on the [Mesh](mesh/struct.Mesh.html) struct, so take a look at that rather long list of functions for a complete overview.
+//! - And more! Most functionality is implemented as methods on the [Mesh](crate::mesh::Mesh) struct, so take a look at that rather long list of functions for a complete overview.
 //!
-//! To construct a new mesh, use the [Mesh builder](mesh_builder/struct.MeshBuilder.html).
+//! To construct a new mesh, use the [Mesh builder](crate::mesh_builder::MeshBuilder).
 
 #![warn(missing_docs)]
 

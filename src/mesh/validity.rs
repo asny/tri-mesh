@@ -1,3 +1,5 @@
+//! See [Mesh](crate::mesh::Mesh).
+
 use crate::mesh::*;
 
 /// # Validity
@@ -11,7 +13,7 @@ impl Mesh
     ///
     /// # Errors
     ///
-    /// If the mesh is not valid, an [IsNotValid](enum.Error.html#variant.MeshIsInvalid) error with a description of the problem is returned.
+    /// If the mesh is not valid, an [IsNotValid](crate::mesh::Error::MeshIsInvalid) error with a description of the problem is returned.
     ///
     pub fn is_valid(&self) -> Result<(), Error>
     {
