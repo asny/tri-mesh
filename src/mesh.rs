@@ -115,6 +115,18 @@ impl Mesh
         self.connectivity_info.no_faces()
     }
 
+    ///
+    /// Returns the face indices in an array `(i0, i1, i2) = (indices[3*x], indices[3*x+1], indices[3*x+2])`.
+    /// ```
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// let indices = mesh.indices_buffer();
+    /// for i in 0..indices.len()/3
+    /// {
+    ///     println!("The indices of face {} is: ({}, {}, {})", i, indices[3*i], indices[3*i+1], indices[3*i+2]);
+    /// }
+    /// # assert_eq!(indices.len(), 36);
+    /// ```
+    ///
     pub fn indices_buffer(&self) -> Vec<u32>
     {
         let vertices: Vec<VertexID> = self.vertex_iter().collect();
@@ -130,6 +142,19 @@ impl Mesh
         indices
     }
 
+    ///
+    /// Returns the positions of the vertices in an array.
+    ///
+    /// ```
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// let positions = mesh.positions_buffer();
+    /// for i in 0..positions.len()/3
+    /// {
+    ///     println!("The position of vertex with index {} is: ({}, {}, {})", i, positions[3*i], positions[3*i+1], positions[3*i+2]);
+    /// }
+    /// # assert_eq!(positions.len(), 24);
+    /// ```
+    ///
     pub fn positions_buffer(&self) -> Vec<f32>
     {
         let mut positions = Vec::with_capacity(self.no_vertices() * 3);
