@@ -36,7 +36,7 @@ use std::collections::HashMap;
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
 
-/// Mesh errors
+/// Mesh errors.
 #[derive(Debug)]
 pub enum Error {
     /// Returned from a Mesh method when applying the method with the given configuration is not valid.
@@ -57,7 +57,9 @@ pub enum Error {
 }
 
 ///
-/// # Overview:
+/// Represents a triangle mesh.
+///
+/// ## Functionality overview:
 /// - [Traversal](#traversal)
 /// - [Validity](#validity)
 ///
