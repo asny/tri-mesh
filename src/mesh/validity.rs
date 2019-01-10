@@ -1,7 +1,17 @@
 use crate::mesh::*;
 
+/// # Validity
 impl Mesh
 {
+    /// WARNING: DO NOT USE IN PRODUCTION!
+    /// 
+    /// This method tests if the mesh is valid, i.e. has correct connectivity and orientation and contains no degenerate triangles.
+    /// Intended only to be used in development and unit tests.
+    ///
+    /// # Errors
+    ///
+    /// If the mesh is not valid, an [IsNotValid](enum.Error.html#variant.IsNotValid) error with a description of the problem is returned.
+    ///
     pub fn is_valid(&self) -> Result<(), Error>
     {
         for vertex_id in self.vertex_iter() {
