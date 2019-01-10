@@ -21,7 +21,7 @@
 
 pub mod mesh;
 pub mod mesh_builder;
-pub mod test_utility;
+mod test_utility;
 pub mod prelude;
 
 pub use crate::mesh_builder::MeshBuilder as MeshBuilder;
