@@ -1,5 +1,9 @@
 
 pub mod math {
+    //!
+    //! Linear algebra types for vector calculations. Basically re-export the [cgmath](https://crates.io/crates/cgmath) library.
+    //!
+
     use cgmath::{Vector2, Vector3};
     pub use cgmath::prelude::*;
 
