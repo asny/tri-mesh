@@ -4,19 +4,13 @@ pub mod math {
     //! Linear algebra types for vector calculations. Basically re-export the [cgmath](https://crates.io/crates/cgmath) library.
     //!
 
-    use cgmath::{Vector2, Vector3};
+    use cgmath::Vector3;
+    pub use cgmath;
     pub use cgmath::prelude::*;
 
-    /// Vector with two elements.
-    pub type Vec2 = Vector2<f32>;
     /// Vector with three elements.
     pub type Vec3 = Vector3<f32>;
 
-    /// Creates a [Vec2](type.Vec2.html)
-    pub fn vec2(x: f32, y: f32) -> Vec2
-    {
-        Vector2::new(x, y)
-    }
     /// Creates a [Vec3](type.Vec3.html)
     pub fn vec3(x: f32, y: f32, z: f32) -> Vec3
     {
