@@ -3,8 +3,9 @@ use crate::mesh::*;
 /// # Validity
 impl Mesh
 {
+    ///
     /// WARNING: DO NOT USE IN PRODUCTION!
-    /// 
+    ///
     /// This method tests if the mesh is valid, i.e. has correct connectivity and orientation and contains no degenerate triangles.
     /// Intended only to be used in development and unit tests.
     ///
