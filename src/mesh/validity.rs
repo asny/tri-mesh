@@ -1,9 +1,4 @@
-use crate::mesh::Mesh;
-
-#[derive(Debug)]
-pub enum Error {
-    IsNotValid {message: String}
-}
+use crate::mesh::*;
 
 impl Mesh
 {

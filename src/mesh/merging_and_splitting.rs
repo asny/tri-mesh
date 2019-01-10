@@ -1,13 +1,8 @@
 
-use crate::mesh::Mesh;
+use crate::mesh::*;
 use crate::mesh::math::*;
 use crate::mesh::ids::*;
 use std::collections::{HashSet, HashMap};
-
-#[derive(Debug)]
-pub enum Error {
-    MergeWillCreateNonManifoldMesh {message: String}
-}
 
 /// # Merging & splitting
 impl Mesh

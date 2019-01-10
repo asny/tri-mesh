@@ -1,12 +1,7 @@
 
-use crate::mesh::Mesh;
+use crate::mesh::*;
 use crate::mesh::math::*;
 use crate::mesh::ids::*;
-
-#[derive(Debug)]
-pub enum Error {
-    FailedToFlipEdge {message: String}
-}
 
 /// # Edit functionality
 impl Mesh

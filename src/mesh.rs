@@ -39,6 +39,13 @@ use crate::mesh::ids::*;
 use crate::mesh::math::*;
 
 #[derive(Debug)]
+pub enum Error {
+    IsNotValid {message: String},
+    FailedToFlipEdge {message: String},
+    MergeWillCreateNonManifoldMesh {message: String}
+}
+
+#[derive(Debug)]
 pub struct Mesh {
     positions: HashMap<VertexID, Vec3>,
     connectivity_info: Rc<ConnectivityInfo>
