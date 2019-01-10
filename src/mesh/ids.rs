@@ -1,5 +1,8 @@
 use std::fmt;
 
+///
+/// An unique ID for a vertex
+///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct VertexID
 {
@@ -19,6 +22,9 @@ impl fmt::Display for VertexID {
     }
 }
 
+///
+/// An unique ID for a halfedge
+///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct HalfEdgeID
 {
@@ -38,6 +44,9 @@ impl fmt::Display for HalfEdgeID {
     }
 }
 
+///
+/// An unique ID for a face
+///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct FaceID
 {
@@ -57,10 +66,18 @@ impl fmt::Display for FaceID {
     }
 }
 
+///
+/// An enum describing the types of primitives.
+///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum PrimitiveID {
+pub enum Primitive {
+    /// Vertex
     Vertex(VertexID),
+    /// Edge described as a pair of vertices
     Edge((VertexID, VertexID)),
+    /// Half-edge
+    HalfEdge(HalfEdgeID),
+    /// Face
     Face(FaceID)
 }
 
