@@ -1,3 +1,6 @@
+//!
+//! Module containing the [Mesh](mesh/struct.Mesh.html) definition and functionality.
+//!
 
 pub mod math {
     //!

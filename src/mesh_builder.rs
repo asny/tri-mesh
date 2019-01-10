@@ -1,8 +1,17 @@
+//!
+//! Module containing [MeshBuilder](mesh_builder/struct.MeshBuilder.html) which has functionality to build a new [Mesh](mesh/struct.Mesh.html) instance.
+//!
+
 use crate::mesh::Mesh;
 
+/// MeshBuilder errors.
 #[derive(Debug)]
 pub enum Error {
-    NoPositionsSpecified {message: String}
+    /// Returned when the positions haven't been specified before calling the build function.
+    NoPositionsSpecified {
+        /// Error reason.
+        message: String
+    }
 }
 
 /// `MeshBuilder` contains functionality to build a mesh from either raw data (indices, positions, normals)
