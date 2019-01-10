@@ -22,7 +22,7 @@ pub enum Error {
 /// assert_eq!(mesh.no_faces(), 3);
 /// assert_eq!(mesh.no_vertices(), 4);
 ///
-/// #   mesh.test_is_valid().unwrap();
+/// #   mesh.is_valid().unwrap();
 /// #   Ok(())
 /// # }
 /// ```
@@ -41,7 +41,7 @@ pub enum Error {
 /// assert_eq!(mesh.no_faces(), 3);
 /// assert_eq!(mesh.no_vertices(), 9);
 ///
-/// #   mesh.test_is_valid().unwrap();
+/// #   mesh.is_valid().unwrap();
 /// #   Ok(())
 /// # }
 /// ```
@@ -56,7 +56,7 @@ pub enum Error {
 /// assert_eq!(mesh.no_faces(), 12);
 /// assert_eq!(mesh.no_vertices(), 8);
 ///
-/// #   mesh.test_is_valid().unwrap();
+/// #   mesh.is_valid().unwrap();
 /// #   Ok(())
 /// # }
 /// ```

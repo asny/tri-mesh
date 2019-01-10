@@ -341,7 +341,7 @@ mod tests {
 
             if mesh.flip_edge(&halfedge_id).is_ok()
             {
-                mesh.test_is_valid().unwrap();
+                mesh.is_valid().unwrap();
 
                 let (v2, v3) = mesh.edge_vertices(&halfedge_id);
                 assert_ne!(v0, v2);
@@ -374,7 +374,7 @@ mod tests {
 
             if mesh.flip_edge(&halfedge_id).is_ok()
             {
-                mesh.test_is_valid().unwrap();
+                mesh.is_valid().unwrap();
 
                 let (v2, v3) = mesh.edge_vertices(&halfedge_id);
                 assert_ne!(v0, v2);
@@ -430,7 +430,7 @@ mod tests {
                 assert!(walker.face_id().is_none());
                 assert!(walker.vertex_id().is_some());
 
-                mesh.test_is_valid().unwrap();
+                mesh.is_valid().unwrap();
 
                 break;
             }
@@ -463,7 +463,7 @@ mod tests {
                 }
                 assert_eq!(start_halfedge_id, end_halfedge_id, "Did not go the full round");
 
-                mesh.test_is_valid().unwrap();
+                mesh.is_valid().unwrap();
                 break;
             }
         }
@@ -496,7 +496,7 @@ mod tests {
         walker.as_twin().as_next().as_twin().as_next().as_twin();
         assert!(walker.face_id().is_none());
 
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -517,7 +517,7 @@ mod tests {
                 assert_eq!(mesh.no_halfedges(), 10);
                 assert_eq!(mesh.no_faces(), 2);
 
-                mesh.test_is_valid().unwrap();
+                mesh.is_valid().unwrap();
 
                 break;
             }
@@ -541,7 +541,7 @@ mod tests {
                 assert_eq!(mesh.no_faces(), 1);
 
 
-                mesh.test_is_valid().unwrap();
+                mesh.is_valid().unwrap();
 
                 break;
             }
@@ -560,7 +560,7 @@ mod tests {
                 assert_eq!(mesh.no_halfedges(), 6);
                 assert_eq!(mesh.no_faces(), 1);
 
-                mesh.test_is_valid().unwrap();
+                mesh.is_valid().unwrap();
                 break;
             }
         }
@@ -585,7 +585,7 @@ mod tests {
         assert_eq!(mesh.no_vertices(), 3);
         assert_eq!(mesh.no_halfedges(), 6);
         assert_eq!(mesh.no_faces(), 1);
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -602,7 +602,7 @@ mod tests {
         assert_eq!(3, mesh.no_vertices());
         assert_eq!(6, mesh.no_halfedges());
         assert_eq!(1, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -617,7 +617,7 @@ mod tests {
         assert_eq!(3, mesh.no_vertices());
         assert_eq!(6, mesh.no_halfedges());
         assert_eq!(1, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -632,6 +632,6 @@ mod tests {
         assert_eq!(4, mesh.no_vertices());
         assert_eq!(10, mesh.no_halfedges());
         assert_eq!(2, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 }

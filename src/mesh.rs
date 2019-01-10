@@ -225,7 +225,7 @@ mod tests {
         let t8 = mesh.walker_from_vertex(&v3).face_id();
         assert_eq!(t8, Some(f1));
 
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -256,6 +256,6 @@ mod tests {
 
         assert_eq!(9, mesh.no_vertices());
         assert_eq!(3, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 }

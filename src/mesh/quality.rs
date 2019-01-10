@@ -149,7 +149,7 @@ mod tests {
         let mut mesh = Mesh::new(indices, positions);
 
         mesh.collapse_small_faces(0.2);
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -167,6 +167,6 @@ mod tests {
         assert_eq!(3, mesh.no_vertices());
         assert_eq!(6, mesh.no_halfedges());
         assert_eq!(1, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 }

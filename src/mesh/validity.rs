@@ -7,7 +7,7 @@ pub enum Error {
 
 impl Mesh
 {
-    pub fn test_is_valid(&self) -> Result<(), Error>
+    pub fn is_valid(&self) -> Result<(), Error>
     {
         for vertex_id in self.vertex_iter() {
             if let Some(halfedge_id) = self.walker_from_vertex(&vertex_id).halfedge_id()

@@ -74,7 +74,7 @@ mod tests {
         let mut mesh = crate::MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
 
         mesh.flip_orientation_of_face(&mesh.face_iter().next().unwrap());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
 
     }
 
@@ -89,7 +89,7 @@ mod tests {
         }
         mesh.flip_orientation();
 
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
         for face_id in mesh.face_iter() {
             assert_eq!(mesh.face_normal(&face_id), -*map.get(&face_id).unwrap());
         }

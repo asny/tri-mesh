@@ -383,8 +383,8 @@ mod tests {
 
         let sub_mesh = mesh.clone_subset(&faces);
 
-        mesh.test_is_valid().unwrap();
-        sub_mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
+        sub_mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -400,7 +400,7 @@ mod tests {
         assert_eq!(4, mesh.no_vertices());
         assert_eq!(12, mesh.no_halfedges());
         assert_eq!(3, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -412,7 +412,7 @@ mod tests {
         assert_eq!(8, mesh.no_vertices());
         assert_eq!(36, mesh.no_halfedges());
         assert_eq!(12, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -428,7 +428,7 @@ mod tests {
         assert_eq!(4, mesh.no_vertices());
         assert_eq!(10, mesh.no_halfedges());
         assert_eq!(2, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -444,7 +444,7 @@ mod tests {
         assert_eq!(5, mesh.no_vertices());
         assert_eq!(14, mesh.no_halfedges());
         assert_eq!(3, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -461,7 +461,7 @@ mod tests {
         assert_eq!(5, mesh.no_vertices());
         assert_eq!(14, mesh.no_halfedges());
         assert_eq!(3, mesh.no_faces());
-        mesh.test_is_valid().unwrap();
+        mesh.is_valid().unwrap();
     }
 
     #[test]
@@ -532,8 +532,8 @@ mod tests {
         assert_eq!(mesh1.no_faces(), 2);
         assert_eq!(mesh1.no_vertices(), 4);
 
-        mesh1.test_is_valid().unwrap();
-        mesh2.test_is_valid().unwrap();
+        mesh1.is_valid().unwrap();
+        mesh2.is_valid().unwrap();
     }
 
     #[test]
@@ -552,7 +552,7 @@ mod tests {
         assert_eq!(mesh1.no_faces(), 2);
         assert_eq!(mesh1.no_vertices(), 4);
 
-        mesh1.test_is_valid().unwrap();
-        mesh2.test_is_valid().unwrap();
+        mesh1.is_valid().unwrap();
+        mesh2.is_valid().unwrap();
     }
 }
