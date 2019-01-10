@@ -68,23 +68,33 @@ pub struct MeshBuilder {
 
 impl MeshBuilder {
 
+    /// Creates a new MeshBuilder instance. See [here](struct.MeshBuilder.html) for examples of use.
     pub fn new() -> Self
     {
         MeshBuilder {indices: None, positions: None}
     }
 
+    /// Set the indices of each face, where the indices of face `x` is `(i0, i1, i2) = (indices[3*x], indices[3*x+1], indices[3*x+2])`.
     pub fn with_indices(mut self, indices: Vec<u32>) -> Self
     {
         self.indices = Some(indices);
         self
     }
 
+    /// Set the positions of each vertex, where the position of vertex `x` is `(x, y, z) = (positions[3*x], positions[3*x+1], positions[3*x+2])`;
     pub fn with_positions(mut self, positions: Vec<f32>) -> Self
     {
         self.positions = Some(positions);
         self
     }
 
+    ///
+    /// Builds the mesh. Returns the mesh if the definition is valid and otherwise an error.
+    ///
+    /// # Errors
+    ///
+    /// If no positions are specified, [NoPositionsSpecified](enum.Error.html#variant.NoPositionsSpecified) error is returned.
+    ///
     pub fn build(self) -> Result<Mesh, Error>
     {
         let positions = self.positions.ok_or(
@@ -93,6 +103,7 @@ impl MeshBuilder {
         Ok(Mesh::new(indices, positions))
     }
 
+    /// Creates a cube.
     pub fn cube(self) -> Self
     {
         self.with_positions(vec![
@@ -120,6 +131,7 @@ impl MeshBuilder {
         )
     }
 
+    /// Creates a cube where each face is not connected to any other face.
     pub fn unconnected_cube(self) -> Self
     {
         self.with_positions(vec![
@@ -167,6 +179,7 @@ impl MeshBuilder {
         ])
     }
 
+    /// Creates an icosahedron, i.e. a discretised sphere.
     pub fn icosahedron(self) -> Self
     {
         let x = 0.525731112119133606;
@@ -184,8 +197,12 @@ impl MeshBuilder {
         ))
     }
 
+    /// Creates a cylinder with the x-direction as axis, length 1 and radius 1.
+    /// `x_subdivisions` defines the number of subdivisions in the x-direction
+    /// and `angle_subdivisions` defines the number of circular subdivisions.
     pub fn cylinder(self, x_subdivisions: usize, angle_subdivisions: usize) -> Self
     {
+        if x_subdivisions < 2 || angle_subdivisions < 3 { return self; }
         let mut positions = Vec::new();
         for i in 0..x_subdivisions + 1 {
             let x = i as f32 / x_subdivisions as f32;
@@ -213,21 +230,25 @@ impl MeshBuilder {
         self.with_positions(positions).with_indices(indices)
     }
 
-
+    /// Creates a triangle in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0` which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
     pub fn triangle(self) -> Self
     {
-        self.with_positions(vec![0.0, 0.0, 0.0,  3.0, 0.0, 0.0,  0.0, 3.0, 0.0])
+        self.with_positions(vec![-3.0, -1.0, 0.0,  3.0, -1.0, 0.0,  0.0, 2.0, 0.0])
     }
 
+    /// Creates a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
     pub fn square(self) -> Self
     {
         self.with_indices(vec![0, 1, 2,  2, 1, 3])
             .with_positions(vec![-1.0, -1.0, 0.0,  1.0, -1.0, 0.0,  -1.0, 1.0, 0.0,  1.0, 1.0, 0.0])
     }
 
+    /// Creates three connected triangles in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0`
+    /// which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`
+    /// and has a common vertex in `(0, 0, 0)`.
     pub fn subdivided_triangle(self) -> Self
     {
         self.with_indices(vec![0, 2, 3,  0, 3, 1,  0, 1, 2])
-            .with_positions(vec![0.0, 0.0, 0.0,  1.0, -0.5, 0.0,  0.0, 1.0, 0.0,  -1.0, -0.5, 0.0])
+            .with_positions(vec![0.0, 0.0, 0.0,  -3.0, -1.0, 0.0,  3.0, -1.0, 0.0,  0.0, 2.0, 0.0])
     }
 }
