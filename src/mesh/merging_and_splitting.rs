@@ -406,7 +406,7 @@ mod tests {
     #[test]
     fn test_merge_overlapping_primitives_of_cube()
     {
-        let mut mesh = create_unconnected_cube();
+        let mut mesh = MeshBuilder::new().unconnected_cube().build().unwrap();
         mesh.merge_overlapping_primitives().unwrap();
 
         assert_eq!(8, mesh.no_vertices());

@@ -93,9 +93,9 @@ impl MeshBuilder {
         Ok(Mesh::new(indices, positions))
     }
 
-    pub fn cube(mut self) -> Self
+    pub fn cube(self) -> Self
     {
-        self.positions = Some(vec![
+        self.with_positions(vec![
             1.0, -1.0, -1.0,
             1.0, -1.0, 1.0,
             -1.0, -1.0, 1.0,
@@ -104,9 +104,7 @@ impl MeshBuilder {
             1.0, 1.0, 1.0,
             -1.0, 1.0, 1.0,
             -1.0, 1.0, -1.0
-        ]);
-
-        self.indices = Some(vec![
+        ]).with_indices(vec![
             0, 1, 2,
             0, 2, 3,
             4, 7, 6,
@@ -118,31 +116,75 @@ impl MeshBuilder {
             2, 6, 7,
             2, 7, 3,
             4, 0, 3,
-            4, 3, 7
-        ]);
-        self
+            4, 3, 7]
+        )
     }
 
-    pub fn icosahedron(mut self) -> Self
+    pub fn unconnected_cube(self) -> Self
+    {
+        self.with_positions(vec![
+            1.0, 1.0, -1.0,
+            -1.0, 1.0, -1.0,
+            1.0, 1.0, 1.0,
+            -1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0,
+            -1.0, 1.0, -1.0,
+
+            -1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            1.0, -1.0, 1.0,
+            1.0, -1.0, 1.0,
+            -1.0, -1.0, 1.0,
+            -1.0, -1.0, -1.0,
+
+            1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0,
+            1.0, 1.0, -1.0,
+            -1.0, 1.0, -1.0,
+            1.0, 1.0, -1.0,
+            -1.0, -1.0, -1.0,
+
+            -1.0, -1.0, 1.0,
+            1.0, -1.0, 1.0,
+            1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0,
+            -1.0, 1.0, 1.0,
+            -1.0, -1.0, 1.0,
+
+            1.0, -1.0, -1.0,
+            1.0, 1.0, -1.0,
+            1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0,
+            1.0, -1.0, 1.0,
+            1.0, -1.0, -1.0,
+
+            -1.0, 1.0, -1.0,
+            -1.0, -1.0, -1.0,
+            -1.0, 1.0, 1.0,
+            -1.0, -1.0, 1.0,
+            -1.0, 1.0, 1.0,
+            -1.0, -1.0, -1.0
+        ])
+    }
+
+    pub fn icosahedron(self) -> Self
     {
         let x = 0.525731112119133606;
         let z = 0.850650808352039932;
 
-        self.positions = Some(vec!(
+        self.with_positions(vec!(
             -x, 0.0, z, x, 0.0, z, -x, 0.0, -z, x, 0.0, -z,
             0.0, z, x, 0.0, z, -x, 0.0, -z, x, 0.0, -z, -x,
             z, x, 0.0, -z, x, 0.0, z, -x, 0.0, -z, -x, 0.0
-        ));
-        self.indices = Some(vec!(
+        )).with_indices(vec!(
             0, 1, 4, 0, 4, 9, 9, 4, 5, 4, 8, 5, 4, 1, 8,
             8, 1, 10, 8, 10, 3, 5, 8, 3, 5, 3, 2, 2, 3, 7,
             7, 3, 10, 7, 10, 6, 7, 6, 11, 11, 6, 0, 0, 6, 1,
             6, 10, 1, 9, 11, 0, 9, 2, 11, 9, 5, 2, 7, 11, 2
-        ));
-        self
+        ))
     }
 
-    pub fn cylinder(mut self, x_subdivisions: usize, angle_subdivisions: usize) -> Self
+    pub fn cylinder(self, x_subdivisions: usize, angle_subdivisions: usize) -> Self
     {
         let mut positions = Vec::new();
         for i in 0..x_subdivisions + 1 {
@@ -155,7 +197,6 @@ impl MeshBuilder {
                 positions.push(angle.sin());
             }
         }
-        self.positions = Some(positions);
 
         let mut indices = Vec::new();
         for i in 0..x_subdivisions as u32 {
@@ -169,7 +210,6 @@ impl MeshBuilder {
                 indices.push((i + 1) * angle_subdivisions as u32 + j);
             }
         }
-        self.indices = Some(indices);
-        self
+        self.with_positions(positions).with_indices(indices)
     }
 }
