@@ -100,16 +100,19 @@ impl Mesh
         Mesh {positions, connectivity_info}
     }
 
+    /// Returns the number of vertices in the mesh.
     pub fn no_vertices(&self) -> usize
     {
         self.connectivity_info.no_vertices()
     }
 
+    /// Returns the number of half-edges in the mesh.
     pub fn no_halfedges(&self) -> usize
     {
         self.connectivity_info.no_halfedges()
     }
 
+    /// Returns the number of faces in the mesh.
     pub fn no_faces(&self) -> usize
     {
         self.connectivity_info.no_faces()
