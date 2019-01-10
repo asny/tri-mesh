@@ -13,7 +13,6 @@ pub enum Error {
 /// Build from indices and positions:
 /// ```
 /// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
-/// # use tri_mesh::test_utility::*;
 /// #
 /// # fn main() -> Result<(), Box<Error>> {
 /// let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
@@ -23,7 +22,7 @@ pub enum Error {
 /// assert_eq!(mesh.no_faces(), 3);
 /// assert_eq!(mesh.no_vertices(), 4);
 ///
-/// #   test_is_valid(&mesh).unwrap();
+/// #   mesh.test_is_valid().unwrap();
 /// #   Ok(())
 /// # }
 /// ```
@@ -32,7 +31,6 @@ pub enum Error {
 /// unconnected but overlapping parts of the mesh):
 /// ```
 /// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
-/// # use tri_mesh::test_utility::*;
 /// #
 /// # fn main() -> Result<(), Box<Error>> {
 /// let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
@@ -43,7 +41,7 @@ pub enum Error {
 /// assert_eq!(mesh.no_faces(), 3);
 /// assert_eq!(mesh.no_vertices(), 9);
 ///
-/// #   test_is_valid(&mesh).unwrap();
+/// #   mesh.test_is_valid().unwrap();
 /// #   Ok(())
 /// # }
 /// ```
@@ -51,7 +49,6 @@ pub enum Error {
 /// Build a cube:
 /// ```
 /// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
-/// # use tri_mesh::test_utility::*;
 /// #
 /// # fn main() -> Result<(), Box<Error>> {
 /// let mesh = MeshBuilder::new().cube().build()?;
@@ -59,7 +56,7 @@ pub enum Error {
 /// assert_eq!(mesh.no_faces(), 12);
 /// assert_eq!(mesh.no_vertices(), 8);
 ///
-/// #   test_is_valid(&mesh).unwrap();
+/// #   mesh.test_is_valid().unwrap();
 /// #   Ok(())
 /// # }
 /// ```

@@ -66,8 +66,6 @@ impl Mesh {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_utility::*;
-
     #[test]
     fn test_flip_orientation_of_face()
     {
@@ -76,7 +74,7 @@ mod tests {
         let mut mesh = crate::MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
 
         mesh.flip_orientation_of_face(&mesh.face_iter().next().unwrap());
-        test_is_valid(&mesh).unwrap();
+        mesh.test_is_valid().unwrap();
 
     }
 
@@ -91,7 +89,7 @@ mod tests {
         }
         mesh.flip_orientation();
 
-        test_is_valid(&mesh).unwrap();
+        mesh.test_is_valid().unwrap();
         for face_id in mesh.face_iter() {
             assert_eq!(mesh.face_normal(&face_id), -*map.get(&face_id).unwrap());
         }

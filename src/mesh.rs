@@ -28,6 +28,7 @@ pub mod edge_measures;
 pub mod face_measures;
 pub mod orientation;
 pub mod transformations;
+pub mod validity;
 
 mod connectivity_info;
 
@@ -224,7 +225,7 @@ mod tests {
         let t8 = mesh.walker_from_vertex(&v3).face_id();
         assert_eq!(t8, Some(f1));
 
-        test_is_valid(&mesh).unwrap();
+        mesh.test_is_valid().unwrap();
     }
 
     #[test]
@@ -255,6 +256,6 @@ mod tests {
 
         assert_eq!(9, mesh.no_vertices());
         assert_eq!(3, mesh.no_faces());
-        test_is_valid(&mesh).unwrap();
+        mesh.test_is_valid().unwrap();
     }
 }
