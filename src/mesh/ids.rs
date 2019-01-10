@@ -75,8 +75,6 @@ pub enum Primitive {
     Vertex(VertexID),
     /// Edge described as a pair of vertices
     Edge((VertexID, VertexID)),
-    /// Half-edge
-    HalfEdge(HalfEdgeID),
     /// Face
     Face(FaceID)
 }
