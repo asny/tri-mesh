@@ -36,11 +36,24 @@ use std::collections::HashMap;
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
 
+/// Mesh errors
 #[derive(Debug)]
 pub enum Error {
-    IsNotValid {message: String},
-    FailedToFlipEdge {message: String},
-    MergeWillCreateNonManifoldMesh {message: String}
+    /// Returned from a Mesh method when applying the method with the given configuration is not valid.
+    ActionWillResultInInvalidMesh {
+        /// Error reason.
+        message: String
+    },
+    /// Returned from a Mesh method when applying a method will produce a non-manifold mesh.
+    ActionWillResultInNonManifoldMesh {
+        /// Error reason.
+        message: String
+    },
+    /// Returned from [is_valid](struct.Mesh.html#method.is_valid) method when the mesh has ended up in an invalid state.
+    MeshIsInvalid {
+        /// Error reason.
+        message: String
+    }
 }
 
 #[derive(Debug)]

@@ -154,7 +154,7 @@ impl Mesh
         let edge2_boundary = !edge2_alone && !edge2_interior;
 
         if edge1_interior && !edge2_alone || edge2_interior && !edge1_alone {
-            return Err(Error::MergeWillCreateNonManifoldMesh { message: format!("Merging halfedges {} and {} will create a non-manifold mesh", halfedge_id1, halfedge_id2) });
+            return Err(Error::ActionWillResultInNonManifoldMesh { message: format!("Merging halfedges {} and {} will create a non-manifold mesh", halfedge_id1, halfedge_id2) });
         }
 
         let mut halfedge_to_remove1 = None;

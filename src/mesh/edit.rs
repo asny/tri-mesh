@@ -9,7 +9,7 @@ impl Mesh
     pub fn flip_edge(&mut self, halfedge_id: &HalfEdgeID) -> Result<(), Error>
     {
         let mut walker = self.walker_from_halfedge(halfedge_id);
-        let face_id = walker.face_id().ok_or(Error::FailedToFlipEdge {message: format!("Trying to flip edge on boundary")})?;
+        let face_id = walker.face_id().ok_or(Error::ActionWillResultInInvalidMesh {message: format!("Trying to flip edge on boundary")})?;
         let next_id = walker.next_id().unwrap();
         let previous_id = walker.previous_id().unwrap();
         let v0 = walker.vertex_id().unwrap();
@@ -19,13 +19,13 @@ impl Mesh
 
         walker.as_twin();
         let twin_id = walker.halfedge_id().unwrap();
-        let twin_face_id = walker.face_id().ok_or(Error::FailedToFlipEdge {message: format!("Trying to flip edge on boundary")})?;
+        let twin_face_id = walker.face_id().ok_or(Error::ActionWillResultInInvalidMesh {message: format!("Trying to flip edge on boundary")})?;
         let twin_next_id = walker.next_id().unwrap();
         let twin_previous_id = walker.previous_id().unwrap();
         let v1 = walker.vertex_id().unwrap();
         let v2 = walker.as_next().vertex_id().unwrap();
 
-        if self.connecting_edge(&v2, &v3).is_some() { return Err(Error::FailedToFlipEdge {message: format!("Trying to flip edge which will connect two vertices that are already connected by another edge")}) }
+        if self.connecting_edge(&v2, &v3).is_some() { return Err(Error::ActionWillResultInInvalidMesh {message: format!("Trying to flip edge which will connect two vertices that are already connected by another edge")}) }
 
         self.connectivity_info.set_face_halfedge(&face_id, previous_id);
         self.connectivity_info.set_face_halfedge(&twin_face_id, twin_previous_id);
