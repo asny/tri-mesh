@@ -155,7 +155,7 @@ mod tests {
     #[test]
     fn test_remove_lonely_vertices()
     {
-        let mut mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
+        let mut mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
         let mut iter = mesh.face_iter();
         let face_id1 = iter.next().unwrap();
         let face_id2 = iter.next().unwrap();

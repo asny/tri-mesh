@@ -219,15 +219,15 @@ impl MeshBuilder {
         self.with_positions(vec![0.0, 0.0, 0.0,  3.0, 0.0, 0.0,  0.0, 3.0, 0.0])
     }
 
-    pub fn create_two_connected_faces(self) -> Self
+    pub fn square(self) -> Self
     {
-        self.with_indices(vec![0, 2, 3,  0, 3, 1])
-            .with_positions(vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5])
+        self.with_indices(vec![0, 1, 2,  2, 1, 3])
+            .with_positions(vec![-1.0, -1.0, 0.0,  1.0, -1.0, 0.0,  -1.0, 1.0, 0.0,  1.0, 1.0, 0.0])
     }
 
-    pub fn create_three_connected_faces(self) -> Self
+    pub fn subdivided_triangle(self) -> Self
     {
         self.with_indices(vec![0, 2, 3,  0, 3, 1,  0, 1, 2])
-            .with_positions(vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5])
+            .with_positions(vec![0.0, 0.0, 0.0,  1.0, -0.5, 0.0,  0.0, 1.0, 0.0,  -1.0, -0.5, 0.0])
     }
 }

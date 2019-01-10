@@ -230,7 +230,7 @@ mod tests {
 
     #[test]
     fn test_three_face_connectivity() {
-        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
+        let mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
         let mut id = None;
         for vertex_id in mesh.vertex_iter() {
             let mut round = true;

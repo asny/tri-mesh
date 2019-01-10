@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_vertex_iterator() {
-        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
+        let mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
 
         let mut i = 0;
         for _ in mesh.vertex_iter() {
@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn test_halfedge_iterator() {
-        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
+        let mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
 
         let mut i = 0;
         for _ in mesh.halfedge_iter() {
@@ -174,7 +174,7 @@ mod tests {
 
     #[test]
     fn test_face_iterator() {
-        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
+        let mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
 
         let mut i = 0;
         for _ in mesh.face_iter() {
@@ -193,7 +193,7 @@ mod tests {
 
     #[test]
     fn test_vertex_halfedge_iterator() {
-        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
+        let mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
 
         let mut i = 0;
         let vertex_id = mesh.vertex_iter().last().unwrap();
