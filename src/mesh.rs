@@ -190,7 +190,7 @@ impl std::fmt::Display for Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utility::*;
+    use crate::MeshBuilder;
 
     #[test]
     fn test_one_face_connectivity() {
@@ -230,7 +230,7 @@ mod tests {
 
     #[test]
     fn test_three_face_connectivity() {
-        let mesh = create_three_connected_faces();
+        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
         let mut id = None;
         for vertex_id in mesh.vertex_iter() {
             let mut round = true;

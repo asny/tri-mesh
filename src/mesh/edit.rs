@@ -327,14 +327,13 @@ impl Mesh
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utility::*;
     use crate::mesh_builder::MeshBuilder;
 
     #[test]
     fn test_flip_edge()
     {
         let mut no_flips = 0;
-        let mut mesh = create_two_connected_faces();
+        let mut mesh = MeshBuilder::new().create_two_connected_faces().build().unwrap();
         let no_edges = mesh.no_halfedges();
         for halfedge_id in mesh.halfedge_iter() {
             let (v0, v1) = mesh.edge_vertices(&halfedge_id);
@@ -399,7 +398,7 @@ mod tests {
     #[test]
     fn test_split_edge_on_boundary()
     {
-        let mut mesh = create_single_face();
+        let mut mesh = MeshBuilder::new().triangle().build().unwrap();
         for halfedge_id in mesh.halfedge_iter()
         {
             if mesh.walker_from_halfedge(&halfedge_id).face_id().is_some()
@@ -440,7 +439,7 @@ mod tests {
     #[test]
     fn test_split_edge()
     {
-        let mut mesh = create_two_connected_faces();
+        let mut mesh = MeshBuilder::new().create_two_connected_faces().build().unwrap();
         for halfedge_id in mesh.halfedge_iter() {
             let mut walker = mesh.walker_from_halfedge(&halfedge_id);
             if walker.face_id().is_some() && walker.as_twin().face_id().is_some()
@@ -472,7 +471,7 @@ mod tests {
     #[test]
     fn test_split_face()
     {
-        let mut mesh = create_single_face();
+        let mut mesh = MeshBuilder::new().triangle().build().unwrap();
         let face_id = mesh.face_iter().next().unwrap();
 
         let vertex_id = mesh.split_face(&face_id, vec3(-1.0, -1.0, -1.0));
@@ -551,7 +550,7 @@ mod tests {
     #[test]
     fn test_collapse_edge()
     {
-        let mut mesh = create_three_connected_faces();
+        let mut mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
         for halfedge_id in mesh.halfedge_iter() {
             if !mesh.on_boundary(&halfedge_id)
             {
@@ -608,7 +607,7 @@ mod tests {
     #[test]
     fn test_remove_face_when_connected()
     {
-        let mut mesh = create_two_connected_faces();
+        let mut mesh = MeshBuilder::new().create_two_connected_faces().build().unwrap();
 
         let face_id = mesh.face_iter().next().unwrap();
 
@@ -623,7 +622,7 @@ mod tests {
     #[test]
     fn test_remove_face_when_three_connected_faces()
     {
-        let mut mesh = create_three_connected_faces();
+        let mut mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
 
         let face_id = mesh.face_iter().next().unwrap();
 

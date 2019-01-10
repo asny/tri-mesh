@@ -139,7 +139,7 @@ fn triangle_quality(p0: &Vec3, p1: &Vec3, p2: &Vec3) -> f32
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utility;
+    use crate::MeshBuilder;
 
     #[test]
     fn test_collapse_small_faces()
@@ -155,7 +155,7 @@ mod tests {
     #[test]
     fn test_remove_lonely_vertices()
     {
-        let mut mesh = test_utility::create_three_connected_faces();
+        let mut mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
         let mut iter = mesh.face_iter();
         let face_id1 = iter.next().unwrap();
         let face_id2 = iter.next().unwrap();

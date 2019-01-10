@@ -132,11 +132,11 @@ impl Iterator for FaceHalfedgeIter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utility::*;
+    use crate::MeshBuilder;
 
     #[test]
     fn test_vertex_iterator() {
-        let mesh = create_three_connected_faces();
+        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
 
         let mut i = 0;
         for _ in mesh.vertex_iter() {
@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn test_halfedge_iterator() {
-        let mesh = create_three_connected_faces();
+        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
 
         let mut i = 0;
         for _ in mesh.halfedge_iter() {
@@ -174,7 +174,7 @@ mod tests {
 
     #[test]
     fn test_face_iterator() {
-        let mesh = create_three_connected_faces();
+        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
 
         let mut i = 0;
         for _ in mesh.face_iter() {
@@ -193,7 +193,7 @@ mod tests {
 
     #[test]
     fn test_vertex_halfedge_iterator() {
-        let mesh = create_three_connected_faces();
+        let mesh = MeshBuilder::new().create_three_connected_faces().build().unwrap();
 
         let mut i = 0;
         let vertex_id = mesh.vertex_iter().last().unwrap();
@@ -221,7 +221,7 @@ mod tests {
 
     #[test]
     fn test_face_halfedge_iterator() {
-        let mesh = create_single_face();
+        let mesh = MeshBuilder::new().triangle().build().unwrap();
         let mut i = 0;
         for edge in mesh.face_halfedge_iter(&FaceID::new(0)) {
             assert!(edge.halfedge_id().is_some());

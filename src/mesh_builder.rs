@@ -212,4 +212,22 @@ impl MeshBuilder {
         }
         self.with_positions(positions).with_indices(indices)
     }
+
+
+    pub fn triangle(self) -> Self
+    {
+        self.with_positions(vec![0.0, 0.0, 0.0,  3.0, 0.0, 0.0,  0.0, 3.0, 0.0])
+    }
+
+    pub fn create_two_connected_faces(self) -> Self
+    {
+        self.with_indices(vec![0, 2, 3,  0, 3, 1])
+            .with_positions(vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5])
+    }
+
+    pub fn create_three_connected_faces(self) -> Self
+    {
+        self.with_indices(vec![0, 2, 3,  0, 3, 1,  0, 1, 2])
+            .with_positions(vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5])
+    }
 }

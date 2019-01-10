@@ -55,14 +55,14 @@ impl Mesh
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utility::*;
+    use crate::MeshBuilder;
 
     #[test]
     fn test_face_normal() {
-        let mesh = create_single_face();
+        let mesh = MeshBuilder::new().triangle().build().unwrap();
         let computed_normal = mesh.face_normal(&FaceID::new(0));
         assert_eq!(0.0, computed_normal.x);
-        assert_eq!(1.0, computed_normal.y);
-        assert_eq!(0.0, computed_normal.z);
+        assert_eq!(0.0, computed_normal.y);
+        assert_eq!(1.0, computed_normal.z);
     }
 }
