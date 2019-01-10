@@ -75,7 +75,10 @@ impl Mesh
 
     pub fn rotate(&mut self, rotation: Mat3)
     {
-        self.apply_transformation(rotation.into());
+        for vertex_id in self.vertex_iter() {
+            let p = *self.vertex_position(&vertex_id);
+            self.move_vertex_to(vertex_id, rotation * p);
+        }
     }
 
     pub fn apply_transformation(&mut self, transformation: Mat4)
