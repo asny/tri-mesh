@@ -164,6 +164,21 @@ impl Mesh
         positions
     }
 
+
+    ///
+    /// Returns the normals of the vertices in an array.
+    /// Note: The normals are computed from the connectivity and positions each time this method is invoked.
+    ///
+    /// ```
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// let normals = mesh.normals_buffer();
+    /// for i in 0..normals.len()/3
+    /// {
+    ///     println!("The normal of vertex with index {} is: ({}, {}, {})", i, normals[3*i], normals[3*i+1], normals[3*i+2]);
+    /// }
+    /// # assert_eq!(normals.len(), 24);
+    /// ```
+    ///
     pub fn normals_buffer(&self) -> Vec<f32>
     {
         let mut normals = Vec::with_capacity(self.no_vertices() * 3);
