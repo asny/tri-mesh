@@ -10,7 +10,7 @@ pub struct VertexID
 }
 
 impl VertexID {
-    pub fn new(val: usize) -> VertexID
+    pub(crate) fn new(val: usize) -> VertexID
     {
         VertexID {val}
     }
@@ -32,7 +32,7 @@ pub struct HalfEdgeID
 }
 
 impl HalfEdgeID {
-    pub fn new(val: usize) -> HalfEdgeID
+    pub(crate) fn new(val: usize) -> HalfEdgeID
     {
         HalfEdgeID {val}
     }
@@ -54,7 +54,7 @@ pub struct FaceID
 }
 
 impl FaceID {
-    pub fn new(val: usize) -> FaceID
+    pub(crate) fn new(val: usize) -> FaceID
     {
         FaceID {val}
     }
