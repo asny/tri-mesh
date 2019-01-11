@@ -103,7 +103,7 @@ impl Mesh
             positions.insert(vertex_id.clone(), self.vertex_position(&vertex_id).clone());
         }
 
-        Mesh::new_internal(positions, std::rc::Rc::new(info))
+        Mesh::new_internal(positions, info)
     }
 
     pub fn merge_overlapping_primitives(&mut self) -> Result<(), Error>

@@ -177,7 +177,7 @@ impl Mesh
         walker.as_twin();
         let dying_vertex_id = walker.vertex_id().unwrap();
         let new_position = 0.5 * (self.vertex_position(&surviving_vertex_id) + self.vertex_position(&dying_vertex_id));
-        self.move_vertex_to(surviving_vertex_id, new_position);
+
 
         // Update halfedges pointing to dying vertex
         for walker1 in self.vertex_halfedge_iter(&dying_vertex_id) {
@@ -185,15 +185,15 @@ impl Mesh
         }
 
         // Remove first face + halfedges
-        let he_id1 = walker.halfedge_id().unwrap();
+        let mut he_id1 = walker.halfedge_id();
         if walker.face_id().is_some() {
             walker.as_previous();
             self.connectivity_info.set_vertex_halfedge( &surviving_vertex_id, walker.twin_id());
             walker.as_next();
-            self.remove_one_face(&he_id1);
         }
         else {
-            self.connectivity_info.remove_halfedge(&he_id1);
+            self.connectivity_info.remove_halfedge(&he_id1.unwrap());
+            he_id1 = None;
         }
 
         // Remove second face + halfedges
@@ -202,16 +202,20 @@ impl Mesh
         if walker.face_id().is_some() {
             walker.as_previous();
             self.connectivity_info.set_vertex_halfedge( &surviving_vertex_id, walker.twin_id());
-            walker.as_next();
             self.remove_one_face(&he_id2);
         }
         else {
             self.connectivity_info.remove_halfedge(&he_id2);
         }
 
+        if let Some(ref he_id_to_remove) = he_id1 {
+            self.remove_one_face(he_id_to_remove);
+        }
+
         // Remove dying vertex
         self.connectivity_info.remove_vertex(&dying_vertex_id);
 
+        self.move_vertex_to(surviving_vertex_id, new_position);
         surviving_vertex_id
     }
 

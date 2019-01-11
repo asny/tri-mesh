@@ -35,7 +35,6 @@ pub mod validity;
 mod connectivity_info;
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
-use std::rc::Rc;
 use std::collections::HashMap;
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
@@ -70,7 +69,7 @@ pub enum Error {
 #[derive(Debug)]
 pub struct Mesh {
     positions: HashMap<VertexID, Vec3>,
-    connectivity_info: Rc<ConnectivityInfo>
+    connectivity_info: ConnectivityInfo
 }
 
 impl Mesh
@@ -79,7 +78,7 @@ impl Mesh
     {
         let no_vertices = positions.len()/3;
         let no_faces = indices.len()/3;
-        let mut mesh = Mesh { connectivity_info: Rc::new(ConnectivityInfo::new(no_vertices, no_faces)), positions: HashMap::new()};
+        let mut mesh = Mesh { connectivity_info: ConnectivityInfo::new(no_vertices, no_faces), positions: HashMap::new()};
 
         // Create vertices
         for i in 0..no_vertices {
@@ -122,7 +121,7 @@ impl Mesh
         mesh
     }
 
-    fn new_internal(positions: HashMap<VertexID, Vec3>, connectivity_info: Rc<ConnectivityInfo>) -> Mesh
+    fn new_internal(positions: HashMap<VertexID, Vec3>, connectivity_info: ConnectivityInfo) -> Mesh
     {
         Mesh {positions, connectivity_info}
     }
@@ -245,7 +244,7 @@ impl Mesh
 
 impl Clone for Mesh {
     fn clone(&self) -> Mesh {
-        Mesh::new_internal(self.positions.clone(), Rc::new((*self.connectivity_info).clone()))
+        Mesh::new_internal(self.positions.clone(), self.connectivity_info.clone())
     }
 }
 

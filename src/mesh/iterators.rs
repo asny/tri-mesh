@@ -1,4 +1,3 @@
-use std::rc::{Rc};
 use crate::mesh::Mesh;
 use crate::mesh::ids::*;
 use crate::mesh::traversal::Walker;
@@ -101,15 +100,15 @@ impl Mesh
     }
 }
 
-pub struct VertexHalfedgeIter
+pub struct VertexHalfedgeIter<'a>
 {
-    current: Walker,
+    current: Walker<'a>,
     start: HalfEdgeID,
     is_done: bool
 }
 
-impl VertexHalfedgeIter {
-    pub(crate) fn new(vertex_id: &VertexID, connectivity_info: &Rc<ConnectivityInfo>) -> VertexHalfedgeIter
+impl<'a> VertexHalfedgeIter<'a> {
+    pub(crate) fn new(vertex_id: &VertexID, connectivity_info: &'a ConnectivityInfo) -> VertexHalfedgeIter<'a>
     {
         let current = Walker::new(connectivity_info).into_vertex_halfedge_walker(vertex_id);
         let start = current.halfedge_id().unwrap();
@@ -117,10 +116,10 @@ impl VertexHalfedgeIter {
     }
 }
 
-impl Iterator for VertexHalfedgeIter {
-    type Item = Walker;
+impl<'a> Iterator for VertexHalfedgeIter<'a> {
+    type Item = Walker<'a>;
 
-    fn next(&mut self) -> Option<Walker>
+    fn next(&mut self) -> Option<Walker<'a>>
     {
         if self.is_done { return None; }
         let curr = self.current.clone();
@@ -142,15 +141,15 @@ impl Iterator for VertexHalfedgeIter {
     }
 }
 
-pub struct FaceHalfedgeIter
+pub struct FaceHalfedgeIter<'a>
 {
-    current: Walker,
+    current: Walker<'a>,
     start: HalfEdgeID,
     is_done: bool
 }
 
-impl FaceHalfedgeIter {
-    pub(crate) fn new(face_id: &FaceID, connectivity_info: &Rc<ConnectivityInfo>) -> FaceHalfedgeIter
+impl<'a> FaceHalfedgeIter<'a> {
+    pub(crate) fn new(face_id: &FaceID, connectivity_info: &'a ConnectivityInfo) -> FaceHalfedgeIter<'a>
     {
         let current = Walker::new(connectivity_info).into_face_halfedge_walker(face_id);
         let start = current.halfedge_id().unwrap();
@@ -158,10 +157,10 @@ impl FaceHalfedgeIter {
     }
 }
 
-impl Iterator for FaceHalfedgeIter {
-    type Item = Walker;
+impl<'a> Iterator for FaceHalfedgeIter<'a> {
+    type Item = Walker<'a>;
 
-    fn next(&mut self) -> Option<Walker>
+    fn next(&mut self) -> Option<Walker<'a>>
     {
         if self.is_done { return None; }
         let curr = self.current.clone();

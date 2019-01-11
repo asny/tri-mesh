@@ -1,4 +1,3 @@
-use std::rc::{Rc};
 use crate::mesh::Mesh;
 use crate::mesh::ids::*;
 use crate::mesh::connectivity_info::{HalfEdge, ConnectivityInfo};
@@ -13,33 +12,33 @@ impl Mesh
 
     pub fn walker_from_vertex(&self, vertex_id: &VertexID) -> Walker
     {
-        Walker::new(&self.connectivity_info).into_vertex_halfedge_walker(vertex_id)
+        self.walker().into_vertex_halfedge_walker(vertex_id)
     }
 
     pub fn walker_from_halfedge(&self, halfedge_id: &HalfEdgeID) -> Walker
     {
-        Walker::new(&self.connectivity_info).into_halfedge_walker(halfedge_id)
+        self.walker().into_halfedge_walker(halfedge_id)
     }
 
     pub fn walker_from_face(&self, face_id: &FaceID) -> Walker
     {
-        Walker::new(&self.connectivity_info).into_face_halfedge_walker(face_id)
+        self.walker().into_face_halfedge_walker(face_id)
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct Walker
+pub struct Walker<'a>
 {
-    connectivity_info: Rc<ConnectivityInfo>,
+    connectivity_info: &'a ConnectivityInfo,
     current: Option<HalfEdgeID>,
     current_info: Option<HalfEdge>
 }
 
-impl Walker
+impl<'a> Walker<'a>
 {
-    pub(crate) fn new(connectivity_info: &Rc<ConnectivityInfo>) -> Self
+    pub(crate) fn new(connectivity_info: &'a ConnectivityInfo) -> Self
     {
-        Walker {current: None, current_info: None, connectivity_info: connectivity_info.clone()}
+        Walker {current: None, current_info: None, connectivity_info: connectivity_info}
     }
 
     pub fn into_vertex_halfedge_walker(mut self, vertex_id: &VertexID) -> Self
@@ -138,7 +137,7 @@ impl Walker
 
     pub fn previous_id(&self) -> Option<HalfEdgeID>
     {
-        if let Some(ref next_id) = self.next_id() { Walker::new(&self.connectivity_info.clone()).into_halfedge_walker(next_id).next_id() }
+        if let Some(ref next_id) = self.next_id() { Walker::new(&self.connectivity_info).into_halfedge_walker(next_id).next_id() }
         else { None }
     }
 
