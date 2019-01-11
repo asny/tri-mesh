@@ -25,11 +25,39 @@ impl Mesh
         FaceHalfedgeIter::new(face_id, &self.connectivity_info)
     }
 
+    ///
+    /// Iterator over the vertex ids.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tri_mesh::prelude::*;
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// let mut sum_vertex_positions = Vec3::zero();
+    /// for vertex_id in mesh.vertex_iter() {
+    ///     sum_vertex_positions += *mesh.vertex_position(&vertex_id);
+    /// }
+    /// ```
+    ///
     pub fn vertex_iter(&self) -> VertexIter
     {
         self.connectivity_info.vertex_iterator()
     }
 
+    ///
+    /// Iterator over the half-edge ids.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tri_mesh::prelude::*;
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// let mut sum_halfedge_lengths = 0.0;
+    /// for halfedge_id in mesh.halfedge_iter() {
+    ///     sum_halfedge_lengths += mesh.edge_length(&halfedge_id);
+    /// }
+    /// ```
+    ///
     pub fn halfedge_iter(&self) -> HalfEdgeIter
     {
         self.connectivity_info.halfedge_iterator()
@@ -47,6 +75,20 @@ impl Mesh
         Box::new(values.into_iter())
     }
 
+    ///
+    /// Iterator over the face ids.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tri_mesh::prelude::*;
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// let mut sum_face_area = 0.0;
+    /// for face_id in mesh.face_iter() {
+    ///     sum_face_area += mesh.face_area(&face_id);
+    /// }
+    /// ```
+    ///
     pub fn face_iter(&self) -> FaceIter
     {
         self.connectivity_info.face_iterator()
