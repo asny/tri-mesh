@@ -41,25 +41,29 @@ impl Mesh {
 
     pub fn fix_orientation(&mut self)
     {
-        let mut visited_faces = std::collections::HashSet::new();
+        let mut visited_faces = std::collections::HashMap::new();
         for face_id in self.face_iter() {
-            self.correct_orientation_of(&face_id, &mut visited_faces);
+            self.find_faces_to_flip_orientation(face_id, &mut visited_faces, false);
+        }
+        for (face_id, should_flip) in visited_faces {
+            if should_flip {
+                self.flip_orientation_of_face(&face_id)
+            }
         }
     }
 
-    fn correct_orientation_of(&mut self, face_id: &FaceID, visited_faces: &mut std::collections::HashSet<FaceID>)
+    fn find_faces_to_flip_orientation(&self, face_id: FaceID, visited_faces: &mut std::collections::HashMap<FaceID, bool>, should_flip: bool)
     {
-        if !visited_faces.contains(face_id)
+        if !visited_faces.contains_key(&face_id)
         {
-            visited_faces.insert(*face_id);
-            for mut walker in self.face_halfedge_iter(face_id) {
+            visited_faces.insert(face_id, should_flip);
+            for mut walker in self.face_halfedge_iter(&face_id) {
                 let vertex_id = walker.vertex_id();
                 if let Some(face_id_to_test) = walker.as_twin().face_id()
                 {
-                    if vertex_id == walker.vertex_id() {
-                        self.flip_orientation_of_face(&face_id_to_test)
-                    }
-                    self.correct_orientation_of(&face_id_to_test, visited_faces);
+                    let is_opposite = vertex_id == walker.vertex_id();
+                    self.find_faces_to_flip_orientation(face_id_to_test, visited_faces,
+                                                        is_opposite && !should_flip || !is_opposite && should_flip);
                 }
             }
         }
