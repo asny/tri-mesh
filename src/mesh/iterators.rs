@@ -14,11 +14,46 @@ pub type EdgeIter = Box<Iterator<Item = (VertexID, VertexID)>>;
 /// # Iterators
 impl Mesh
 {
+    ///
+    /// Iterator over the halfedges which starts in the given vertex, ie. the one-ring.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tri_mesh::prelude::*;
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// # let vertex_id = mesh.vertex_iter().next().unwrap();
+    /// let mut one_ring_average_position = Vec3::zero();
+    /// let mut i = 0;
+    /// for halfedge_id in mesh.vertex_halfedge_iter(vertex_id) {
+    ///     let walker = mesh.walker_from_halfedge(halfedge_id);
+    ///     one_ring_average_position += *mesh.vertex_position(walker.vertex_id().unwrap());
+    ///     i = i+1;
+    /// }
+    /// one_ring_average_position /= i as f32;
+    /// ```
+    ///
     pub fn vertex_halfedge_iter(&self, vertex_id: VertexID) -> VertexHalfedgeIter
     {
         VertexHalfedgeIter::new(vertex_id, &self.connectivity_info)
     }
 
+    ///
+    /// Iterator over the three halfedges connected to the given face.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tri_mesh::prelude::*;
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// # let face_id = mesh.face_iter().next().unwrap();
+    /// let mut face_circumference = 0.0f32;
+    /// for halfedge_id in mesh.face_halfedge_iter(face_id) {
+    ///     face_circumference += mesh.edge_length(halfedge_id);
+    /// }
+    /// # assert_eq!(face_circumference, 4.0f32 + 8.0f32.sqrt());
+    /// ```
+    ///
     pub fn face_halfedge_iter(&self, face_id: FaceID) -> FaceHalfedgeIter
     {
         FaceHalfedgeIter::new(face_id, &self.connectivity_info)
@@ -102,7 +137,7 @@ impl Mesh
 
 pub struct VertexHalfedgeIter<'a>
 {
-    current: Walker<'a>,
+    walker: Walker<'a>,
     start: HalfEdgeID,
     is_done: bool
 }
@@ -110,9 +145,9 @@ pub struct VertexHalfedgeIter<'a>
 impl<'a> VertexHalfedgeIter<'a> {
     pub(crate) fn new(vertex_id: VertexID, connectivity_info: &'a ConnectivityInfo) -> VertexHalfedgeIter<'a>
     {
-        let current = Walker::new(connectivity_info).into_vertex_halfedge_walker(vertex_id);
-        let start = current.halfedge_id().unwrap();
-        VertexHalfedgeIter { current, start, is_done: false }
+        let walker = Walker::new(connectivity_info).into_vertex_halfedge_walker(vertex_id);
+        let start = walker.halfedge_id().unwrap();
+        VertexHalfedgeIter { walker, start, is_done: false }
     }
 }
 
@@ -122,21 +157,21 @@ impl<'a> Iterator for VertexHalfedgeIter<'a> {
     fn next(&mut self) -> Option<HalfEdgeID>
     {
         if self.is_done { return None; }
-        let curr = self.current.halfedge_id().unwrap();
+        let curr = self.walker.halfedge_id().unwrap();
 
-        match self.current.face_id() {
+        match self.walker.face_id() {
             Some(_) => {
-                self.current.as_previous().as_twin();
+                self.walker.as_previous().as_twin();
             },
             None => { // In the case there are holes in the one-ring
-                self.current.as_twin();
-                while let Some(_) = self.current.face_id() {
-                    self.current.as_next().as_twin();
+                self.walker.as_twin();
+                while let Some(_) = self.walker.face_id() {
+                    self.walker.as_next().as_twin();
                 }
-                self.current.as_twin();
+                self.walker.as_twin();
             }
         }
-        self.is_done = self.current.halfedge_id().unwrap() == self.start;
+        self.is_done = self.walker.halfedge_id().unwrap() == self.start;
         Some(curr)
     }
 }
