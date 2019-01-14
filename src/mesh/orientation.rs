@@ -8,16 +8,16 @@ impl Mesh {
     pub fn flip_orientation(&mut self)
     {
         for face_id in self.face_iter() {
-            self.flip_orientation_of_face(&face_id);
+            self.flip_orientation_of_face(face_id);
         }
     }
 
-    pub(crate) fn flip_orientation_of_face(&mut self, face_id: &FaceID)
+    pub(crate) fn flip_orientation_of_face(&mut self, face_id: FaceID)
     {
         let mut update_list = [(None, None, None); 3];
 
         let mut i = 0;
-        for mut walker in self.face_halfedge_iter(*face_id) {
+        for mut walker in self.face_halfedge_iter(face_id) {
             let halfedge_id = walker.halfedge_id();
             let vertex_id = walker.vertex_id();
             walker.as_previous();
@@ -47,7 +47,7 @@ impl Mesh {
         }
         for (face_id, should_flip) in visited_faces {
             if should_flip {
-                self.flip_orientation_of_face(&face_id)
+                self.flip_orientation_of_face(face_id)
             }
         }
     }
@@ -79,7 +79,7 @@ mod tests {
         let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5];
         let mut mesh = crate::MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
 
-        mesh.flip_orientation_of_face(&mesh.face_iter().next().unwrap());
+        mesh.flip_orientation_of_face(mesh.face_iter().next().unwrap());
         mesh.is_valid().unwrap();
 
     }
