@@ -162,8 +162,8 @@ impl Mesh
         let mut indices = Vec::with_capacity(self.no_faces() * 3);
         for face_id in self.face_iter()
         {
-            for walker in self.face_halfedge_iter(face_id) {
-                let vertex_id = walker.vertex_id().unwrap();
+            for halfedge_id in self.face_halfedge_iter(face_id) {
+                let vertex_id = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
                 let index = vertices.iter().position(|v| v == &vertex_id).unwrap();
                 indices.push(index as u32);
             }
@@ -305,8 +305,8 @@ mod tests {
         let mut id = None;
         for vertex_id in mesh.vertex_iter() {
             let mut round = true;
-            for walker in mesh.vertex_halfedge_iter(vertex_id) {
-                if walker.face_id().is_none() { round = false; break; }
+            for halfedge_id in mesh.vertex_halfedge_iter(vertex_id) {
+                if mesh.walker_from_halfedge(halfedge_id).face_id().is_none() { round = false; break; }
             }
             if round { id = Some(vertex_id); break; }
         }

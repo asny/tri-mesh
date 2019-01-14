@@ -103,33 +103,31 @@ impl Mesh
 
         // Update twin information
         let mut new_halfedge_id = HalfEdgeID::new(0);
-        for walker in self.face_halfedge_iter(face_id1) {
-            let vid = walker.vertex_id().unwrap();
-            let hid = walker.halfedge_id().unwrap();
+        for halfedge_id in self.face_halfedge_iter(face_id1) {
+            let vid = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
             if vid == vertex_id1 {
-                self.connectivity_info.set_halfedge_twin(halfedge_id2, hid);
+                self.connectivity_info.set_halfedge_twin(halfedge_id2, halfedge_id);
             }
             else if vid == vertex_id2 {
-                self.connectivity_info.set_halfedge_twin(twin_id2, hid);
+                self.connectivity_info.set_halfedge_twin(twin_id2, halfedge_id);
             }
             else if vid == new_vertex_id {
-                new_halfedge_id = walker.halfedge_id().unwrap();
+                new_halfedge_id = halfedge_id;
             }
             else {
                 panic!("Split face failed")
             }
         }
-        for walker in self.face_halfedge_iter(face_id2) {
-            let vid = walker.vertex_id().unwrap();
-            let hid = walker.halfedge_id().unwrap();
+        for halfedge_id in self.face_halfedge_iter(face_id2) {
+            let vid = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
             if vid == vertex_id2 {
-                self.connectivity_info.set_halfedge_twin(new_halfedge_id, hid);
+                self.connectivity_info.set_halfedge_twin(new_halfedge_id, halfedge_id);
             }
             else if vid == vertex_id3 {
-                self.connectivity_info.set_halfedge_twin(twin_id3, hid);
+                self.connectivity_info.set_halfedge_twin(twin_id3, halfedge_id);
             }
             else if vid == new_vertex_id {
-                self.connectivity_info.set_halfedge_twin(halfedge_id3, hid);
+                self.connectivity_info.set_halfedge_twin(halfedge_id3, halfedge_id);
             }
             else {
                 panic!("Split face failed")
@@ -152,17 +150,16 @@ impl Mesh
         let new_face_id = self.connectivity_info.create_face(vertex_id1, vertex_id2, new_vertex_id);
 
         // Update twin information
-        for walker in self.face_halfedge_iter(new_face_id) {
-            let vid = walker.vertex_id().unwrap();
-            let hid = walker.halfedge_id().unwrap();
+        for halfedge_id in self.face_halfedge_iter(new_face_id) {
+            let vid = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
             if vid == vertex_id1 {
-                self.connectivity_info.set_halfedge_twin(twin_halfedge_id, hid);
+                self.connectivity_info.set_halfedge_twin(twin_halfedge_id, halfedge_id);
             }
             else if vid == vertex_id2 {
-                self.connectivity_info.set_halfedge_twin(halfedge_to_update1, hid);
+                self.connectivity_info.set_halfedge_twin(halfedge_to_update1, halfedge_id);
             }
             else if vid == new_vertex_id {
-                self.connectivity_info.set_halfedge_twin(halfedge_to_update2, hid);
+                self.connectivity_info.set_halfedge_twin(halfedge_to_update2, halfedge_id);
             }
             else {
                 panic!("Split one face failed")
@@ -180,8 +177,8 @@ impl Mesh
 
 
         // Update halfedges pointing to dying vertex
-        for walker1 in self.vertex_halfedge_iter(dying_vertex_id) {
-            self.connectivity_info.set_halfedge_vertex(walker1.twin_id().unwrap(), surviving_vertex_id);
+        for halfedge_id in self.vertex_halfedge_iter(dying_vertex_id) {
+            self.connectivity_info.set_halfedge_vertex(self.walker_from_halfedge(halfedge_id).twin_id().unwrap(), surviving_vertex_id);
         }
 
         // Remove first face + halfedges
@@ -246,8 +243,8 @@ impl Mesh
     pub fn remove_face(&mut self, face_id: FaceID)
     {
         let mut edges = Vec::new();
-        for walker in self.face_halfedge_iter(face_id) {
-            edges.push(walker.halfedge_id().unwrap());
+        for halfedge_id in self.face_halfedge_iter(face_id) {
+            edges.push(halfedge_id);
         }
 
         self.remove_face_unsafe(face_id);
