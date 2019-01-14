@@ -38,7 +38,7 @@ impl Mesh
         self.connectivity_info.set_halfedge_next(next_id, Some(twin_id));
         self.connectivity_info.set_halfedge_next(previous_id, Some(twin_next_id));
         self.connectivity_info.set_halfedge_next(twin_id, Some(twin_previous_id));
-        self.connectivity_info.set_halfedge_next(twin_next_id, Some(halfedge_id.clone()));
+        self.connectivity_info.set_halfedge_next(twin_next_id, Some(halfedge_id));
         self.connectivity_info.set_halfedge_next(twin_previous_id, Some(next_id));
 
         self.connectivity_info.set_halfedge_vertex(halfedge_id, v3);
@@ -65,7 +65,7 @@ impl Mesh
         let is_boundary = walker.face_id().is_none();
 
         let new_vertex_id = self.create_vertex(position);
-        self.split_one_face(split_halfedge_id, twin_halfedge_id.clone(), new_vertex_id);
+        self.split_one_face(split_halfedge_id, twin_halfedge_id, new_vertex_id);
 
         if !is_boundary {
             self.split_one_face(twin_halfedge_id, split_halfedge_id, new_vertex_id);
@@ -99,7 +99,7 @@ impl Mesh
         let face_id1 = self.connectivity_info.create_face(vertex_id1, vertex_id2, new_vertex_id);
         let face_id2 = self.connectivity_info.create_face(vertex_id2, vertex_id3, new_vertex_id);
 
-        self.connectivity_info.set_halfedge_vertex(halfedge_id2, new_vertex_id.clone());
+        self.connectivity_info.set_halfedge_vertex(halfedge_id2, new_vertex_id);
 
         // Update twin information
         let mut new_halfedge_id = HalfEdgeID::new(0);

@@ -62,7 +62,7 @@ impl<'a> Walker<'a>
 
     pub fn as_halfedge_walker(&mut self, halfedge_id: HalfEdgeID) -> &mut Self
     {
-        let halfedge_id = Some(halfedge_id.clone());
+        let halfedge_id = Some(halfedge_id);
         self.set_current(halfedge_id);
         self
     }
@@ -89,7 +89,7 @@ impl<'a> Walker<'a>
     pub fn as_twin(&mut self) -> &mut Self
     {
         let halfedge_id = match self.current_info {
-            Some(ref current_info) => { current_info.twin.clone() },
+            Some(ref current_info) => { current_info.twin },
             None => None
         };
         self.set_current(halfedge_id);
@@ -98,7 +98,7 @@ impl<'a> Walker<'a>
 
     pub fn twin_id(&self) -> Option<HalfEdgeID>
     {
-        if let Some(ref halfedge) = self.current_info { halfedge.twin.clone() }
+        if let Some(ref halfedge) = self.current_info { halfedge.twin }
         else { None }
     }
 
@@ -111,7 +111,7 @@ impl<'a> Walker<'a>
     pub fn as_next(&mut self) -> &mut Self
     {
         let halfedge_id = match self.current_info {
-            Some(ref current_info) => { current_info.next.clone() },
+            Some(ref current_info) => { current_info.next },
             None => None
         };
         self.set_current(halfedge_id);
@@ -120,7 +120,7 @@ impl<'a> Walker<'a>
 
     pub fn next_id(&self) -> Option<HalfEdgeID>
     {
-        if let Some(ref halfedge) = self.current_info { halfedge.next.clone() }
+        if let Some(ref halfedge) = self.current_info { halfedge.next }
         else { None }
     }
 
@@ -143,18 +143,18 @@ impl<'a> Walker<'a>
 
     pub fn vertex_id(&self) -> Option<VertexID>
     {
-        if let Some(ref halfedge) = self.current_info { halfedge.vertex.clone() }
+        if let Some(ref halfedge) = self.current_info { halfedge.vertex }
         else { None }
     }
 
     pub fn halfedge_id(&self) -> Option<HalfEdgeID>
     {
-        self.current.clone()
+        self.current
     }
 
     pub fn face_id(&self) -> Option<FaceID>
     {
-        if let Some(ref halfedge) = self.current_info { halfedge.face.clone() }
+        if let Some(ref halfedge) = self.current_info { halfedge.face }
         else { None }
     }
 

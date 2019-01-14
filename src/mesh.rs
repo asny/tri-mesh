@@ -223,7 +223,7 @@ impl Mesh
     fn create_vertex(&mut self, position: Vec3) -> VertexID
     {
         let id = self.connectivity_info.new_vertex();
-        self.positions.insert(id.clone(), position);
+        self.positions.insert(id, position);
         id
     }
 
@@ -273,24 +273,24 @@ mod tests {
         let v3 = mesh.walker_from_face(f1).as_previous().vertex_id().unwrap();
 
         let t1 = mesh.walker_from_vertex(v1).vertex_id();
-        assert_eq!(t1, Some(v2.clone()));
+        assert_eq!(t1, Some(v2));
 
         let t2 = mesh.walker_from_vertex(v1).as_twin().vertex_id();
         assert_eq!(t2, Some(v1));
 
-        let t3 = mesh.walker_from_vertex(v2.clone()).as_next().as_next().vertex_id();
-        assert_eq!(t3, Some(v2.clone()));
+        let t3 = mesh.walker_from_vertex(v2).as_next().as_next().vertex_id();
+        assert_eq!(t3, Some(v2));
 
-        let t4 = mesh.walker_from_face(f1.clone()).as_twin().face_id();
+        let t4 = mesh.walker_from_face(f1).as_twin().face_id();
         assert!(t4.is_none());
 
-        let t5 = mesh.walker_from_face(f1.clone()).as_twin().next_id();
+        let t5 = mesh.walker_from_face(f1).as_twin().next_id();
         assert!(t5.is_none());
 
-        let t6 = mesh.walker_from_face(f1.clone()).as_previous().as_previous().as_twin().as_twin().face_id();
-        assert_eq!(t6, Some(f1.clone()));
+        let t6 = mesh.walker_from_face(f1).as_previous().as_previous().as_twin().as_twin().face_id();
+        assert_eq!(t6, Some(f1));
 
-        let t7 = mesh.walker_from_vertex(v2.clone()).as_next().as_next().next_id();
+        let t7 = mesh.walker_from_vertex(v2).as_next().as_next().next_id();
         assert_eq!(t7, mesh.walker_from_vertex(v2).halfedge_id());
 
         let t8 = mesh.walker_from_vertex(v3).face_id();

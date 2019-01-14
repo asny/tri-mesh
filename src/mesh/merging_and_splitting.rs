@@ -19,7 +19,7 @@ impl Mesh
     {
         let mut mapping: HashMap<VertexID, VertexID> = HashMap::new();
         let mut get_or_create_vertex = |mesh: &mut Mesh, vertex_id| -> VertexID {
-            if let Some(vid) = mapping.get(&vertex_id) {return vid.clone();}
+            if let Some(vid) = mapping.get(&vertex_id) {return *vid;}
             let p = other.vertex_position(vertex_id);
             let vid = mesh.create_vertex(p.clone());
             mapping.insert(vertex_id, vid);
@@ -95,7 +95,7 @@ impl Mesh
                 }
             }
 
-            info.add_face(face_id.clone(), face);
+            info.add_face(*face_id, face);
         }
 
         let mut positions = HashMap::with_capacity(info.no_vertices());
@@ -235,7 +235,7 @@ impl Mesh
         }
         self.connectivity_info.remove_vertex(vertex_id2);
 
-        Ok(vertex_id1.clone())
+        Ok(vertex_id1)
     }
 
     fn find_overlapping_vertices(&self) -> Vec<Vec<VertexID>>

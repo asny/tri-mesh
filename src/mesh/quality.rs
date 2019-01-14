@@ -70,7 +70,7 @@ impl Mesh
 
         while to_be_flipped.len() > 0
         {
-            let halfedge_id = to_be_flipped.iter().next().unwrap().clone();
+            let halfedge_id = *to_be_flipped.iter().next().unwrap();
             to_be_flipped.remove(&halfedge_id);
 
             if self.flip_edge(halfedge_id).is_ok() {

@@ -21,7 +21,7 @@ impl Mesh {
             let halfedge_id = walker.halfedge_id();
             let vertex_id = walker.vertex_id();
             walker.as_previous();
-            update_list[i] = (halfedge_id.clone(), walker.vertex_id(), walker.halfedge_id());
+            update_list[i] = (halfedge_id, walker.vertex_id(), walker.halfedge_id());
             i += 1;
 
             self.connectivity_info.set_vertex_halfedge(walker.vertex_id().unwrap(), walker.halfedge_id());

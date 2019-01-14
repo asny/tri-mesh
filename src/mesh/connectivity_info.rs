@@ -40,13 +40,13 @@ impl ConnectivityInfo {
         let id = self.new_face();
 
         // Create inner halfedges
-        let halfedge1 = self.new_halfedge(Some(vertex_id2.clone()), None, Some(id.clone()));
-        let halfedge3 = self.new_halfedge(Some(vertex_id1.clone()), Some(halfedge1.clone()), Some(id.clone()));
-        let halfedge2 = self.new_halfedge(Some(vertex_id3.clone()), Some(halfedge3.clone()), Some(id.clone()));
+        let halfedge1 = self.new_halfedge(Some(vertex_id2), None, Some(id));
+        let halfedge3 = self.new_halfedge(Some(vertex_id1), Some(halfedge1), Some(id));
+        let halfedge2 = self.new_halfedge(Some(vertex_id3), Some(halfedge3), Some(id));
 
-        self.set_halfedge_next(halfedge1, Some(halfedge2.clone()));
+        self.set_halfedge_next(halfedge1, Some(halfedge2));
 
-        self.set_vertex_halfedge(vertex_id1, Some(halfedge1.clone()));
+        self.set_vertex_halfedge(vertex_id1, Some(halfedge1));
         self.set_vertex_halfedge(vertex_id2, Some(halfedge2));
         self.set_vertex_halfedge(vertex_id3, Some(halfedge3));
 
@@ -66,7 +66,7 @@ impl ConnectivityInfo {
             id = VertexID::new(i);
         }
 
-        vertices.insert(id.clone(), Vertex { halfedge: None });
+        vertices.insert(id, Vertex { halfedge: None });
         id
     }
 
@@ -81,7 +81,7 @@ impl ConnectivityInfo {
             id = HalfEdgeID::new(i);
         }
 
-        halfedges.insert(id.clone(), HalfEdge { vertex, twin: None, next, face });
+        halfedges.insert(id, HalfEdge { vertex, twin: None, next, face });
         id
     }
 
@@ -96,7 +96,7 @@ impl ConnectivityInfo {
             id = FaceID::new(i);
         }
 
-        faces.insert(id.clone(), Face { halfedge: None });
+        faces.insert(id, Face { halfedge: None });
         id
     }
 
@@ -175,21 +175,21 @@ impl ConnectivityInfo {
     pub fn vertex_iterator(&self) -> Box<Iterator<Item = VertexID>>
     {
         let vertices = RefCell::borrow(&self.vertices);
-        let t: Vec<VertexID> = vertices.iter().map(|pair| pair.0.clone()).collect();
+        let t: Vec<VertexID> = vertices.iter().map(|pair| *pair.0).collect();
         Box::new(t.into_iter())
     }
 
     pub fn halfedge_iterator(&self) -> Box<Iterator<Item = HalfEdgeID>>
     {
         let halfedges = RefCell::borrow(&self.halfedges);
-        let t: Vec<HalfEdgeID> = halfedges.iter().map(|pair| pair.0.clone()).collect();
+        let t: Vec<HalfEdgeID> = halfedges.iter().map(|pair| *pair.0).collect();
         Box::new(t.into_iter())
     }
 
     pub fn face_iterator(&self) -> Box<Iterator<Item = FaceID>>
     {
         let faces = RefCell::borrow(&self.faces);
-        let t: Vec<FaceID> = faces.iter().map(|pair| pair.0.clone()).collect();
+        let t: Vec<FaceID> = faces.iter().map(|pair| *pair.0).collect();
         Box::new(t.into_iter())
     }
 
