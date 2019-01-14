@@ -19,8 +19,8 @@ impl Mesh
     {
         let mut mapping: HashMap<VertexID, VertexID> = HashMap::new();
         let mut get_or_create_vertex = |mesh: &mut Mesh, vertex_id| -> VertexID {
-            if let Some(vid) = mapping.get(&vertex_id) {return vid.clone();}
-            let p = other.vertex_position(&vertex_id);
+            if let Some(vid) = mapping.get(&vertex_id) {return *vid;}
+            let p = other.vertex_position(vertex_id);
             let vid = mesh.create_vertex(p.clone());
             mapping.insert(vertex_id, vid);
             vid
@@ -28,24 +28,24 @@ impl Mesh
 
         let mut face_mapping: HashMap<FaceID, FaceID> = HashMap::new();
         for other_face_id in other.face_iter() {
-            let vertex_ids = other.face_vertices(&other_face_id);
+            let vertex_ids = other.face_vertices(other_face_id);
 
             let vertex_id0 = get_or_create_vertex(self, vertex_ids.0);
             let vertex_id1 = get_or_create_vertex(self, vertex_ids.1);
             let vertex_id2 = get_or_create_vertex(self, vertex_ids.2);
-            let new_face_id = self.connectivity_info.create_face(&vertex_id0, &vertex_id1, &vertex_id2);
+            let new_face_id = self.connectivity_info.create_face(vertex_id0, vertex_id1, vertex_id2);
 
-            for mut walker in other.face_halfedge_iter(&other_face_id) {
+            for mut walker in other.face_halfedge_iter(other_face_id) {
                 if let Some(fid) = walker.as_twin().face_id()
                 {
                     if let Some(self_face_id) = face_mapping.get(&fid)
                     {
-                        for mut walker1 in self.face_halfedge_iter(&self_face_id)
+                        for mut walker1 in self.face_halfedge_iter(*self_face_id)
                         {
                             let source_vertex_id = walker1.vertex_id().unwrap();
                             let sink_vertex_id = walker1.as_next().vertex_id().unwrap();
 
-                            for mut walker2 in self.face_halfedge_iter(&new_face_id)
+                            for mut walker2 in self.face_halfedge_iter(new_face_id)
                             {
                                 if sink_vertex_id == walker2.vertex_id().unwrap() && source_vertex_id == walker2.as_next().vertex_id().unwrap() {
                                     self.connectivity_info.set_halfedge_twin(walker1.halfedge_id().unwrap(), walker2.halfedge_id().unwrap());
@@ -66,44 +66,44 @@ impl Mesh
     {
         let info = crate::mesh::ConnectivityInfo::new(faces.len(), faces.len());
         for face_id in faces {
-            let face = self.connectivity_info.face(face_id).unwrap();
-            for mut walker in self.face_halfedge_iter(face_id) {
+            let face = self.connectivity_info.face(*face_id).unwrap();
+            for mut walker in self.face_halfedge_iter(*face_id) {
                 let halfedge_id = walker.halfedge_id().unwrap();
-                let halfedge = self.connectivity_info.halfedge(&halfedge_id).unwrap();
+                let halfedge = self.connectivity_info.halfedge(halfedge_id).unwrap();
                 info.add_halfedge(halfedge_id, halfedge);
 
                 let vertex_id = walker.vertex_id().unwrap();
-                let vertex = self.connectivity_info.vertex(&vertex_id).unwrap();
+                let vertex = self.connectivity_info.vertex(vertex_id).unwrap();
                 info.add_vertex(vertex_id, vertex);
-                info.set_vertex_halfedge(&vertex_id, walker.next_id());
+                info.set_vertex_halfedge(vertex_id, walker.next_id());
 
                 walker.as_twin();
                 if walker.face_id().is_none()
                 {
                     let twin_id = walker.halfedge_id().unwrap();
-                    let twin = self.connectivity_info.halfedge(&twin_id).unwrap();
+                    let twin = self.connectivity_info.halfedge(twin_id).unwrap();
                     info.add_halfedge(twin_id, twin);
 
                 }
                 else if !faces.contains(&walker.face_id().unwrap())
                 {
                     let twin_id = walker.halfedge_id().unwrap();
-                    let mut twin = self.connectivity_info.halfedge(&twin_id).unwrap();
+                    let mut twin = self.connectivity_info.halfedge(twin_id).unwrap();
                     twin.face = None;
                     twin.next = None;
                     info.add_halfedge(twin_id, twin);
                 }
             }
 
-            info.add_face(face_id.clone(), face);
+            info.add_face(*face_id, face);
         }
 
         let mut positions = HashMap::with_capacity(info.no_vertices());
         for vertex_id in info.vertex_iterator() {
-            positions.insert(vertex_id.clone(), self.vertex_position(&vertex_id).clone());
+            positions.insert(vertex_id, self.vertex_position(vertex_id).clone());
         }
 
-        Mesh::new_internal(positions, std::rc::Rc::new(info))
+        Mesh::new_internal(positions, info)
     }
 
     pub fn merge_overlapping_primitives(&mut self) -> Result<(), Error>
@@ -116,7 +116,7 @@ impl Mesh
             let mut iter = faces_to_merge.iter();
             iter.next();
             for face_id2 in iter {
-                self.remove_face_unsafe(&face_id2);
+                self.remove_face_unsafe(*face_id2);
             }
         }
 
@@ -124,7 +124,7 @@ impl Mesh
             let mut iter = vertices_to_merge.iter();
             let mut vertex_id1 = *iter.next().unwrap();
             for vertex_id2 in iter {
-                vertex_id1 = self.merge_vertices(&vertex_id1, vertex_id2)?;
+                vertex_id1 = self.merge_vertices(vertex_id1, *vertex_id2)?;
             }
         }
 
@@ -132,7 +132,7 @@ impl Mesh
             let mut iter = edges_to_merge.iter();
             let mut edge_id1 = *iter.next().unwrap();
             for edge_id2 in iter {
-                edge_id1 = self.merge_halfedges(&edge_id1, edge_id2)?;
+                edge_id1 = self.merge_halfedges(edge_id1, *edge_id2)?;
             }
         }
 
@@ -141,7 +141,7 @@ impl Mesh
         Ok(())
     }
 
-    fn merge_halfedges(&mut self, halfedge_id1: &HalfEdgeID, halfedge_id2: &HalfEdgeID) -> Result<HalfEdgeID, Error>
+    fn merge_halfedges(&mut self, halfedge_id1: HalfEdgeID, halfedge_id2: HalfEdgeID) -> Result<HalfEdgeID, Error>
     {
         let mut walker1 = self.walker_from_halfedge(halfedge_id1);
         let mut walker2 = self.walker_from_halfedge(halfedge_id2);
@@ -217,25 +217,25 @@ impl Mesh
             }
         }
 
-        self.connectivity_info.remove_halfedge(&halfedge_to_remove1.unwrap());
-        self.connectivity_info.remove_halfedge(&halfedge_to_remove2.unwrap());
+        self.connectivity_info.remove_halfedge(halfedge_to_remove1.unwrap());
+        self.connectivity_info.remove_halfedge(halfedge_to_remove2.unwrap());
         self.connectivity_info.set_halfedge_twin(halfedge_to_survive1.unwrap(), halfedge_to_survive2.unwrap());
-        self.connectivity_info.set_vertex_halfedge(&vertex_id1.unwrap(), halfedge_to_survive2);
-        self.connectivity_info.set_vertex_halfedge(&vertex_id2.unwrap(), halfedge_to_survive1);
+        self.connectivity_info.set_vertex_halfedge(vertex_id1.unwrap(), halfedge_to_survive2);
+        self.connectivity_info.set_vertex_halfedge(vertex_id2.unwrap(), halfedge_to_survive1);
         Ok(halfedge_to_survive1.unwrap())
     }
 
-    fn merge_vertices(&mut self, vertex_id1: &VertexID, vertex_id2: &VertexID) -> Result<VertexID, Error>
+    fn merge_vertices(&mut self, vertex_id1: VertexID, vertex_id2: VertexID) -> Result<VertexID, Error>
     {
         for halfedge_id in self.halfedge_iter() {
-            let walker = self.walker_from_halfedge(&halfedge_id);
-            if walker.vertex_id().unwrap() == *vertex_id2 {
-                self.connectivity_info.set_halfedge_vertex(&walker.halfedge_id().unwrap(), *vertex_id1);
+            let walker = self.walker_from_halfedge(halfedge_id);
+            if walker.vertex_id().unwrap() == vertex_id2 {
+                self.connectivity_info.set_halfedge_vertex(walker.halfedge_id().unwrap(), vertex_id1);
             }
         }
         self.connectivity_info.remove_vertex(vertex_id2);
 
-        Ok(vertex_id1.clone())
+        Ok(vertex_id1)
     }
 
     fn find_overlapping_vertices(&self) -> Vec<Vec<VertexID>>
@@ -251,7 +251,7 @@ impl Mesh
             let mut to_merge = Vec::new();
             for id2 in to_check.iter()
             {
-                if (self.vertex_position(&id1) - self.vertex_position(id2)).magnitude() < 0.00001
+                if (self.vertex_position(id1) - self.vertex_position(*id2)).magnitude() < 0.00001
                 {
                     to_merge.push(*id2);
                 }
@@ -282,7 +282,7 @@ impl Mesh
             let id1 = *to_check.iter().next().unwrap();
             to_check.remove(&id1);
 
-            let (v0, v1, v2) = self.face_vertices(&id1);
+            let (v0, v1, v2) = self.face_vertices(id1);
             if let Some(vertices_to_merge0) = vertices_to_merge(v0)
             {
                 if let Some(vertices_to_merge1) = vertices_to_merge(v1)
@@ -292,7 +292,7 @@ impl Mesh
                         let mut to_merge = Vec::new();
                         for id2 in to_check.iter()
                         {
-                            let (v3, v4, v5) = self.face_vertices(&id2);
+                            let (v3, v4, v5) = self.face_vertices(*id2);
                             if (vertices_to_merge0.contains(&v3) || vertices_to_merge0.contains(&v4) || vertices_to_merge0.contains(&v5))
                                 && (vertices_to_merge1.contains(&v3) || vertices_to_merge1.contains(&v4) || vertices_to_merge1.contains(&v5))
                                 && (vertices_to_merge2.contains(&v3) || vertices_to_merge2.contains(&v4) || vertices_to_merge2.contains(&v5))
@@ -339,16 +339,16 @@ impl Mesh
                         if vertices_to_merge0.contains(&id2.0) && vertices_to_merge1.contains(&id2.1)
                             || vertices_to_merge1.contains(&id2.0) && vertices_to_merge0.contains(&id2.1)
                         {
-                            to_merge.push(self.connecting_edge(&id2.0, &id2.1).unwrap());
+                            to_merge.push(self.connecting_edge(id2.0, id2.1).unwrap());
                         }
                     }
                     if !to_merge.is_empty()
                     {
                         for id in to_merge.iter()
                         {
-                            to_check.remove(&self.ordered_edge_vertices(id));
+                            to_check.remove(&self.ordered_edge_vertices(*id));
                         }
-                        to_merge.push(self.connecting_edge(&id1.0, &id1.1).unwrap());
+                        to_merge.push(self.connecting_edge(id1.0, id1.1).unwrap());
                         set_to_merge.push(to_merge);
                     }
                 }
@@ -468,11 +468,11 @@ mod tests {
 
         let mut vertex_id1 = None;
         for vertex_id in mesh.vertex_iter() {
-            if *mesh.vertex_position(&vertex_id) == vec3(0.0, 0.0, 0.0)
+            if *mesh.vertex_position(vertex_id) == vec3(0.0, 0.0, 0.0)
             {
                 if vertex_id1.is_none() { vertex_id1 = Some(vertex_id); }
                 else {
-                    mesh.merge_vertices(&vertex_id1.unwrap(), &vertex_id).unwrap();
+                    mesh.merge_vertices(vertex_id1.unwrap(), vertex_id).unwrap();
                     break;
                 }
             }
@@ -492,15 +492,15 @@ mod tests {
 
         let mut heid1 = None;
         for (v0, v1) in mesh.edge_iter() {
-            if mesh.vertex_position(&v0)[2] == 0.0 && mesh.vertex_position(&v1)[2] == 0.0
+            if mesh.vertex_position(v0)[2] == 0.0 && mesh.vertex_position(v1)[2] == 0.0
             {
-                let halfedge_id = mesh.connecting_edge(&v0, &v1).unwrap();
+                let halfedge_id = mesh.connecting_edge(v0, v1).unwrap();
                 if heid1.is_none() { heid1 = Some((halfedge_id, v0, v1)); }
                 else {
                     let (halfedge_id1, v10, v11) = heid1.unwrap();
-                    mesh.merge_vertices(&v0, &v11).unwrap();
-                    mesh.merge_vertices(&v1, &v10).unwrap();
-                    mesh.merge_halfedges(&halfedge_id1, &halfedge_id).unwrap();
+                    mesh.merge_vertices(v0, v11).unwrap();
+                    mesh.merge_vertices(v1, v10).unwrap();
+                    mesh.merge_halfedges(halfedge_id1, halfedge_id).unwrap();
                     break;
                 }
             }
