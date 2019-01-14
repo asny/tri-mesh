@@ -10,17 +10,17 @@ impl Mesh
         Walker::new(&self.connectivity_info)
     }
 
-    pub fn walker_from_vertex(&self, vertex_id: &VertexID) -> Walker
+    pub fn walker_from_vertex(&self, vertex_id: VertexID) -> Walker
     {
         self.walker().into_vertex_halfedge_walker(vertex_id)
     }
 
-    pub fn walker_from_halfedge(&self, halfedge_id: &HalfEdgeID) -> Walker
+    pub fn walker_from_halfedge(&self, halfedge_id: HalfEdgeID) -> Walker
     {
         self.walker().into_halfedge_walker(halfedge_id)
     }
 
-    pub fn walker_from_face(&self, face_id: &FaceID) -> Walker
+    pub fn walker_from_face(&self, face_id: FaceID) -> Walker
     {
         self.walker().into_face_halfedge_walker(face_id)
     }
@@ -41,39 +41,39 @@ impl<'a> Walker<'a>
         Walker {current: None, current_info: None, connectivity_info: connectivity_info}
     }
 
-    pub fn into_vertex_halfedge_walker(mut self, vertex_id: &VertexID) -> Self
+    pub fn into_vertex_halfedge_walker(mut self, vertex_id: VertexID) -> Self
     {
         self.as_vertex_halfedge_walker(vertex_id);
         self
     }
 
-    pub fn as_vertex_halfedge_walker(&mut self, vertex_id: &VertexID) -> &mut Self
+    pub fn as_vertex_halfedge_walker(&mut self, vertex_id: VertexID) -> &mut Self
     {
         let halfedge_id = self.connectivity_info.vertex_halfedge(vertex_id);
         self.set_current(halfedge_id);
         self
     }
 
-    pub fn into_halfedge_walker(mut self, halfedge_id: &HalfEdgeID) -> Self
+    pub fn into_halfedge_walker(mut self, halfedge_id: HalfEdgeID) -> Self
     {
         self.as_halfedge_walker(halfedge_id);
         self
     }
 
-    pub fn as_halfedge_walker(&mut self, halfedge_id: &HalfEdgeID) -> &mut Self
+    pub fn as_halfedge_walker(&mut self, halfedge_id: HalfEdgeID) -> &mut Self
     {
         let halfedge_id = Some(halfedge_id.clone());
         self.set_current(halfedge_id);
         self
     }
 
-    pub fn into_face_halfedge_walker(mut self, face_id: &FaceID) -> Self
+    pub fn into_face_halfedge_walker(mut self, face_id: FaceID) -> Self
     {
         self.as_face_halfedge_walker(face_id);
         self
     }
 
-    pub fn as_face_halfedge_walker(&mut self, face_id: &FaceID) -> &mut Self
+    pub fn as_face_halfedge_walker(&mut self, face_id: FaceID) -> &mut Self
     {
         let halfedge_id = self.connectivity_info.face_halfedge(face_id);
         self.set_current(halfedge_id);
@@ -137,7 +137,7 @@ impl<'a> Walker<'a>
 
     pub fn previous_id(&self) -> Option<HalfEdgeID>
     {
-        if let Some(ref next_id) = self.next_id() { Walker::new(&self.connectivity_info).into_halfedge_walker(next_id).next_id() }
+        if let Some(next_id) = self.next_id() { Walker::new(&self.connectivity_info).into_halfedge_walker(next_id).next_id() }
         else { None }
     }
 
@@ -160,7 +160,7 @@ impl<'a> Walker<'a>
 
     fn set_current(&mut self, halfedge_id: Option<HalfEdgeID>)
     {
-        self.current_info = if let Some(ref id) = halfedge_id { self.connectivity_info.halfedge(id) } else { None };
+        self.current_info = if let Some(id) = halfedge_id { self.connectivity_info.halfedge(id) } else { None };
         self.current = halfedge_id;
     }
 }
