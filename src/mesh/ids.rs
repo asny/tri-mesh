@@ -68,19 +68,6 @@ impl fmt::Display for FaceID {
     }
 }
 
-///
-/// An enum describing the types of primitives.
-///
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub enum Primitive {
-    /// Vertex
-    Vertex(VertexID),
-    /// Edge described as a pair of vertices
-    Edge((VertexID, VertexID)),
-    /// Face
-    Face(FaceID)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
