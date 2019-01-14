@@ -3,10 +3,14 @@ use crate::mesh::ids::*;
 use crate::mesh::traversal::Walker;
 use crate::mesh::connectivity_info::ConnectivityInfo;
 
+/// An iterator over the vertices. See [here](../struct.Mesh.html#method.vertex_iter) for more information.
 pub type VertexIter = Box<Iterator<Item = VertexID>>;
+
+/// An iterator over the half-edges. See [here](../struct.Mesh.html#method.halfedge_iter) for more information.
 pub type HalfEdgeIter = Box<Iterator<Item = HalfEdgeID>>;
+
+/// An iterator over the faces. See [here](../struct.Mesh.html#method.face_iter) for more information.
 pub type FaceIter = Box<Iterator<Item = FaceID>>;
-pub type HalfEdgeTwinsIter = Box<Iterator<Item = (HalfEdgeID, HalfEdgeID)>>;
 
 /// # Iterators
 impl Mesh
@@ -149,6 +153,7 @@ impl Mesh
     }
 }
 
+/// An iterator over the half-edges starting in a given vertex. See [here](../struct.Mesh.html#method.vertex_halfedge_iter) for more information.
 pub struct VertexHalfedgeIter<'a>
 {
     walker: Walker<'a>,
@@ -190,6 +195,7 @@ impl<'a> Iterator for VertexHalfedgeIter<'a> {
     }
 }
 
+/// An iterator over the three half-edges in a face. See [here](../struct.Mesh.html#method.face_halfedge_iter) for more information.
 pub struct FaceHalfedgeIter<'a>
 {
     walker: Walker<'a>,
@@ -215,6 +221,7 @@ impl<'a> Iterator for FaceHalfedgeIter<'a> {
     }
 }
 
+/// An iterator over the edges. See [here](../struct.Mesh.html#method.edge_iter) for more information.
 pub struct EdgeIter<'a>
 {
     walker: Walker<'a>,
