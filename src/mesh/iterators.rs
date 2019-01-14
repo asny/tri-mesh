@@ -2,14 +2,11 @@ use crate::mesh::Mesh;
 use crate::mesh::ids::*;
 use crate::mesh::traversal::Walker;
 use crate::mesh::connectivity_info::ConnectivityInfo;
-use std::collections::HashSet;
-use std::iter::FromIterator;
 
 pub type VertexIter = Box<Iterator<Item = VertexID>>;
 pub type HalfEdgeIter = Box<Iterator<Item = HalfEdgeID>>;
 pub type FaceIter = Box<Iterator<Item = FaceID>>;
 pub type HalfEdgeTwinsIter = Box<Iterator<Item = (HalfEdgeID, HalfEdgeID)>>;
-pub type EdgeIter = Box<Iterator<Item = (VertexID, VertexID)>>;
 
 /// # Iterators
 impl Mesh
@@ -136,8 +133,7 @@ impl Mesh
 
     pub fn edge_iter(&self) -> EdgeIter
     {
-        let set: HashSet<(VertexID, VertexID)> = HashSet::from_iter(self.halfedge_iter().map(|halfedge_id| self.ordered_edge_vertices(halfedge_id)));
-        Box::new(set.into_iter())
+        EdgeIter::new(&self.connectivity_info)
     }
 }
 
@@ -207,6 +203,41 @@ impl<'a> Iterator for FaceHalfedgeIter<'a> {
     }
 }
 
+
+
+pub struct EdgeIter<'a>
+{
+    walker: Walker<'a>,
+    iter: HalfEdgeIter
+}
+
+impl<'a> EdgeIter<'a> {
+    pub(crate) fn new(connectivity_info: &'a ConnectivityInfo) -> EdgeIter<'a>
+    {
+        EdgeIter { walker: Walker::new(connectivity_info), iter: connectivity_info.halfedge_iterator() }
+    }
+}
+
+impl<'a> Iterator for EdgeIter<'a> {
+    type Item = HalfEdgeID;
+
+    fn next(&mut self) -> Option<HalfEdgeID>
+    {
+        if let Some(next_id) = self.iter.next() {
+            if self.walker.as_halfedge_walker(next_id).twin_id().unwrap() > next_id
+            {
+                self.next()
+            }
+            else {
+                Some(next_id)
+            }
+        }
+        else {
+            None
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -245,6 +276,25 @@ mod tests {
         let vec: Vec<HalfEdgeID> = mesh.halfedge_iter().collect();
         i = 0;
         for halfedge_id in mesh.halfedge_iter() {
+            assert_eq!(halfedge_id, vec[i]);
+            i = i+1;
+        }
+    }
+
+    #[test]
+    fn test_edge_iterator() {
+        let mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
+
+        let mut i = 0;
+        for _ in mesh.edge_iter() {
+            i = i+1;
+        }
+        assert_eq!(6, i);
+
+        // Test that two iterations return the same result
+        let vec: Vec<HalfEdgeID> = mesh.edge_iter().collect();
+        i = 0;
+        for halfedge_id in mesh.edge_iter() {
             assert_eq!(halfedge_id, vec[i]);
             i = i+1;
         }
