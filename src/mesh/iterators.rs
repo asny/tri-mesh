@@ -317,6 +317,12 @@ mod tests {
             assert_eq!(halfedge_id, vec[i]);
             i = i+1;
         }
+
+        // Test that the twin is not returned
+        for halfedge_id in mesh.edge_iter() {
+            let twin_id = mesh.walker_from_halfedge(halfedge_id).twin_id().unwrap();
+            assert!(vec.iter().find(|edge_id| *edge_id == &twin_id).is_none());
+        }
     }
 
     #[test]
