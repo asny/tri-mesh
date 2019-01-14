@@ -143,17 +143,14 @@ impl<'a> Iterator for VertexHalfedgeIter<'a> {
 
 pub struct FaceHalfedgeIter<'a>
 {
-    current: Walker<'a>,
-    start: HalfEdgeID,
-    is_done: bool
+    walker: Walker<'a>,
+    count: usize
 }
 
 impl<'a> FaceHalfedgeIter<'a> {
     pub(crate) fn new(face_id: FaceID, connectivity_info: &'a ConnectivityInfo) -> FaceHalfedgeIter<'a>
     {
-        let current = Walker::new(connectivity_info).into_face_halfedge_walker(face_id);
-        let start = current.halfedge_id().unwrap();
-        FaceHalfedgeIter { current, start, is_done: false }
+        FaceHalfedgeIter { walker: Walker::new(connectivity_info).into_face_halfedge_walker(face_id), count: 0 }
     }
 }
 
@@ -162,10 +159,10 @@ impl<'a> Iterator for FaceHalfedgeIter<'a> {
 
     fn next(&mut self) -> Option<HalfEdgeID>
     {
-        if self.is_done { return None; }
-        self.current.as_next();
-        self.is_done = self.current.halfedge_id().unwrap() == self.start;
-        Some(self.current.halfedge_id().unwrap())
+        if self.count == 3 { return None; }
+        self.walker.as_next();
+        self.count += 1;
+        Some(self.walker.halfedge_id().unwrap())
     }
 }
 
