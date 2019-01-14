@@ -1,3 +1,5 @@
+//! See [Mesh](crate::mesh::Mesh).
+
 use std::fmt;
 
 ///

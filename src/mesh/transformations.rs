@@ -20,7 +20,7 @@ impl Mesh
         self.move_vertex_to(vertex_id, p);
     }
 
-    /// Scales the entire mesh by `scale`.
+    /// Scales the entire mesh by applying the `scale` to each vertex position.
     ///
     /// # Examples
     ///
@@ -30,10 +30,10 @@ impl Mesh
     /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
     ///     let mut mesh = MeshBuilder::new().cube().build()?;
     /// #   let first_face_id = mesh.face_iter().next().unwrap();
-    /// #   let face_area_before_scale = mesh.face_area(first_face_id);
+    /// #   let face_area_before = mesh.face_area(first_face_id);
     ///     mesh.scale(2.0);
-    /// #   let face_area_after_scale = mesh.face_area(first_face_id);
-    /// #   assert_eq!(4.0 * face_area_before_scale, face_area_after_scale);
+    /// #   let face_area_after = mesh.face_area(first_face_id);
+    /// #   assert_eq!(4.0 * face_area_before, face_area_after);
     /// #   mesh.is_valid().unwrap();
     /// #   Ok(())
     /// # }
@@ -47,7 +47,7 @@ impl Mesh
         }
     }
 
-    /// Translates the entire mesh by `translation`.
+    /// Translates the entire mesh by applying the `translation` to each vertex position.
     ///
     /// # Examples
     ///
@@ -57,10 +57,10 @@ impl Mesh
     /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
     ///     let mut mesh = MeshBuilder::new().cube().build()?;
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
-    /// #   let vertex_position_before_scale = *mesh.vertex_position(first_vertex_id);
+    /// #   let vertex_position_before = *mesh.vertex_position(first_vertex_id);
     ///     mesh.translate(vec3(2.5, -1.0, 0.0));
-    /// #   let vertex_position_after_scale = *mesh.vertex_position(first_vertex_id);
-    /// #   assert_eq!(vertex_position_before_scale + vec3(2.5, -1.0, 0.0), vertex_position_after_scale);
+    /// #   let vertex_position_after = *mesh.vertex_position(first_vertex_id);
+    /// #   assert_eq!(vertex_position_before + vec3(2.5, -1.0, 0.0), vertex_position_after);
     /// #   mesh.is_valid().unwrap();
     /// #   Ok(())
     /// # }
@@ -73,6 +73,26 @@ impl Mesh
         }
     }
 
+    ///
+    /// Rotates the entire mesh by applying the given `rotation` to each vertex position.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tri_mesh::prelude::*;
+    /// #
+    /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
+    ///     let mut mesh = MeshBuilder::new().cube().build()?;
+    /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
+    /// #   let vertex_position_before = *mesh.vertex_position(first_vertex_id);
+    ///     mesh.apply_transformation(Mat4::from_angle_y(Deg(360.0)));
+    /// #   let vertex_position_after = *mesh.vertex_position(first_vertex_id);
+    /// #   assert!((vertex_position_before - vertex_position_after).magnitude() < 0.000001);
+    /// #   mesh.is_valid().unwrap();
+    /// #   Ok(())
+    /// # }
+    /// ```
+    ///
     pub fn rotate(&mut self, rotation: Mat3)
     {
         for vertex_id in self.vertex_iter() {
@@ -81,6 +101,26 @@ impl Mesh
         }
     }
 
+    ///
+    /// Transforms the entire mesh by applying the `transformation` to each vertex position.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tri_mesh::prelude::*;
+    /// #
+    /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
+    ///     let mut mesh = MeshBuilder::new().cube().build()?;
+    /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
+    /// #   let vertex_position_before = *mesh.vertex_position(first_vertex_id);
+    ///     mesh.apply_transformation(Mat4::from_translation(vec3(2.5, -1.0, 0.0)));
+    /// #   let vertex_position_after = *mesh.vertex_position(first_vertex_id);
+    /// #   assert_eq!(vertex_position_before + vec3(2.5, -1.0, 0.0), vertex_position_after);
+    /// #   mesh.is_valid().unwrap();
+    /// #   Ok(())
+    /// # }
+    /// ```
+    ///
     pub fn apply_transformation(&mut self, transformation: Mat4)
     {
         for vertex_id in self.vertex_iter() {
