@@ -12,6 +12,108 @@ pub type HalfEdgeIter = Box<Iterator<Item = HalfEdgeID>>;
 /// An iterator over the faces. See [here](../struct.Mesh.html#method.face_iter) for more information.
 pub type FaceIter = Box<Iterator<Item = FaceID>>;
 
+/// An iterator over the half-edges starting in a given vertex. See [here](../struct.Mesh.html#method.vertex_halfedge_iter) for more information.
+pub struct VertexHalfedgeIter<'a>
+{
+    walker: Walker<'a>,
+    start: HalfEdgeID,
+    is_done: bool
+}
+
+impl<'a> VertexHalfedgeIter<'a> {
+    pub(crate) fn new(vertex_id: VertexID, connectivity_info: &'a ConnectivityInfo) -> VertexHalfedgeIter<'a>
+    {
+        let walker = Walker::new(connectivity_info).into_vertex_halfedge_walker(vertex_id);
+        let start = walker.halfedge_id().unwrap();
+        VertexHalfedgeIter { walker, start, is_done: false }
+    }
+}
+
+impl<'a> Iterator for VertexHalfedgeIter<'a> {
+    type Item = HalfEdgeID;
+
+    fn next(&mut self) -> Option<HalfEdgeID>
+    {
+        if self.is_done { return None; }
+        let curr = self.walker.halfedge_id().unwrap();
+
+        match self.walker.face_id() {
+            Some(_) => {
+                self.walker.as_previous().as_twin();
+            },
+            None => { // In the case there are holes in the one-ring
+                self.walker.as_twin();
+                while let Some(_) = self.walker.face_id() {
+                    self.walker.as_next().as_twin();
+                }
+                self.walker.as_twin();
+            }
+        }
+        self.is_done = self.walker.halfedge_id().unwrap() == self.start;
+        Some(curr)
+    }
+}
+
+/// An iterator over the three half-edges in a face. See [here](../struct.Mesh.html#method.face_halfedge_iter) for more information.
+pub struct FaceHalfedgeIter<'a>
+{
+    walker: Walker<'a>,
+    count: usize
+}
+
+impl<'a> FaceHalfedgeIter<'a> {
+    pub(crate) fn new(face_id: FaceID, connectivity_info: &'a ConnectivityInfo) -> FaceHalfedgeIter<'a>
+    {
+        FaceHalfedgeIter { walker: Walker::new(connectivity_info).into_face_halfedge_walker(face_id), count: 0 }
+    }
+}
+
+impl<'a> Iterator for FaceHalfedgeIter<'a> {
+    type Item = HalfEdgeID;
+
+    fn next(&mut self) -> Option<HalfEdgeID>
+    {
+        if self.count == 3 { return None; }
+        self.walker.as_next();
+        self.count += 1;
+        Some(self.walker.halfedge_id().unwrap())
+    }
+}
+
+/// An iterator over the edges. See [here](../struct.Mesh.html#method.edge_iter) for more information.
+pub struct EdgeIter<'a>
+{
+    walker: Walker<'a>,
+    iter: HalfEdgeIter
+}
+
+impl<'a> EdgeIter<'a> {
+    pub(crate) fn new(connectivity_info: &'a ConnectivityInfo) -> EdgeIter<'a>
+    {
+        EdgeIter { walker: Walker::new(connectivity_info), iter: connectivity_info.halfedge_iterator() }
+    }
+}
+
+impl<'a> Iterator for EdgeIter<'a> {
+    type Item = HalfEdgeID;
+
+    fn next(&mut self) -> Option<HalfEdgeID>
+    {
+        if let Some(next_id) = self.iter.next() {
+            if self.walker.as_halfedge_walker(next_id).twin_id().unwrap() > next_id
+            {
+                self.next()
+            }
+            else {
+                Some(next_id)
+            }
+        }
+        else {
+            None
+        }
+    }
+}
+
 /// # Iterators
 impl Mesh
 {
@@ -150,108 +252,6 @@ impl Mesh
     pub fn face_halfedge_iter(&self, face_id: FaceID) -> FaceHalfedgeIter
     {
         FaceHalfedgeIter::new(face_id, &self.connectivity_info)
-    }
-}
-
-/// An iterator over the half-edges starting in a given vertex. See [here](../struct.Mesh.html#method.vertex_halfedge_iter) for more information.
-pub struct VertexHalfedgeIter<'a>
-{
-    walker: Walker<'a>,
-    start: HalfEdgeID,
-    is_done: bool
-}
-
-impl<'a> VertexHalfedgeIter<'a> {
-    pub(crate) fn new(vertex_id: VertexID, connectivity_info: &'a ConnectivityInfo) -> VertexHalfedgeIter<'a>
-    {
-        let walker = Walker::new(connectivity_info).into_vertex_halfedge_walker(vertex_id);
-        let start = walker.halfedge_id().unwrap();
-        VertexHalfedgeIter { walker, start, is_done: false }
-    }
-}
-
-impl<'a> Iterator for VertexHalfedgeIter<'a> {
-    type Item = HalfEdgeID;
-
-    fn next(&mut self) -> Option<HalfEdgeID>
-    {
-        if self.is_done { return None; }
-        let curr = self.walker.halfedge_id().unwrap();
-
-        match self.walker.face_id() {
-            Some(_) => {
-                self.walker.as_previous().as_twin();
-            },
-            None => { // In the case there are holes in the one-ring
-                self.walker.as_twin();
-                while let Some(_) = self.walker.face_id() {
-                    self.walker.as_next().as_twin();
-                }
-                self.walker.as_twin();
-            }
-        }
-        self.is_done = self.walker.halfedge_id().unwrap() == self.start;
-        Some(curr)
-    }
-}
-
-/// An iterator over the three half-edges in a face. See [here](../struct.Mesh.html#method.face_halfedge_iter) for more information.
-pub struct FaceHalfedgeIter<'a>
-{
-    walker: Walker<'a>,
-    count: usize
-}
-
-impl<'a> FaceHalfedgeIter<'a> {
-    pub(crate) fn new(face_id: FaceID, connectivity_info: &'a ConnectivityInfo) -> FaceHalfedgeIter<'a>
-    {
-        FaceHalfedgeIter { walker: Walker::new(connectivity_info).into_face_halfedge_walker(face_id), count: 0 }
-    }
-}
-
-impl<'a> Iterator for FaceHalfedgeIter<'a> {
-    type Item = HalfEdgeID;
-
-    fn next(&mut self) -> Option<HalfEdgeID>
-    {
-        if self.count == 3 { return None; }
-        self.walker.as_next();
-        self.count += 1;
-        Some(self.walker.halfedge_id().unwrap())
-    }
-}
-
-/// An iterator over the edges. See [here](../struct.Mesh.html#method.edge_iter) for more information.
-pub struct EdgeIter<'a>
-{
-    walker: Walker<'a>,
-    iter: HalfEdgeIter
-}
-
-impl<'a> EdgeIter<'a> {
-    pub(crate) fn new(connectivity_info: &'a ConnectivityInfo) -> EdgeIter<'a>
-    {
-        EdgeIter { walker: Walker::new(connectivity_info), iter: connectivity_info.halfedge_iterator() }
-    }
-}
-
-impl<'a> Iterator for EdgeIter<'a> {
-    type Item = HalfEdgeID;
-
-    fn next(&mut self) -> Option<HalfEdgeID>
-    {
-        if let Some(next_id) = self.iter.next() {
-            if self.walker.as_halfedge_walker(next_id).twin_id().unwrap() > next_id
-            {
-                self.next()
-            }
-            else {
-                Some(next_id)
-            }
-        }
-        else {
-            None
-        }
     }
 }
 
