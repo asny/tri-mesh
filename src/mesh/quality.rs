@@ -46,7 +46,8 @@ impl Mesh
 
     pub fn remove_lonely_primitives(&mut self)
     {
-        for (halfedge_id, _) in self.halfedge_twins_iter() {
+        let edges: Vec<HalfEdgeID> = self.edge_iter().collect();
+        for halfedge_id in edges {
             self.remove_edge_if_lonely(halfedge_id);
         }
 

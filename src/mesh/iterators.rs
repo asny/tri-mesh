@@ -119,18 +119,6 @@ impl Mesh
         FaceHalfedgeIter::new(face_id, &self.connectivity_info)
     }
 
-    pub fn halfedge_twins_iter(&self) -> HalfEdgeTwinsIter
-    {
-        let mut values = Vec::with_capacity(self.no_halfedges()/2);
-        for halfedge_id in self.halfedge_iter() {
-            let twin_id = self.walker_from_halfedge(halfedge_id).twin_id().unwrap();
-            if halfedge_id < twin_id {
-                values.push((halfedge_id, twin_id))
-            }
-        }
-        Box::new(values.into_iter())
-    }
-
     pub fn edge_iter(&self) -> EdgeIter
     {
         EdgeIter::new(&self.connectivity_info)
