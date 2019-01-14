@@ -1,4 +1,4 @@
-//! See [Mesh](crate::mesh::Mesh).
+//! Module containing iterator definitions. See [Mesh](crate::mesh::Mesh) for more information.
 
 use crate::mesh::Mesh;
 use crate::mesh::ids::*;

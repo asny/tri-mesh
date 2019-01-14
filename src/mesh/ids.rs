@@ -1,4 +1,4 @@
-//! See [Mesh](crate::mesh::Mesh).
+//! Module containing definitions of unique id's for a vertex, half-edge and face.
 
 use std::fmt;
 
