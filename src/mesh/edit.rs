@@ -177,8 +177,8 @@ impl Mesh
 
 
         // Update halfedges pointing to dying vertex
-        for walker1 in self.vertex_halfedge_iter(dying_vertex_id) {
-            self.connectivity_info.set_halfedge_vertex(walker1.twin_id().unwrap(), surviving_vertex_id);
+        for halfedge_id in self.vertex_halfedge_iter(dying_vertex_id) {
+            self.connectivity_info.set_halfedge_vertex(self.walker_from_halfedge(halfedge_id).twin_id().unwrap(), surviving_vertex_id);
         }
 
         // Remove first face + halfedges

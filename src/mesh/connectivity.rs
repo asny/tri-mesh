@@ -8,9 +8,9 @@ impl Mesh
 {
     pub fn connecting_edge(&self, vertex_id1: VertexID, vertex_id2: VertexID) -> Option<HalfEdgeID>
     {
-        for walker in self.vertex_halfedge_iter(vertex_id1) {
-            if walker.vertex_id().unwrap() == vertex_id2 {
-                return walker.halfedge_id()
+        for halfedge_id in self.vertex_halfedge_iter(vertex_id1) {
+            if self.walker_from_halfedge(halfedge_id).vertex_id().unwrap() == vertex_id2 {
+                return Some(halfedge_id)
             }
         }
         None
@@ -31,7 +31,8 @@ impl Mesh
 
     pub fn vertex_on_boundary(&self, vertex_id: VertexID) -> bool
     {
-        for mut walker in self.vertex_halfedge_iter(vertex_id) {
+        for halfedge_id in self.vertex_halfedge_iter(vertex_id) {
+            let mut walker = self.walker_from_halfedge(halfedge_id);
             if walker.face_id().is_none() || walker.as_twin().face_id().is_none()
             {
                 return true;

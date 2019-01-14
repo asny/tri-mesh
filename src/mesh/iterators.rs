@@ -117,12 +117,12 @@ impl<'a> VertexHalfedgeIter<'a> {
 }
 
 impl<'a> Iterator for VertexHalfedgeIter<'a> {
-    type Item = Walker<'a>;
+    type Item = HalfEdgeID;
 
-    fn next(&mut self) -> Option<Walker<'a>>
+    fn next(&mut self) -> Option<HalfEdgeID>
     {
         if self.is_done { return None; }
-        let curr = self.current.clone();
+        let curr = self.current.halfedge_id().unwrap();
 
         match self.current.face_id() {
             Some(_) => {
@@ -234,8 +234,8 @@ mod tests {
 
         let mut i = 0;
         let vertex_id = mesh.vertex_iter().last().unwrap();
-        for edge in mesh.vertex_halfedge_iter(vertex_id) {
-            assert!(edge.vertex_id().is_some());
+        for halfedge_id in mesh.vertex_halfedge_iter(vertex_id) {
+            assert!(mesh.walker_from_halfedge(halfedge_id).vertex_id().is_some());
             i = i + 1;
         }
         assert_eq!(i, 3, "All edges of a one-ring are not visited");
@@ -248,8 +248,8 @@ mod tests {
         let mesh = Mesh::new(indices, positions);
 
         let mut i = 0;
-        for edge in mesh.vertex_halfedge_iter(VertexID::new(0)) {
-            assert!(edge.vertex_id().is_some());
+        for halfedge_id in mesh.vertex_halfedge_iter(VertexID::new(0)) {
+            assert!(mesh.walker_from_halfedge(halfedge_id).vertex_id().is_some());
             i = i+1;
         }
         assert_eq!(i,4, "All edges of a one-ring are not visited");

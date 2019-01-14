@@ -305,8 +305,8 @@ mod tests {
         let mut id = None;
         for vertex_id in mesh.vertex_iter() {
             let mut round = true;
-            for walker in mesh.vertex_halfedge_iter(vertex_id) {
-                if walker.face_id().is_none() { round = false; break; }
+            for halfedge_id in mesh.vertex_halfedge_iter(vertex_id) {
+                if mesh.walker_from_halfedge(halfedge_id).face_id().is_none() { round = false; break; }
             }
             if round { id = Some(vertex_id); break; }
         }

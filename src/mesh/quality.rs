@@ -14,8 +14,9 @@ impl Mesh
         for vertex_id in self.vertex_iter() {
             let mut avg_pos = vec3(0.0, 0.0, 0.0);
             let mut i = 0;
-            for walker in self.vertex_halfedge_iter(vertex_id) {
-                avg_pos = avg_pos + *self.vertex_position(walker.vertex_id().unwrap());
+            for halfedge_id in self.vertex_halfedge_iter(vertex_id) {
+                let vid = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
+                avg_pos = avg_pos + *self.vertex_position(vid);
                 i = i + 1;
             }
             avg_pos = avg_pos / i as f32;
