@@ -158,15 +158,14 @@ impl<'a> FaceHalfedgeIter<'a> {
 }
 
 impl<'a> Iterator for FaceHalfedgeIter<'a> {
-    type Item = Walker<'a>;
+    type Item = HalfEdgeID;
 
-    fn next(&mut self) -> Option<Walker<'a>>
+    fn next(&mut self) -> Option<HalfEdgeID>
     {
         if self.is_done { return None; }
-        let curr = self.current.clone();
         self.current.as_next();
         self.is_done = self.current.halfedge_id().unwrap() == self.start;
-        Some(curr)
+        Some(self.current.halfedge_id().unwrap())
     }
 }
 
@@ -264,9 +263,10 @@ mod tests {
     fn test_face_halfedge_iterator() {
         let mesh = MeshBuilder::new().triangle().build().unwrap();
         let mut i = 0;
-        for edge in mesh.face_halfedge_iter(FaceID::new(0)) {
-            assert!(edge.halfedge_id().is_some());
-            assert!(edge.face_id().is_some());
+        for halfedge_id in mesh.face_halfedge_iter(FaceID::new(0)) {
+            let walker = mesh.walker_from_halfedge(halfedge_id);
+            assert!(walker.halfedge_id().is_some());
+            assert!(walker.face_id().is_some());
             i = i+1;
         }
         assert_eq!(i, 3, "All edges of a face are not visited");

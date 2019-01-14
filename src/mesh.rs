@@ -162,8 +162,8 @@ impl Mesh
         let mut indices = Vec::with_capacity(self.no_faces() * 3);
         for face_id in self.face_iter()
         {
-            for walker in self.face_halfedge_iter(face_id) {
-                let vertex_id = walker.vertex_id().unwrap();
+            for halfedge_id in self.face_halfedge_iter(face_id) {
+                let vertex_id = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
                 let index = vertices.iter().position(|v| v == &vertex_id).unwrap();
                 indices.push(index as u32);
             }

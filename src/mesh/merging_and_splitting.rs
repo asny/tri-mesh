@@ -35,18 +35,20 @@ impl Mesh
             let vertex_id2 = get_or_create_vertex(self, vertex_ids.2);
             let new_face_id = self.connectivity_info.create_face(vertex_id0, vertex_id1, vertex_id2);
 
-            for mut walker in other.face_halfedge_iter(other_face_id) {
-                if let Some(fid) = walker.as_twin().face_id()
+            for halfedge_id in other.face_halfedge_iter(other_face_id) {
+                if let Some(fid) = self.walker_from_halfedge(halfedge_id).as_twin().face_id()
                 {
                     if let Some(self_face_id) = face_mapping.get(&fid)
                     {
-                        for mut walker1 in self.face_halfedge_iter(*self_face_id)
+                        for halfedge_id1 in self.face_halfedge_iter(*self_face_id)
                         {
+                            let mut walker1 = self.walker_from_halfedge(halfedge_id1);
                             let source_vertex_id = walker1.vertex_id().unwrap();
                             let sink_vertex_id = walker1.as_next().vertex_id().unwrap();
 
-                            for mut walker2 in self.face_halfedge_iter(new_face_id)
+                            for halfedge_id2 in self.face_halfedge_iter(new_face_id)
                             {
+                                let mut walker2 = self.walker_from_halfedge(halfedge_id2);
                                 if sink_vertex_id == walker2.vertex_id().unwrap() && source_vertex_id == walker2.as_next().vertex_id().unwrap() {
                                     self.connectivity_info.set_halfedge_twin(walker1.halfedge_id().unwrap(), walker2.halfedge_id().unwrap());
                                 }
@@ -67,8 +69,8 @@ impl Mesh
         let info = crate::mesh::ConnectivityInfo::new(faces.len(), faces.len());
         for face_id in faces {
             let face = self.connectivity_info.face(*face_id).unwrap();
-            for mut walker in self.face_halfedge_iter(*face_id) {
-                let halfedge_id = walker.halfedge_id().unwrap();
+            for halfedge_id in self.face_halfedge_iter(*face_id) {
+                let mut walker = self.walker_from_halfedge(halfedge_id);
                 let halfedge = self.connectivity_info.halfedge(halfedge_id).unwrap();
                 info.add_halfedge(halfedge_id, halfedge);
 

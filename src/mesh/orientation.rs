@@ -17,11 +17,11 @@ impl Mesh {
         let mut update_list = [(None, None, None); 3];
 
         let mut i = 0;
-        for mut walker in self.face_halfedge_iter(face_id) {
-            let halfedge_id = walker.halfedge_id();
+        for halfedge_id in self.face_halfedge_iter(face_id) {
+            let mut walker = self.walker_from_halfedge(halfedge_id);
             let vertex_id = walker.vertex_id();
             walker.as_previous();
-            update_list[i] = (halfedge_id, walker.vertex_id(), walker.halfedge_id());
+            update_list[i] = (Some(halfedge_id), walker.vertex_id(), walker.halfedge_id());
             i += 1;
 
             self.connectivity_info.set_vertex_halfedge(walker.vertex_id().unwrap(), walker.halfedge_id());
@@ -57,7 +57,8 @@ impl Mesh {
         if !visited_faces.contains_key(&face_id)
         {
             visited_faces.insert(face_id, should_flip);
-            for mut walker in self.face_halfedge_iter(face_id) {
+            for halfedge_id in self.face_halfedge_iter(face_id) {
+                let mut walker = self.walker_from_halfedge(halfedge_id);
                 let vertex_id = walker.vertex_id();
                 if let Some(face_id_to_test) = walker.as_twin().face_id()
                 {
