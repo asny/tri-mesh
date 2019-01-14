@@ -36,6 +36,8 @@ impl Mesh
     ///
     /// Iterator over the half-edge ids.
     ///
+    /// **Note:** Each edge is visited two times, one for each half-edge. If you want to visit the edges only once, then use `edge_iter` instead.
+    ///
     /// # Examples
     ///
     /// ```
@@ -72,7 +74,11 @@ impl Mesh
     }
 
     ///
-    /// Iterator over the halfedges which starts in the given vertex, ie. the one-ring.
+    /// Iterator over the half-edges which starts in the given vertex, ie. the one-ring.
+    ///
+    /// **Note:** If the given vertex is the only connection between two or more separate sets of faces,
+    /// then this iterator will only iterate the half-edges in one of the sets.
+    /// If the vertex is on the boundary, all half-edges are visited.
     ///
     /// # Examples
     ///
@@ -96,7 +102,7 @@ impl Mesh
     }
 
     ///
-    /// Iterator over the three halfedges connected to the given face.
+    /// Iterator over the three half-edges connected to the given face.
     ///
     /// # Examples
     ///
