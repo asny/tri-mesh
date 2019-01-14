@@ -40,15 +40,44 @@ impl Mesh
     /// ```
     /// # use tri_mesh::prelude::*;
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
-    /// let mut sum_halfedge_lengths = 0.0;
+    /// let mut halfedge_length_average = 0.0;
+    /// let mut i = 0;
     /// for halfedge_id in mesh.halfedge_iter() {
-    ///     sum_halfedge_lengths += mesh.edge_length(halfedge_id);
+    ///     halfedge_length_average += mesh.edge_length(halfedge_id);
+    ///     i += 1;
     /// }
+    /// halfedge_length_average /= i as f32;
+    /// # assert_eq!(i, 36);
     /// ```
     ///
     pub fn halfedge_iter(&self) -> HalfEdgeIter
     {
         self.connectivity_info.halfedge_iterator()
+    }
+
+    ///
+    /// Iterator over the edges given as a half-edge id.
+    ///
+    /// **Note:** Each edge is visited once. If you want to visit both half-edges of an edge, then use `halfedge_iter` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tri_mesh::prelude::*;
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// let mut edge_length_average = 0.0;
+    /// let mut i = 0;
+    /// for halfedge_id in mesh.edge_iter() {
+    ///     edge_length_average += mesh.edge_length(halfedge_id);
+    ///     i += 1;
+    /// }
+    /// edge_length_average /= i as f32;
+    /// # assert_eq!(i, 18);
+    /// ```
+    ///
+    pub fn edge_iter(&self) -> EdgeIter
+    {
+        EdgeIter::new(&self.connectivity_info)
     }
 
     ///
@@ -118,11 +147,6 @@ impl Mesh
     {
         FaceHalfedgeIter::new(face_id, &self.connectivity_info)
     }
-
-    pub fn edge_iter(&self) -> EdgeIter
-    {
-        EdgeIter::new(&self.connectivity_info)
-    }
 }
 
 pub struct VertexHalfedgeIter<'a>
@@ -190,8 +214,6 @@ impl<'a> Iterator for FaceHalfedgeIter<'a> {
         Some(self.walker.halfedge_id().unwrap())
     }
 }
-
-
 
 pub struct EdgeIter<'a>
 {
