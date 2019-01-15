@@ -555,4 +555,25 @@ mod tests {
         mesh1.is_valid().unwrap();
         mesh2.is_valid().unwrap();
     }
+
+    #[test]
+    fn test_box_icosahedron_append()
+    {
+        let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
+        let mut mesh2 = MeshBuilder::new().icosahedron().build().unwrap();
+        mesh2.translate(vec3(0.5, 0.5, 0.5));
+
+        mesh1.append(&mesh2);
+
+        mesh1.is_valid().unwrap();
+        mesh2.is_valid().unwrap();
+
+        assert_eq!(mesh1.no_vertices(), mesh2.no_vertices() + 8);
+        assert_eq!(mesh1.no_halfedges(), mesh2.no_halfedges() + 36);
+        assert_eq!(mesh1.no_faces(), mesh2.no_faces() + 12);
+
+        for pos in mesh2.vertex_iter().map(|v| mesh2.vertex_position(v)) {
+            assert!(mesh1.vertex_iter().find(|v| mesh1.vertex_position(*v) == pos).is_some());
+        }
+    }
 }
