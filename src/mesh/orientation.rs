@@ -5,10 +5,30 @@ use crate::mesh::ids::*;
 
 /// # Orientation functionality
 impl Mesh {
+
+    ///
+    /// Flip the orientation of all faces in the mesh, ie. such that the normal points in the opposite direction.
+    ///
     pub fn flip_orientation(&mut self)
     {
         for face_id in self.face_iter() {
             self.flip_orientation_of_face(face_id);
+        }
+    }
+
+    ///
+    /// Fix the orientation of all faces in the mesh such that the orientation of each pair of neighbouring faces is aligned.
+    ///
+    pub fn fix_orientation(&mut self)
+    {
+        let mut visited_faces = std::collections::HashMap::new();
+        for face_id in self.face_iter() {
+            self.find_faces_to_flip_orientation(face_id, &mut visited_faces, false);
+        }
+        for (face_id, should_flip) in visited_faces {
+            if should_flip {
+                self.flip_orientation_of_face(face_id)
+            }
         }
     }
 
@@ -36,19 +56,6 @@ impl Mesh {
         for (halfedge_id, new_vertex_id, new_next_id) in update_list.iter() {
             self.connectivity_info.set_halfedge_vertex(halfedge_id.unwrap(), new_vertex_id.unwrap());
             self.connectivity_info.set_halfedge_next(halfedge_id.unwrap(), *new_next_id);
-        }
-    }
-
-    pub fn fix_orientation(&mut self)
-    {
-        let mut visited_faces = std::collections::HashMap::new();
-        for face_id in self.face_iter() {
-            self.find_faces_to_flip_orientation(face_id, &mut visited_faces, false);
-        }
-        for (face_id, should_flip) in visited_faces {
-            if should_flip {
-                self.flip_orientation_of_face(face_id)
-            }
         }
     }
 
