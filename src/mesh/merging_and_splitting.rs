@@ -8,6 +8,9 @@ use std::collections::{HashSet, HashMap};
 /// # Merging & splitting
 impl Mesh
 {
+    /// Merges the mesh together with the `other` mesh.
+    /// The `other` mesh primitives are copied to the current mesh (and `other` is therefore not changed)
+    /// followed by merging of overlapping primitives.
     pub fn merge_with(&mut self, other: &Self) -> Result<(), Error>
     {
         self.append(other);
@@ -15,6 +18,8 @@ impl Mesh
         Ok(())
     }
 
+    /// Appends the `other` mesh to this mesh which means that all the primitivess of
+    /// the `other` mesh are copied to the current mesh. The `other`mesh is therefore not changed.
     pub fn append(&mut self, other: &Self)
     {
         let mut mapping: HashMap<VertexID, VertexID> = HashMap::new();
@@ -64,6 +69,7 @@ impl Mesh
         self.create_boundary_edges();
     }
 
+    /// Returns a clone a subset of this mesh.
     pub fn clone_subset(&self, faces: &std::collections::HashSet<FaceID>) -> Mesh
     {
         let info = crate::mesh::ConnectivityInfo::new(faces.len(), faces.len());
@@ -108,6 +114,13 @@ impl Mesh
         Mesh::new_internal(positions, info)
     }
 
+    ///
+    /// Merges overlapping faces, edges and vertices.
+    ///
+    /// # Error
+    ///
+    /// Returns an error if the merging will result in a non-manifold mesh.
+    ///
     pub fn merge_overlapping_primitives(&mut self) -> Result<(), Error>
     {
         let set_of_vertices_to_merge = self.find_overlapping_vertices();
