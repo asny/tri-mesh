@@ -102,7 +102,7 @@ impl<'a> Iterator for EdgeIter<'a> {
     fn next(&mut self) -> Option<HalfEdgeID>
     {
         if let Some(next_id) = self.iter.next() {
-            if self.walker.as_halfedge_walker(next_id).twin_id().unwrap() > next_id
+            if self.walker.as_halfedge_walker(next_id).twin_id().unwrap() < next_id
             {
                 self.next()
             }
@@ -321,6 +321,7 @@ mod tests {
         // Test that the twin is not returned
         for halfedge_id in mesh.edge_iter() {
             let twin_id = mesh.walker_from_halfedge(halfedge_id).twin_id().unwrap();
+            assert!(halfedge_id < twin_id);
             assert!(vec.iter().find(|edge_id| *edge_id == &twin_id).is_none());
         }
     }
