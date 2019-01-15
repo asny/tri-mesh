@@ -1,10 +1,13 @@
-//! See [Mesh](crate::mesh::Mesh).
+//! Defines a [Walker](crate::mesh::traversal::Walker) for easy and efficient traversal of the mesh.
+//! See [Mesh](crate::mesh::Mesh) for how to construct a walker.
 
 use crate::mesh::Mesh;
 use crate::mesh::ids::*;
 use crate::mesh::connectivity_info::{HalfEdge, ConnectivityInfo};
 
 /// # Traversal
+/// Methods to construct a [Walker](crate::mesh::traversal::Walker) which is used for easy and efficient traversal of the mesh.
+/// See [Walker](crate::mesh::traversal::Walker) for more information and examples.
 impl Mesh
 {
     /// Creates an 'empty' [walker](crate::mesh::traversal::Walker), ie. a walker that is associated with any half-edge.

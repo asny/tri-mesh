@@ -1,4 +1,4 @@
-//! Module containing iterator definitions. See [Mesh](crate::mesh::Mesh) for more information.
+//! Defines iterator types for easy iterating mesh primitives. See [Mesh](crate::mesh::Mesh) for more information.
 
 use crate::mesh::Mesh;
 use crate::mesh::ids::*;
