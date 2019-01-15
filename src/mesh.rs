@@ -24,15 +24,15 @@ pub mod math {
 pub mod ids;
 pub mod traversal;
 pub mod iterators;
-pub mod merging_and_splitting;
 pub mod connectivity;
-pub mod edit;
-pub mod quality;
 pub mod vertex_measures;
 pub mod edge_measures;
 pub mod face_measures;
+pub mod edit;
+pub mod quality;
 pub mod orientation;
 pub mod transformations;
+pub mod merging_and_splitting;
 pub mod validity;
 
 mod connectivity_info;
@@ -65,8 +65,18 @@ pub enum Error {
 ///
 /// Represents a triangle mesh.
 ///
-/// ## Functionality overview:
+/// ## Functionality:
 /// - [Traversal](#traversal)
+/// - [Iterators](#iterators)
+/// - [Connectivity functionality](#connectivity-functionality)
+/// - [Vertex measures](#vertex-measures)
+/// - [Edge measures](#edge-measures)
+/// - [Face measures](#face-measures)
+/// - [Edit functionality](#edit-functionality)
+/// - [Quality functionality](#quality-functionality)
+/// - [Orientation functionality](#orientation-functionality)
+/// - [Transformations](#transformations)
+/// - [Merging & splitting](#merging--splitting)
 /// - [Validity](#validity)
 ///
 #[derive(Debug)]
