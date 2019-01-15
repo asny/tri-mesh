@@ -8,6 +8,8 @@ use std::collections::{HashSet, HashMap};
 /// # Quality functionality
 impl Mesh
 {
+    /// Moves the vertices to `pos + factor * (avg_pos - pos)` where `pos` is the current position
+    /// and `avg_pos` is the average position of the neighbouring vertices.
     pub fn smooth_vertices(&mut self, factor: f32)
     {
         let mut map = HashMap::new();
@@ -29,6 +31,7 @@ impl Mesh
         }
     }
 
+    /// Collapse an edge of faces which has an area smaller than `area_threshold`.
     pub fn collapse_small_faces(&mut self, area_threshold: f32)
     {
         let mut faces_to_test = HashSet::new();
@@ -44,6 +47,7 @@ impl Mesh
         }
     }
 
+    /// Removes edges and vertices that are not connected to a face.
     pub fn remove_lonely_primitives(&mut self)
     {
         let edges: Vec<HalfEdgeID> = self.edge_iter().collect();
@@ -56,6 +60,15 @@ impl Mesh
         }
     }
 
+    ///
+    /// Flip all edges in the mesh
+    /// * which is not on the boundary
+    /// * where the flip will improve the sum of the quality of the two faces adjacent to the edge
+    /// (The face quality is given as the circumscribed radius divided by the inscribed radius)
+    /// * where the dot product between the normals of the adjacent faces is smaller than `flattness_threshold`
+    /// (1: Completely flat, 0: 90 degrees angle between normals)
+    /// * where the flip will not result in inverted triangles
+    ///
     pub fn flip_edges(&mut self, flatness_threshold: f32)
     {
         let insert_or_remove = |mesh: &Mesh, to_be_flipped: &mut HashSet<HalfEdgeID>, halfedge_id: HalfEdgeID| {
