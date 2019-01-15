@@ -5,10 +5,8 @@ use crate::mesh::ids::*;
 
 /// # Orientation functionality
 impl Mesh {
-
-    ///
+    
     /// Flip the orientation of all faces in the mesh, ie. such that the normal points in the opposite direction.
-    ///
     pub fn flip_orientation(&mut self)
     {
         for face_id in self.face_iter() {
@@ -16,9 +14,7 @@ impl Mesh {
         }
     }
 
-    ///
     /// Fix the orientation of all faces in the mesh such that the orientation of each pair of neighbouring faces is aligned.
-    ///
     pub fn fix_orientation(&mut self)
     {
         let mut visited_faces = std::collections::HashMap::new();
