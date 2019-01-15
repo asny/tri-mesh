@@ -3,6 +3,8 @@ name = "tri-mesh"
 version = "0.1.0"
 authors = ["Asger Nyman Christiansen <asgernyman@gmail.com>"]
 edition = "2018"
+description = "A triangle mesh data structure including basic operations."
+license = "MIT"
 
 [dependencies]
 cgmath = "0.16.1"

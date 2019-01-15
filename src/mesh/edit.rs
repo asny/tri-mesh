@@ -194,7 +194,7 @@ impl Mesh
     /// Returns the merged vertex.
     ///
     /// **Note:** This might make some faces degenerate.
-    /// 
+    ///
     pub fn collapse_edge(&mut self, halfedge_id: HalfEdgeID) -> VertexID
     {
         let mut walker = self.walker_from_halfedge(halfedge_id);
