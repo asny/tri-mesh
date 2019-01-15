@@ -145,6 +145,12 @@ impl Mesh
         self.connectivity_info.no_vertices()
     }
 
+    /// Returns the number of edges in the mesh.
+    pub fn no_edges(&self) -> usize
+    {
+        self.connectivity_info.no_halfedges()/2
+    }
+
     /// Returns the number of half-edges in the mesh.
     pub fn no_halfedges(&self) -> usize
     {
