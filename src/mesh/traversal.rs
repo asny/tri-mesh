@@ -49,6 +49,18 @@ impl<'a> Walker<'a>
         self
     }
 
+    pub fn into_halfedge_walker(mut self, halfedge_id: HalfEdgeID) -> Self
+    {
+        self.as_halfedge_walker(halfedge_id);
+        self
+    }
+
+    pub fn into_face_halfedge_walker(mut self, face_id: FaceID) -> Self
+    {
+        self.as_face_halfedge_walker(face_id);
+        self
+    }
+
     pub fn as_vertex_halfedge_walker(&mut self, vertex_id: VertexID) -> &mut Self
     {
         let halfedge_id = self.connectivity_info.vertex_halfedge(vertex_id);
@@ -56,22 +68,10 @@ impl<'a> Walker<'a>
         self
     }
 
-    pub fn into_halfedge_walker(mut self, halfedge_id: HalfEdgeID) -> Self
-    {
-        self.as_halfedge_walker(halfedge_id);
-        self
-    }
-
     pub fn as_halfedge_walker(&mut self, halfedge_id: HalfEdgeID) -> &mut Self
     {
         let halfedge_id = Some(halfedge_id);
         self.set_current(halfedge_id);
-        self
-    }
-
-    pub fn into_face_halfedge_walker(mut self, face_id: FaceID) -> Self
-    {
-        self.as_face_halfedge_walker(face_id);
         self
     }
 
@@ -88,25 +88,15 @@ impl<'a> Walker<'a>
         self
     }
 
-    pub fn as_twin(&mut self) -> &mut Self
-    {
-        let halfedge_id = match self.current_info {
-            Some(ref current_info) => { current_info.twin },
-            None => None
-        };
-        self.set_current(halfedge_id);
-        self
-    }
-
-    pub fn twin_id(&self) -> Option<HalfEdgeID>
-    {
-        if let Some(ref halfedge) = self.current_info { halfedge.twin }
-        else { None }
-    }
-
     pub fn into_next(mut self) -> Self
     {
         self.as_next();
+        self
+    }
+
+    pub fn into_previous(mut self) -> Self
+    {
+        self.as_next().as_next();
         self
     }
 
@@ -120,40 +110,59 @@ impl<'a> Walker<'a>
         self
     }
 
-    pub fn next_id(&self) -> Option<HalfEdgeID>
-    {
-        if let Some(ref halfedge) = self.current_info { halfedge.next }
-        else { None }
-    }
-
     pub fn as_previous(&mut self) -> &mut Self
     {
         self.as_next().as_next()
     }
 
-    pub fn into_previous(mut self) -> Self
+    pub fn as_twin(&mut self) -> &mut Self
     {
-        self.as_next().as_next();
+        let halfedge_id = match self.current_info {
+            Some(ref current_info) => { current_info.twin },
+            None => None
+        };
+        self.set_current(halfedge_id);
         self
     }
 
-    pub fn previous_id(&self) -> Option<HalfEdgeID>
-    {
-        if let Some(next_id) = self.next_id() { Walker::new(&self.connectivity_info).into_halfedge_walker(next_id).next_id() }
-        else { None }
-    }
-
+    /// Returns the id of the vertex pointed to by the current half-edge or `None` if the walker has walked outside of the mesh at some point.
     pub fn vertex_id(&self) -> Option<VertexID>
     {
         if let Some(ref halfedge) = self.current_info { halfedge.vertex }
         else { None }
     }
 
+    /// Returns the id of the next half-edge in the adjacent face or `None` if the half-edge is at the boundary of the mesh
+    /// or if the walker has walked outside of the mesh at some point.
+    pub fn next_id(&self) -> Option<HalfEdgeID>
+    {
+        if let Some(ref halfedge) = self.current_info { halfedge.next }
+        else { None }
+    }
+
+    /// Returns the id of the previous half-edge in the adjacent face or `None` if the half-edge is at the boundary of the mesh
+    /// or if the walker has walked outside of the mesh at some point.
+    pub fn previous_id(&self) -> Option<HalfEdgeID>
+    {
+        if let Some(next_id) = self.next_id() { Walker::new(&self.connectivity_info).into_halfedge_walker(next_id).next_id() }
+        else { None }
+    }
+
+    /// Returns the id of the twin half-edge to the current half-edge or `None` if the walker has walked outside of the mesh at some point.
+    pub fn twin_id(&self) -> Option<HalfEdgeID>
+    {
+        if let Some(ref halfedge) = self.current_info { halfedge.twin }
+        else { None }
+    }
+
+    /// Returns the id of the current half-edge or `None` if the walker has walked outside of the mesh at some point.
     pub fn halfedge_id(&self) -> Option<HalfEdgeID>
     {
         self.current
     }
 
+    /// Returns the id of the adjacent face or `None` if the half-edge is at the boundary of the mesh
+    /// or if the walker has walked outside of the mesh at some point.
     pub fn face_id(&self) -> Option<FaceID>
     {
         if let Some(ref halfedge) = self.current_info { halfedge.face }
