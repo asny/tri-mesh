@@ -36,7 +36,7 @@ impl Mesh
             let new_face_id = self.connectivity_info.create_face(vertex_id0, vertex_id1, vertex_id2);
 
             for halfedge_id in other.face_halfedge_iter(other_face_id) {
-                if let Some(fid) = self.walker_from_halfedge(halfedge_id).as_twin().face_id()
+                if let Some(fid) = other.walker_from_halfedge(halfedge_id).as_twin().face_id()
                 {
                     if let Some(self_face_id) = face_mapping.get(&fid)
                     {
