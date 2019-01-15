@@ -7,6 +7,17 @@ use crate::mesh::ids::*;
 /// # Edit functionality
 impl Mesh
 {
+    /// Flip the given edge such that the edge after the flip is connected to the
+    /// other pair of the four vertices connected to the two adjacent faces.
+    ///
+    /// ```text
+    ///   /\          /|\
+    ///  /  \        / | \
+    /// /____\  --> /  |  \
+    /// \    /      \  |  /
+    ///  \  /        \ | /
+    ///   \/          \|/
+    /// ```
     pub fn flip_edge(&mut self, halfedge_id: HalfEdgeID) -> Result<(), Error>
     {
         let mut walker = self.walker_from_halfedge(halfedge_id);
@@ -50,6 +61,8 @@ impl Mesh
         Ok(())
     }
 
+    /// Split the given edge into two.
+    /// Returns the id of the new vertex positioned at the given position.
     pub fn split_edge(&mut self, halfedge_id: HalfEdgeID, position: Vec3) -> VertexID
     {
         let mut walker = self.walker_from_halfedge(halfedge_id);
@@ -79,6 +92,8 @@ impl Mesh
         new_vertex_id
     }
 
+    /// Split the given face into three new faces.
+    /// Returns the id of the new vertex positioned at the given position.
     pub fn split_face(&mut self, face_id: FaceID, position: Vec3) -> VertexID
     {
         let new_vertex_id = self.create_vertex(position);
@@ -167,6 +182,10 @@ impl Mesh
         }
     }
 
+    /// Collapses the given edge. Consequently, the to adjacent faces are removed and
+    /// the two adjacent vertices are merged into one vertex
+    /// which position is the average of the original vertex positions.
+    /// Returns the merged vertex.
     pub fn collapse_edge(&mut self, halfedge_id: HalfEdgeID) -> VertexID
     {
         let mut walker = self.walker_from_halfedge(halfedge_id);
@@ -240,13 +259,10 @@ impl Mesh
 
     }
 
+    /// Removes the given face and the adjacent edges if they are then not connected to any face.
     pub fn remove_face(&mut self, face_id: FaceID)
     {
-        let mut edges = Vec::new();
-        for halfedge_id in self.face_halfedge_iter(face_id) {
-            edges.push(halfedge_id);
-        }
-
+        let edges: Vec<HalfEdgeID> = self.face_halfedge_iter(face_id).collect();
         self.remove_face_unsafe(face_id);
         for halfedge_id in edges {
             self.remove_edge_if_lonely(halfedge_id);
