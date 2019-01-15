@@ -187,10 +187,14 @@ impl Mesh
         }
     }
 
+    ///
     /// Collapses the given edge. Consequently, the to adjacent faces are removed and
     /// the two adjacent vertices are merged into one vertex
     /// which position is the average of the original vertex positions.
     /// Returns the merged vertex.
+    ///
+    /// **Note:** This might make some faces degenerate.
+    /// 
     pub fn collapse_edge(&mut self, halfedge_id: HalfEdgeID) -> VertexID
     {
         let mut walker = self.walker_from_halfedge(halfedge_id);
