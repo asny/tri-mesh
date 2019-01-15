@@ -34,12 +34,12 @@ impl ConnectivityInfo {
         RefCell::borrow(&self.faces).len()
     }
 
-    // Creates a face and the three internal halfedges and connects them to eachother and to the three given vertices
+    // Creates a face and the three internal half-edges and connects them to eachother and to the three given vertices
     pub fn create_face(&self, vertex_id1: VertexID, vertex_id2: VertexID, vertex_id3: VertexID) -> FaceID
     {
         let id = self.new_face();
 
-        // Create inner halfedges
+        // Create inner half-edges
         let halfedge1 = self.new_halfedge(Some(vertex_id2), None, Some(id));
         let halfedge3 = self.new_halfedge(Some(vertex_id1), Some(halfedge1), Some(id));
         let halfedge2 = self.new_halfedge(Some(vertex_id3), Some(halfedge3), Some(id));
