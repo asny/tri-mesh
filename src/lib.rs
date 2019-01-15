@@ -5,9 +5,9 @@
 //! then `tri-mesh` is probably something for you!
 //!
 //! ## Features
-//! - An implementation of the [halfedge mesh data structure](crate::mesh::Mesh)
+//! - The main struct [Mesh](crate::mesh::Mesh) implements the halfedge mesh data structure for easy and efficient traversal
 //! - [Iterators](mesh/struct.Mesh.html#iterators) over primitives (vertices, halfedges, faces)
-//! - Halfedge [walker](mesh/struct.Mesh.html#traversal) to efficiently traverse the mesh
+//! - Halfedge [walker](mesh/struct.Mesh.html#traversal) to traverse the mesh
 //! - Convenient [connectivity](mesh/struct.Mesh.html#connectivity-functionality) functionality (e.g. vertices of a face, edge between two vertices)
 //! - Measures on [vertices](mesh/struct.Mesh.html#vertex-measures), [edges](mesh/struct.Mesh.html#edge-measures) and [faces](mesh/struct.Mesh.html#face-measures) (e.g. position of vertex, area of face)
 //! - [Edit](mesh/struct.Mesh.html#edit-functionality) functionality (e.g. split edge, collapse edge, flip edge)
