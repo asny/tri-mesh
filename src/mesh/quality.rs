@@ -100,7 +100,7 @@ impl Mesh
 
     fn should_flip(&self, halfedge_id: HalfEdgeID, flatness_threshold: f32) -> bool
     {
-        !self.on_boundary(halfedge_id)
+        !self.is_edge_on_boundary(halfedge_id)
             && self.flatness(halfedge_id) > flatness_threshold
             && !self.flip_will_invert_triangle(halfedge_id)
             && self.flip_will_improve_quality(halfedge_id)

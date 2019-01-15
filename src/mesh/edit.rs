@@ -549,7 +549,7 @@ mod tests {
         let mut mesh = Mesh::new(indices, positions);
         for halfedge_id in mesh.halfedge_iter()
         {
-            if mesh.on_boundary(halfedge_id)
+            if mesh.is_edge_on_boundary(halfedge_id)
             {
                 mesh.collapse_edge(halfedge_id);
 
@@ -570,7 +570,7 @@ mod tests {
     {
         let mut mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
         for halfedge_id in mesh.halfedge_iter() {
-            if !mesh.on_boundary(halfedge_id)
+            if !mesh.is_edge_on_boundary(halfedge_id)
             {
                 mesh.collapse_edge(halfedge_id);
                 assert_eq!(mesh.no_vertices(), 3);
@@ -592,7 +592,7 @@ mod tests {
 
         while mesh.no_faces() > 1 {
             for halfedge_id in mesh.halfedge_iter() {
-                if mesh.on_boundary(halfedge_id)
+                if mesh.is_edge_on_boundary(halfedge_id)
                 {
                     mesh.collapse_edge(halfedge_id);
                     break;
