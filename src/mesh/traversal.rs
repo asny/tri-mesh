@@ -35,7 +35,86 @@ impl Mesh
     }
 }
 
-
+///
+/// Used for easy and efficient traversal of the mesh.
+/// See [Mesh](crate::mesh::Mesh) for how to construct a walker
+/// and the examples below for instructions on how to use a walker.
+///
+/// # Examples
+///
+/// ## \# 1
+///
+/// ```
+/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
+/// // Find the id of the vertex pointed to by a half-edge.
+/// let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id();
+/// ```
+///
+/// ## \# 2
+///
+/// ```
+/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
+/// let mut walker = mesh.walker_from_halfedge(halfedge_id);
+/// // Walk around the three sides of a face..
+/// let result_halfedge_id = walker.as_next().as_next().next_id().unwrap();
+/// // .. ending up at the same half-edge
+/// assert_eq!(halfedge_id, result_halfedge_id);
+/// ```
+/// ## \# 3
+///
+/// ```
+/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # let face_id = mesh.face_iter().next().unwrap();
+/// // Find one neighbouring face to the given face
+/// let neighbour_face_id = mesh.walker_from_face(face_id).into_twin().face_id().unwrap();
+/// ```
+///
+/// ## \# 4
+///
+/// ```
+/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # let face_id = mesh.face_iter().next().unwrap();
+/// // Find the circumference of the face
+/// let mut walker = mesh.walker_from_face(face_id);
+/// let mut circumference = mesh.edge_length(walker.halfedge_id().unwrap());
+/// walker.as_next();
+/// circumference += mesh.edge_length(walker.halfedge_id().unwrap());
+/// circumference += mesh.edge_length(walker.next_id().unwrap());
+/// # assert_eq!(circumference, 4.0f32 + 8.0f32.sqrt());
+/// ```
+///
+/// ## \# 5
+///
+/// ```
+/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
+/// // Check if the half-edge is on the boundary of the mesh
+/// let mut walker = mesh.walker_from_halfedge(halfedge_id);
+/// let is_on_boundary = walker.face_id().is_none() || walker.as_twin().face_id().is_none();
+/// # assert!(!is_on_boundary);
+/// ```
+///
+/// ## \# 6
+///
+/// ```
+/// # use tri_mesh::prelude::*;
+/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// // Compute the average edge length
+/// let mut avg_edge_length = 0.0f32;
+/// let mut walker = mesh.walker();
+/// for halfedge_id in mesh.edge_iter()
+/// {
+///     // Reuse the walker for efficiency
+///     walker.as_halfedge_walker(halfedge_id);
+///     let p0 = mesh.vertex_position(walker.vertex_id().unwrap());
+///     let p1 = mesh.vertex_position(walker.as_twin().vertex_id().unwrap());
+///     avg_edge_length += (p0 - p1).magnitude();
+/// }
+/// avg_edge_length /= mesh.no_edges() as f32;
+/// ```
+///
 #[derive(Clone, Debug)]
 pub struct Walker<'a>
 {
