@@ -37,8 +37,11 @@ impl Mesh
 
 ///
 /// Used for easy and efficient traversal of the mesh.
-/// See [Mesh](crate::mesh::Mesh) for how to construct a walker
+/// See [Mesh](../struct.Mesh.html#traversal) for how to construct a walker
 /// and the examples below for instructions on how to use a walker.
+///
+/// **Note:** If you walk outside the mesh at some point, no error will be returned,
+/// instead, all methods to extract an ID will return `None`.
 ///
 /// # Examples
 ///
@@ -48,7 +51,7 @@ impl Mesh
 /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
 /// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
 /// // Find the id of the vertex pointed to by a half-edge.
-/// let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id();
+/// let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
 /// ```
 ///
 /// ## \# 2

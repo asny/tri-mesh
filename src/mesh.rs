@@ -63,7 +63,7 @@ pub enum Error {
 }
 
 ///
-/// Represents a triangle mesh.
+/// Represents a triangle mesh. Use the [Mesh builder](crate::mesh_builder::MeshBuilder) to construct a new mesh.
 ///
 /// ## Functionality:
 /// - [Traversal](#traversal)
