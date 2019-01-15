@@ -12,9 +12,12 @@ pub mod math {
 
     /// Vector with three elements.
     pub type Vec3 = Vector3<f32>;
+    /// Vector with four elements.
     pub type Vec4 = Vector4<f32>;
 
+    /// 3x3 matrix.
     pub type Mat3 = Matrix3<f32>;
+    /// 4x4 matrix.
     pub type Mat4 = Matrix4<f32>;
 }
 

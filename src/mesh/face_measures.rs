@@ -59,7 +59,6 @@ impl Mesh
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::MeshBuilder;
 
     #[test]

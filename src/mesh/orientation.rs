@@ -5,7 +5,7 @@ use crate::mesh::ids::*;
 
 /// # Orientation functionality
 impl Mesh {
-    
+
     /// Flip the orientation of all faces in the mesh, ie. such that the normal points in the opposite direction.
     pub fn flip_orientation(&mut self)
     {
