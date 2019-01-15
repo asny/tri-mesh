@@ -7,26 +7,31 @@ use crate::mesh::connectivity_info::{HalfEdge, ConnectivityInfo};
 /// # Traversal
 impl Mesh
 {
+    /// Creates an 'empty' [walker](crate::mesh::traversal::Walker), ie. a walker that is associated with any half-edge.
     pub fn walker(&self) -> Walker
     {
         Walker::new(&self.connectivity_info)
     }
 
+    /// Creates a [walker](crate::mesh::traversal::Walker) at the half-edge pointed to by the given vertex.
     pub fn walker_from_vertex(&self, vertex_id: VertexID) -> Walker
     {
         self.walker().into_vertex_halfedge_walker(vertex_id)
     }
 
+    /// Creates a [walker](crate::mesh::traversal::Walker) at the given half-edge.
     pub fn walker_from_halfedge(&self, halfedge_id: HalfEdgeID) -> Walker
     {
         self.walker().into_halfedge_walker(halfedge_id)
     }
 
+    /// Creates a [walker](crate::mesh::traversal::Walker) at the half-edge pointed to by the given face.
     pub fn walker_from_face(&self, face_id: FaceID) -> Walker
     {
         self.walker().into_face_halfedge_walker(face_id)
     }
 }
+
 
 #[derive(Clone, Debug)]
 pub struct Walker<'a>
@@ -43,24 +48,28 @@ impl<'a> Walker<'a>
         Walker {current: None, current_info: None, connectivity_info: connectivity_info}
     }
 
+    /// Jumps to the half-edge pointed to by the given vertex.
     pub fn into_vertex_halfedge_walker(mut self, vertex_id: VertexID) -> Self
     {
         self.as_vertex_halfedge_walker(vertex_id);
         self
     }
 
+    /// Jumps to the given half-edge.
     pub fn into_halfedge_walker(mut self, halfedge_id: HalfEdgeID) -> Self
     {
         self.as_halfedge_walker(halfedge_id);
         self
     }
 
+    /// Jumps to the half-edge pointed to by the given face.
     pub fn into_face_halfedge_walker(mut self, face_id: FaceID) -> Self
     {
         self.as_face_halfedge_walker(face_id);
         self
     }
 
+    /// Jumps to the half-edge pointed to by the given vertex.
     pub fn as_vertex_halfedge_walker(&mut self, vertex_id: VertexID) -> &mut Self
     {
         let halfedge_id = self.connectivity_info.vertex_halfedge(vertex_id);
@@ -68,6 +77,7 @@ impl<'a> Walker<'a>
         self
     }
 
+    /// Jumps to the given half-edge.
     pub fn as_halfedge_walker(&mut self, halfedge_id: HalfEdgeID) -> &mut Self
     {
         let halfedge_id = Some(halfedge_id);
@@ -75,6 +85,7 @@ impl<'a> Walker<'a>
         self
     }
 
+    /// Jumps to the half-edge pointed to by the given face.
     pub fn as_face_halfedge_walker(&mut self, face_id: FaceID) -> &mut Self
     {
         let halfedge_id = self.connectivity_info.face_halfedge(face_id);
@@ -82,24 +93,28 @@ impl<'a> Walker<'a>
         self
     }
 
-    pub fn into_twin(mut self) -> Self
-    {
-        self.as_twin();
-        self
-    }
-
+    /// Walk to the next half-edge in the adjacent face.
     pub fn into_next(mut self) -> Self
     {
         self.as_next();
         self
     }
 
+    /// Walk to the previous half-edge in the adjacent face.
     pub fn into_previous(mut self) -> Self
     {
         self.as_next().as_next();
         self
     }
 
+    /// Walk to the twin half-edge.
+    pub fn into_twin(mut self) -> Self
+    {
+        self.as_twin();
+        self
+    }
+
+    /// Walk to the next half-edge in the adjacent face.
     pub fn as_next(&mut self) -> &mut Self
     {
         let halfedge_id = match self.current_info {
@@ -110,11 +125,13 @@ impl<'a> Walker<'a>
         self
     }
 
+    /// Walk to the previous half-edge in the adjacent face.
     pub fn as_previous(&mut self) -> &mut Self
     {
         self.as_next().as_next()
     }
 
+    /// Walk to the twin half-edge.
     pub fn as_twin(&mut self) -> &mut Self
     {
         let halfedge_id = match self.current_info {
