@@ -4,7 +4,7 @@
 //! # Features
 //!
 //! - The main struct [Mesh](crate::mesh::Mesh) implements the half-edge mesh data structure for easy and efficient traversal
-//! - Half-edge [walker](mesh/struct.Mesh.html#traversal) to traverse the mesh
+//! - Half-edge [walker](crate::mesh::traversal::Walker) to traverse the mesh
 //! - [Iterators](mesh/struct.Mesh.html#iterators) over primitives (vertices, half-edges, edges, faces)
 //! - Convenient [connectivity](mesh/struct.Mesh.html#connectivity-functionality) functionality (e.g. vertices of a face, edge between two vertices)
 //! - Measures on [vertices](mesh/struct.Mesh.html#vertex-measures), [edges](mesh/struct.Mesh.html#edge-measures) and [faces](mesh/struct.Mesh.html#face-measures) (e.g. position of vertex, area of face)
