@@ -242,8 +242,8 @@ impl Mesh
     /// Returns minimum and maximum coordinates of the axis aligned bounding box of the mesh.
     pub fn extreme_coordinates(&self) -> (Vec3, Vec3)
     {
-        let mut min_coordinates = vec3(std::f32::MIN, std::f32::MIN, std::f32::MIN);
-        let mut max_coordinates = vec3(std::f32::MAX, std::f32::MAX, std::f32::MAX);
+        let mut min_coordinates = vec3(std::f32::MAX, std::f32::MAX, std::f32::MAX);
+        let mut max_coordinates = vec3(std::f32::MIN, std::f32::MIN, std::f32::MIN);
         for vertex_id in self.vertex_iter()
         {
             let position = self.vertex_position(vertex_id);
@@ -363,5 +363,18 @@ mod tests {
         assert_eq!(9, mesh.no_vertices());
         assert_eq!(3, mesh.no_faces());
         mesh.is_valid().unwrap();
+    }
+
+    #[test]
+    fn test_extreme_coordinates()
+    {
+        let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
+        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
+        let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
+
+        let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
+
+        assert_eq!(min_coordinates, vec3(-1.0, 0.0, -0.5));
+        assert_eq!(max_coordinates, vec3(1.0, 0.0, 1.0));
     }
 }
