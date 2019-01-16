@@ -2,6 +2,7 @@
 
 [![](http://meritbadge.herokuapp.com/tri-mesh)](https://crates.io/crates/tri-mesh)
 [![Docs.rs](https://docs.rs/tri-mesh/badge.svg)](https://docs.rs/tri-mesh)
+[![Build Status](https://travis-ci.org/asny/tri-mesh.svg?branch=master)](https://travis-ci.org/asny/tri-mesh)
 
 A triangle mesh data structure including basic operations.
 
@@ -11,7 +12,7 @@ then `tri-mesh` is probably something for you!
 
 ```toml
 [dependencies]
-tri-mesh = "0.1.0"
+tri-mesh = "0.1.1"
 ```
 
 ## Features
