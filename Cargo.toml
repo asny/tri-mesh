@@ -8,7 +8,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/asny/tri-mesh"
 categories = ["data-structures"]
-keywords = ["triangle mesh", "geometry", "geometry processing", "computational geometry"]
+keywords = ["mesh", "geometry", "3d", "half-edge", "processing", "computational", "graphics"]
 
 [dependencies]
 cgmath = "0.16.1"
