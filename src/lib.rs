@@ -1,11 +1,8 @@
 //!
 //! A triangle mesh data structure including basic operations.
 //!
-//! Why another triangle mesh data structure crate you might ask.
-//! Well, if you want a more feature complete crate than [half_edge_mesh](https://crates.io/crates/half_edge_mesh) and a less generic crate than [plexus](https://crates.io/crates/plexus),
-//! then `tri-mesh` is probably something for you!
+//! # Features
 //!
-//! ## Features
 //! - The main struct [Mesh](crate::mesh::Mesh) implements the half-edge mesh data structure for easy and efficient traversal
 //! - Half-edge [walker](mesh/struct.Mesh.html#traversal) to traverse the mesh
 //! - [Iterators](mesh/struct.Mesh.html#iterators) over primitives (vertices, half-edges, edges, faces)
