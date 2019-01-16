@@ -12,7 +12,7 @@ then `tri-mesh` is probably something for you!
 
 ```toml
 [dependencies]
-tri-mesh = "0.1.1"
+tri-mesh = "0.1.2"
 ```
 
 ## Features
