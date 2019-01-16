@@ -5,6 +5,8 @@ authors = ["Asger Nyman Christiansen <asgernyman@gmail.com>"]
 edition = "2018"
 description = "A triangle mesh data structure including basic operations."
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/asny/tri-mesh"
 
 [dependencies]
 cgmath = "0.16.1"
