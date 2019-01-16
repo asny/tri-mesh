@@ -239,6 +239,22 @@ impl Mesh
         normals
     }
 
+    /// Returns minimum and maximum coordinates of the axis aligned bounding box of the mesh.
+    pub fn extreme_coordinates(&self) -> (Vec3, Vec3)
+    {
+        let mut min_coordinates = vec3(std::f32::MIN, std::f32::MIN, std::f32::MIN);
+        let mut max_coordinates = vec3(std::f32::MAX, std::f32::MAX, std::f32::MAX);
+        for vertex_id in self.vertex_iter()
+        {
+            let position = self.vertex_position(vertex_id);
+            for i in 0..3 {
+                min_coordinates[i] = min_coordinates[i].min(position[i]);
+                max_coordinates[i] = max_coordinates[i].max(position[i]);
+            }
+        }
+        (min_coordinates, max_coordinates)
+    }
+
     fn create_vertex(&mut self, position: Vec3) -> VertexID
     {
         let id = self.connectivity_info.new_vertex();
