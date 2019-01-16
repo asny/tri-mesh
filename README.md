@@ -1,8 +1,5 @@
 # tri-mesh
 
-[![](http://meritbadge.herokuapp.com/tri-mesh)](https://crates.io/crates/tri-mesh)
-[![Docs.rs](https://docs.rs/tri-mesh/badge.svg)](https://docs.rs/tri-mesh)
-
 A triangle mesh data structure including basic operations.
 
 Why another triangle mesh data structure crate you might ask.
