@@ -7,6 +7,8 @@ description = "A triangle mesh data structure including basic operations."
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/asny/tri-mesh"
+categories = ["data-structures"]
+keywords = ["triangle mesh", "geometry", "geometry processing", "computational geometry"]
 
 [dependencies]
 cgmath = "0.16.1"
