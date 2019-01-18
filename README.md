@@ -32,6 +32,8 @@ Please, see the [documentation](https://docs.rs/tri-mesh) for more details.
 
 ## Usage
 
+### Example #1: Bounding box
+
 ```rust
 use tri_mesh::prelude::*;
 
@@ -55,6 +57,51 @@ fn main() {
     
     // .. or use the built-in method
     let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
+}
+```
+
+### Example #2: Normals
+
+```rust
+use tri_mesh::prelude::*;
+
+fn main() {
+    // Construct a cube mesh
+    let mesh = MeshBuilder::new().cube().build().unwrap();
+    
+    // Get the indices and position buffer to be able to visualise the model..
+    let indices = mesh.indices_buffer();
+    let positions = mesh.positions_buffer();
+    
+    // .. but wait, we also need the normals. 
+    // Let's compute the normals for each vertex and put it in an array..
+    let mut normals = Vec::with_capacity(3 * mesh.no_vertices());
+    for vertex_id in mesh.vertex_iter()
+    {
+        let mut normal = Vec3::zero();
+        for halfedge_id in mesh.vertex_halfedge_iter(vertex_id) {
+            if let Some(face_id) = mesh.walker_from_halfedge(halfedge_id).face_id() {
+                normal += mesh.face_normal(face_id)
+            }
+        }
+        normal.normalize();
+        normals.push(normal.x);
+        normals.push(normal.y);
+        normals.push(normal.z);
+    }
+    
+    // .. we could simplify that using the vertex_normal method..
+    let mut normals = Vec::with_capacity(3 * mesh.no_vertices());
+    for vertex_id in mesh.vertex_iter()
+    {
+        let normal = mesh.vertex_normal(vertex_id);
+        normals.push(normal.x);
+        normals.push(normal.y);
+        normals.push(normal.z);
+    }
+    
+    // .. or simply just use the built-in method
+    let normals = mesh.normals_buffer();
 }
 ```
 
