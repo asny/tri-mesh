@@ -20,7 +20,7 @@ impl Mesh
         self.move_vertex_to(vertex_id, p);
     }
 
-    /// Scales the entire mesh by applying the `scale` to each vertex position.
+    /// Scales the entire mesh by multiplying `scale` to each vertex position.
     ///
     /// # Examples
     ///
@@ -44,6 +44,35 @@ impl Mesh
         for vertex_id in self.vertex_iter() {
             let p = *self.vertex_position(vertex_id);
             self.move_vertex_to(vertex_id, p * scale);
+        }
+    }
+
+    /// Scales the entire mesh by multiplying `scale_x` to the x component of each vertex position, `scale_y` to the y component and `scale_z` to the z component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use tri_mesh::prelude::*;
+    /// #
+    /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
+    ///     let mut mesh = MeshBuilder::new().cube().build()?;
+    /// #   let first_face_id = mesh.face_iter().find(|f| mesh.face_normal(*f) == vec3(0.0, 1.0, 0.0)).unwrap();
+    /// #   let second_face_id = mesh.face_iter().find(|f| mesh.face_normal(*f) == vec3(1.0, 0.0, 0.0)).unwrap();
+    /// #   let face_area_before1 = mesh.face_area(first_face_id);
+    /// #   let face_area_before2 = mesh.face_area(second_face_id);
+    ///     mesh.non_uniform_scale(2.0, 1.0, 1.0);
+    /// #   assert_eq!(2.0 * face_area_before1, mesh.face_area(first_face_id));
+    /// #   assert_eq!(face_area_before2, mesh.face_area(second_face_id));
+    /// #   mesh.is_valid().unwrap();
+    /// #   Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn non_uniform_scale(&mut self, scale_x: f32, scale_y: f32, scale_z: f32)
+    {
+        for vertex_id in self.vertex_iter() {
+            let p = *self.vertex_position(vertex_id);
+            self.move_vertex_to(vertex_id, vec3(p.x * scale_x, p.y * scale_y, p.z * scale_z));
         }
     }
 
