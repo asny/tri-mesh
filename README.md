@@ -43,7 +43,7 @@ fn main() {
     let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
     let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
     
-    // Compute the extreme coordinates..
+    // Compute the extreme coordinates which defines the axis aligned bounding box..
     let mut min_coordinates = vec3(std::f32::MAX, std::f32::MAX, std::f32::MAX);
     let mut max_coordinates = vec3(std::f32::MIN, std::f32::MIN, std::f32::MIN);
     for vertex_id in mesh.vertex_iter()
@@ -55,8 +55,12 @@ fn main() {
         }
     }
     
-    // .. or use the built-in method
+    // .. or use the built-in method..
     let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
+    
+    // .. or construct an actual mesh representing the axis aligned bounding box
+    let aabb = mesh.axis_aligned_bounding_box();
+    assert_eq!((min_coordinates, max_coordinates), aabb.extreme_coordinates());
 }
 ```
 
