@@ -32,7 +32,7 @@ Please, see the [documentation](https://docs.rs/tri-mesh) for more details.
 
 ## Usage
 
-### Example #1: Bounding box
+### Example #1: Computing the bounding box
 
 ```rust
 use tri_mesh::prelude::*;
@@ -60,7 +60,7 @@ fn main() {
 }
 ```
 
-### Example #2: Normals
+### Example #2: Computing the vertex normals
 
 ```rust
 use tri_mesh::prelude::*;
