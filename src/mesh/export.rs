@@ -34,7 +34,7 @@ use crate::mesh::ids::*;
 /// for face in 0..indices.len()/3
 /// {
 ///     let vertices = (indices[3*face] as usize, indices[3*face + 1] as usize, indices[3*face + 2] as usize);
-///     println!("The positions of face with index {} is:", face);
+///     println!("The vertex positions of face with index {} is:", face);
 ///     println!("({}, {}, {}), ({}, {}, {}) and ({}, {}, {})",
 ///         positions[3*vertices.0], positions[3*vertices.0+1], positions[3*vertices.0+2],
 ///         positions[3*vertices.1], positions[3*vertices.1+1], positions[3*vertices.1+2],
@@ -44,6 +44,33 @@ use crate::mesh::ids::*;
 ///         normals[3*vertices.0], normals[3*vertices.0+1], normals[3*vertices.0+2],
 ///         normals[3*vertices.1], normals[3*vertices.1+1], normals[3*vertices.1+2],
 ///         normals[3*vertices.2], normals[3*vertices.2+1], normals[3*vertices.2+2]);
+/// }
+/// ```
+///
+/// ## Non-index based arrays
+///
+/// ```
+/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// // Get vertex positions and vertex normals for each corner of each face as float arrays..
+/// let positions = mesh.non_indexed_positions_buffer();
+/// let normals = mesh.non_indexed_normals_buffer();
+/// # assert_eq!(positions.len(), mesh.no_faces() * 3 * 3);
+/// # assert_eq!(normals.len(), mesh.no_faces() * 3 * 3);
+///
+/// // .. the face attributes are extracted by
+/// for face in 0..positions.len()/9
+/// {
+///     let vertices = (3*face, 3*(face+1), 3*(face+2));
+///     println!("The vertex positions of face with index {} is:", face);
+///     println!("({}, {}, {}), ({}, {}, {}) and ({}, {}, {})",
+///         positions[vertices.0], positions[vertices.0+1], positions[vertices.0+2],
+///         positions[vertices.1], positions[vertices.1+1], positions[vertices.1+2],
+///         positions[vertices.2], positions[vertices.2+1], positions[vertices.2+2]);
+///     println!("The vertex normals of face with index {} is:", face);
+///     println!("({}, {}, {}), ({}, {}, {}) and ({}, {}, {})",
+///         normals[vertices.0], normals[vertices.0+1], normals[vertices.0+2],
+///         normals[vertices.1], normals[vertices.1+1], normals[vertices.1+2],
+///         normals[vertices.2], normals[vertices.2+1], normals[vertices.2+2]);
 /// }
 /// ```
 ///
@@ -79,8 +106,8 @@ impl Mesh
     pub fn positions_buffer(&self) -> Vec<f32>
     {
         let mut positions = Vec::with_capacity(self.no_vertices() * 3);
-        for v3 in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
-            positions.push(v3.x); positions.push(v3.y); positions.push(v3.z);
+        for position in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
+            push_vec3(&mut positions, *position);
         }
         positions
     }
@@ -92,18 +119,61 @@ impl Mesh
     ///
     /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
     ///
+    /// **Note:** The normal of a vertex is computed as the average of the normals of the adjacent faces.
+    ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
     pub fn normals_buffer(&self) -> Vec<f32>
     {
         let mut normals = Vec::with_capacity(self.no_vertices() * 3);
         for vertex_id in self.vertex_iter() {
-            let normal = self.vertex_normal(vertex_id);
-            normals.push(normal.x);
-            normals.push(normal.y);
-            normals.push(normal.z);
+            push_vec3(&mut normals, self.vertex_normal(vertex_id));
         }
         normals
     }
 
+    ///
+    /// Returns the positions of the face corners in an array which is meant to be used for visualisation.
+    /// See [this](#non-index-based-arrays) example.
+    ///
+    pub fn non_indexed_positions_buffer(&self) -> Vec<f32>
+    {
+        let mut positions = Vec::with_capacity(self.no_faces() * 3 * 3);
+        for face_id in self.face_iter()
+        {
+            let (p0, p1, p2) = self.face_positions(face_id);
+            push_vec3(&mut positions, *p0);
+            push_vec3(&mut positions, *p1);
+            push_vec3(&mut positions, *p2);
+        }
+        positions
+    }
+
+    ///
+    /// Returns the normals of the face corners in an array which is meant to be used for visualisation.
+    /// See [this](#non-index-based-arrays) example.
+    ///
+    /// **Note:** The normal of a vertex is computed as the average of the normals of the adjacent faces.
+    ///
+    /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
+    ///
+    pub fn non_indexed_normals_buffer(&self) -> Vec<f32>
+    {
+        let mut normals = Vec::with_capacity(self.no_faces() * 3 * 3);
+        for face_id in self.face_iter()
+        {
+            let (v0, v1, v2) = self.face_vertices(face_id);
+            push_vec3(&mut normals, self.vertex_normal(v0));
+            push_vec3(&mut normals, self.vertex_normal(v1));
+            push_vec3(&mut normals, self.vertex_normal(v2));
+        }
+        normals
+    }
+}
+
+fn push_vec3(vec: &mut Vec<f32>, vec3: crate::mesh::math::Vec3)
+{
+    for i in 0..3 {
+        vec.push(vec3[i]);
+    }
 }
