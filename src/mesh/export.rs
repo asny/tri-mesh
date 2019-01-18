@@ -60,7 +60,7 @@ use crate::mesh::ids::*;
 /// // .. the face attributes are extracted by
 /// for face in 0..positions.len()/9
 /// {
-///     let vertices = (3*face, 3*(face+1), 3*(face+2));
+///     let vertices = (9*face, 9*face+3, 9*face+6);
 ///     println!("The vertex positions of face with index {} is:", face);
 ///     println!("({}, {}, {}), ({}, {}, {}) and ({}, {}, {})",
 ///         positions[vertices.0], positions[vertices.0+1], positions[vertices.0+2],
@@ -175,5 +175,74 @@ fn push_vec3(vec: &mut Vec<f32>, vec3: crate::mesh::math::Vec3)
 {
     for i in 0..3 {
         vec.push(vec3[i]);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::MeshBuilder;
+    use crate::mesh::math::*;
+
+    #[test]
+    fn test_indexed_export() {
+        let mesh = MeshBuilder::new().cylinder(3, 16).build().unwrap();
+        let indices = mesh.indices_buffer();
+        let positions = mesh.positions_buffer();
+        let normals = mesh.normals_buffer();
+
+        assert_eq!(indices.len(), mesh.no_faces() * 3);
+        assert_eq!(positions.len(), mesh.no_vertices() * 3);
+        assert_eq!(normals.len(), mesh.no_vertices() * 3);
+
+        for face in 0..positions.len()/9 {
+            let vertices = (indices[3*face] as usize, indices[3*face + 1] as usize, indices[3*face + 2] as usize);
+            let p0 = vec3(positions[3*vertices.0], positions[3*vertices.0+1], positions[3*vertices.0+2]);
+            let p1 = vec3(positions[3*vertices.1], positions[3*vertices.1+1], positions[3*vertices.1+2]);
+            let p2 = vec3(positions[3*vertices.2], positions[3*vertices.2+1], positions[3*vertices.2+2]);
+            let center = (p0 + p1 + p2) / 3.0;
+            let face_id = mesh.face_iter().find(|face_id| (mesh.face_center(*face_id) - center).magnitude() < 0.00001);
+            assert!(face_id.is_some());
+
+            let n0 = vec3(normals[3*vertices.0], normals[3*vertices.0+1], normals[3*vertices.0+2]);
+            let n1 = vec3(normals[3*vertices.1], normals[3*vertices.1+1], normals[3*vertices.1+2]);
+            let n2 = vec3(normals[3*vertices.2], normals[3*vertices.2+1], normals[3*vertices.2+2]);
+
+            let (v0, v1, v2) = mesh.face_vertices(face_id.unwrap());
+
+            assert!(n0 == mesh.vertex_normal(v0) || n1 == mesh.vertex_normal(v0) || n2 == mesh.vertex_normal(v0));
+            assert!(n0 == mesh.vertex_normal(v1) || n1 == mesh.vertex_normal(v1) || n2 == mesh.vertex_normal(v1));
+            assert!(n0 == mesh.vertex_normal(v2) || n1 == mesh.vertex_normal(v2) || n2 == mesh.vertex_normal(v2));
+        }
+    }
+
+    #[test]
+    fn test_non_indexed_export() {
+        let mesh = MeshBuilder::new().cylinder(3, 16).build().unwrap();
+        let positions = mesh.non_indexed_positions_buffer();
+        let normals = mesh.non_indexed_normals_buffer();
+
+        assert_eq!(positions.len(), mesh.no_faces() * 3 * 3);
+        assert_eq!(normals.len(), mesh.no_faces() * 3 * 3);
+
+        for face in 0..positions.len()/9 {
+            let vertices = (9*face, 9*face+3, 9*face+6);
+            let p0 = vec3(positions[vertices.0], positions[vertices.0+1], positions[vertices.0+2]);
+            let p1 = vec3(positions[vertices.1], positions[vertices.1+1], positions[vertices.1+2]);
+            let p2 = vec3(positions[vertices.2], positions[vertices.2+1], positions[vertices.2+2]);
+            let center = (p0 + p1 + p2) / 3.0;
+
+            let face_id = mesh.face_iter().find(|face_id| (mesh.face_center(*face_id) - center).magnitude() < 0.00001);
+            assert!(face_id.is_some());
+
+            let n0 = vec3(normals[vertices.0], normals[vertices.0+1], normals[vertices.0+2]);
+            let n1 = vec3(normals[vertices.1], normals[vertices.1+1], normals[vertices.1+2]);
+            let n2 = vec3(normals[vertices.2], normals[vertices.2+1], normals[vertices.2+2]);
+
+            let (v0, v1, v2) = mesh.face_vertices(face_id.unwrap());
+
+            assert!(n0 == mesh.vertex_normal(v0) || n1 == mesh.vertex_normal(v0) || n2 == mesh.vertex_normal(v0));
+            assert!(n0 == mesh.vertex_normal(v1) || n1 == mesh.vertex_normal(v1) || n2 == mesh.vertex_normal(v1));
+            assert!(n0 == mesh.vertex_normal(v2) || n1 == mesh.vertex_normal(v2) || n2 == mesh.vertex_normal(v2));
+        }
     }
 }
