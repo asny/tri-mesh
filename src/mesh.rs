@@ -28,6 +28,7 @@ pub mod connectivity;
 pub mod vertex_measures;
 pub mod edge_measures;
 pub mod face_measures;
+pub mod bounding_box;
 pub mod edit;
 pub mod quality;
 pub mod orientation;
@@ -73,6 +74,7 @@ pub enum Error {
 /// - [Vertex measures](#vertex-measures)
 /// - [Edge measures](#edge-measures)
 /// - [Face measures](#face-measures)
+/// - [Bounding box functionality](#bounding-box-functionality)
 /// - [Edit functionality](#edit-functionality)
 /// - [Quality functionality](#quality-functionality)
 /// - [Orientation functionality](#orientation-functionality)
@@ -163,22 +165,6 @@ impl Mesh
     pub fn no_faces(&self) -> usize
     {
         self.connectivity_info.no_faces()
-    }
-
-    /// Returns minimum and maximum coordinates of the axis aligned bounding box of the mesh.
-    pub fn extreme_coordinates(&self) -> (Vec3, Vec3)
-    {
-        let mut min_coordinates = vec3(std::f32::MAX, std::f32::MAX, std::f32::MAX);
-        let mut max_coordinates = vec3(std::f32::MIN, std::f32::MIN, std::f32::MIN);
-        for vertex_id in self.vertex_iter()
-        {
-            let position = self.vertex_position(vertex_id);
-            for i in 0..3 {
-                min_coordinates[i] = min_coordinates[i].min(position[i]);
-                max_coordinates[i] = max_coordinates[i].max(position[i]);
-            }
-        }
-        (min_coordinates, max_coordinates)
     }
 
     fn create_vertex(&mut self, position: Vec3) -> VertexID
