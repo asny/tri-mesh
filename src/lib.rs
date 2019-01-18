@@ -13,6 +13,7 @@
 //! - [Orientation](mesh/struct.Mesh.html#orientation-functionality) functionality (e.g. flip orientation of all faces)
 //! - [Transformations](mesh/struct.Mesh.html#transformations) affecting the vertex positions (e.g. moving a single vertex or rotate the entire mesh)
 //! - [Merging and splitting](mesh/struct.Mesh.html#merging--splitting) used for high level merging and splitting of entire meshes (e.g. clone a subset of a mesh or merge overlapping primitives)
+//! - [Export](mesh/struct.Mesh.html#export-functionality) functionality (methods for extracting raw float buffers which can be used for visualisation)
 //!
 //! All functionality is implemented as methods on the [Mesh](crate::mesh::Mesh) struct, so take a look at that rather long list of methods for a complete overview.
 //! Also, to construct a new mesh, use the [Mesh builder](crate::mesh_builder::MeshBuilder).

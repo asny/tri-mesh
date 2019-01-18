@@ -33,6 +33,7 @@ pub mod quality;
 pub mod orientation;
 pub mod transformations;
 pub mod merging_and_splitting;
+pub mod export;
 pub mod validity;
 
 mod connectivity_info;
@@ -77,6 +78,7 @@ pub enum Error {
 /// - [Orientation functionality](#orientation-functionality)
 /// - [Transformations](#transformations)
 /// - [Merging & splitting](#merging--splitting)
+/// - [Export functionality](#export-functionality)
 /// - [Validity](#validity)
 ///
 #[derive(Debug)]
@@ -161,119 +163,6 @@ impl Mesh
     pub fn no_faces(&self) -> usize
     {
         self.connectivity_info.no_faces()
-    }
-
-    ///
-    /// Returns the face indices in an array `(i0, i1, i2) = (indices[3*x], indices[3*x+1], indices[3*x+2])` which is meant to be used for visualisation.
-    /// Use the `positions_buffer` method and `normals_buffer` method to get the positions and normals of the vertices.
-    ///
-    /// ```
-    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
-    /// let indices = mesh.indices_buffer();
-    /// let positions = mesh.positions_buffer();
-    /// for face in 0..indices.len()/3
-    /// {
-    ///     let vertices = (indices[3*face] as usize, indices[3*face + 1] as usize, indices[3*face + 2] as usize);
-    ///     println!("The indices of the face with index {} is: ({}, {}, {})", face, vertices.0, vertices.1, vertices.2);
-    ///     println!("The positions of the face with index {} is: ({}, {}, {}), ({}, {}, {}) and ({}, {}, {})", face,
-    ///         positions[3*vertices.0], positions[3*vertices.0+1], positions[3*vertices.0+2],
-    ///         positions[3*vertices.1], positions[3*vertices.1+1], positions[3*vertices.1+2],
-    ///         positions[3*vertices.2], positions[3*vertices.2+1], positions[3*vertices.2+2]);
-    /// }
-    /// # assert_eq!(indices.len(), 36);
-    /// ```
-    ///
-    pub fn indices_buffer(&self) -> Vec<u32>
-    {
-        let vertices: Vec<VertexID> = self.vertex_iter().collect();
-        let mut indices = Vec::with_capacity(self.no_faces() * 3);
-        for face_id in self.face_iter()
-        {
-            for halfedge_id in self.face_halfedge_iter(face_id) {
-                let vertex_id = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
-                let index = vertices.iter().position(|v| v == &vertex_id).unwrap();
-                indices.push(index as u32);
-            }
-        }
-        indices
-    }
-
-    ///
-    /// Returns the positions of the vertices in an array which is meant to be used for visualisation.
-    ///
-    /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
-    ///
-    /// ```
-    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
-    /// // Get the vertex positions..
-    /// let positions = mesh.positions_buffer();
-    /// for vertex in 0..positions.len()/3
-    /// {
-    ///     println!("The position of vertex with index {} is: ({}, {}, {})", vertex, positions[3*vertex], positions[3*vertex+1], positions[3*vertex+2]);
-    /// }
-    /// # assert_eq!(positions.len(), 24);
-    ///
-    /// // .. but wait, we want the three corner positions of each face. Let's use the indices to get that information
-    /// let indices = mesh.indices_buffer();
-    /// for face in 0..indices.len()/3
-    /// {
-    ///     let vertices = (indices[3*face] as usize, indices[3*face + 1] as usize, indices[3*face + 2] as usize);
-    ///     println!("The positions of face with index {} is: ({}, {}, {}), ({}, {}, {}) and ({}, {}, {})", face,
-    ///         positions[3*vertices.0], positions[3*vertices.0+1], positions[3*vertices.0+2],
-    ///         positions[3*vertices.1], positions[3*vertices.1+1], positions[3*vertices.1+2],
-    ///         positions[3*vertices.2], positions[3*vertices.2+1], positions[3*vertices.2+2]);
-    /// }
-    /// ```
-    ///
-    pub fn positions_buffer(&self) -> Vec<f32>
-    {
-        let mut positions = Vec::with_capacity(self.no_vertices() * 3);
-        for v3 in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
-            positions.push(v3.x); positions.push(v3.y); positions.push(v3.z);
-        }
-        positions
-    }
-
-
-    ///
-    /// Returns the normals of the vertices in an array which is meant to be used for visualisation.
-    ///
-    /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
-    ///
-    /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
-    ///
-    /// ```
-    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
-    /// // Get the vertex normals..
-    /// let normals = mesh.normals_buffer();
-    /// for i in 0..normals.len()/3
-    /// {
-    ///     println!("The normal of vertex with index {} is: ({}, {}, {})", i, normals[3*i], normals[3*i+1], normals[3*i+2]);
-    /// }
-    /// # assert_eq!(normals.len(), 24);
-    ///
-    /// // .. but wait, we want the three corner normals of each face. Let's use the indices to get that information
-    /// let indices = mesh.indices_buffer();
-    /// for face in 0..indices.len()/3
-    /// {
-    ///     let vertices = (indices[3*face] as usize, indices[3*face + 1] as usize, indices[3*face + 2] as usize);
-    ///     println!("The normals of face with index {} is: ({}, {}, {}), ({}, {}, {}) and ({}, {}, {})", face,
-    ///         normals[3*vertices.0], normals[3*vertices.0+1], normals[3*vertices.0+2],
-    ///         normals[3*vertices.1], normals[3*vertices.1+1], normals[3*vertices.1+2],
-    ///         normals[3*vertices.2], normals[3*vertices.2+1], normals[3*vertices.2+2]);
-    /// }
-    /// ```
-    ///
-    pub fn normals_buffer(&self) -> Vec<f32>
-    {
-        let mut normals = Vec::with_capacity(self.no_vertices() * 3);
-        for vertex_id in self.vertex_iter() {
-            let normal = self.vertex_normal(vertex_id);
-            normals.push(normal.x);
-            normals.push(normal.y);
-            normals.push(normal.z);
-        }
-        normals
     }
 
     /// Returns minimum and maximum coordinates of the axis aligned bounding box of the mesh.
