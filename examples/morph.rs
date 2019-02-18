@@ -8,11 +8,14 @@ fn main() {
     let (width, height) = window.size();
     let gl = window.gl();
 
+    let scene_radius = 10.0;
+    let scene_center = vec3(0.0, 5.0, 0.0);
+
     // Renderer
     let renderer = DeferredPipeline::new(&gl, width, height, true).unwrap();
 
     // Camera
-    let mut camera = camera::PerspectiveCamera::new(dust::vec3(5.0, 3.0, 5.0), dust::vec3(0.0, 1.0, 0.0),
+    let mut camera = camera::PerspectiveCamera::new(scene_center + scene_radius * vec3(1.0, 1.0, 1.0).normalize(), scene_center,
                                                     dust::vec3(0.0, 1.0, 0.0),degrees(45.0), width as f32 / height as f32, 0.1, 1000.0);
 
     // Objects
@@ -23,8 +26,13 @@ fn main() {
     let mut meshes = geo_proc::loader::load_obj("examples/bunny.obj").unwrap();
     let mut mesh = meshes.drain(..).next().unwrap();
     println!("Model loaded");
-    mesh.scale(20.0);
-    mesh.translate(vec3(0.0, 1.0, 0.0));
+    let (min, max) = mesh.extreme_coordinates();
+    let center = 0.5 * (max + min);
+    mesh.translate(-center);
+    let size = max - min;
+    let max_dim = size.x.max(size.y).max(size.z);
+    mesh.scale(0.5 * scene_radius / max_dim);
+    mesh.translate(scene_center);
 
     let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
     model.color = color;
@@ -57,21 +65,24 @@ fn main() {
     let mut ambient_light = light::AmbientLight::new();
     ambient_light.base.intensity = 0.4;
 
-    let scene_radius = 30.0;
-    let mut light1 = light::SpotLight::new(vec3(scene_radius, scene_radius, scene_radius), vec3(-1.0, -1.0, -1.0));
-    light1.enable_shadows(&gl, scene_radius * 2.0).unwrap();
+    let mut dir = vec3(-1.0, -1.0, -1.0).normalize();
+    let mut light1 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
+    light1.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light1.base.intensity = 0.75;
 
-    let mut light2 = light::SpotLight::new(vec3(-scene_radius, scene_radius, scene_radius), vec3(1.0, -1.0, -1.0));
-    light2.enable_shadows(&gl, scene_radius * 2.0).unwrap();
+    dir = vec3(-1.0, -1.0, 1.0).normalize();
+    let mut light2 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
+    light2.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light2.base.intensity = 0.75;
 
-    let mut light3 = light::SpotLight::new(vec3(-scene_radius, scene_radius, -scene_radius), vec3(1.0, -1.0, 1.0));
-    light3.enable_shadows(&gl, scene_radius * 2.0).unwrap();
+    dir = vec3(1.0, -1.0, 1.0).normalize();
+    let mut light3 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
+    light3.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light3.base.intensity = 0.75;
 
-    let mut light4 = light::SpotLight::new(vec3(scene_radius, scene_radius, -scene_radius), vec3(-1.0, -1.0, 1.0));
-    light4.enable_shadows(&gl, scene_radius * 2.0).unwrap();
+    dir = vec3(1.0, -1.0, -1.0).normalize();
+    let mut light4 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
+    light4.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light4.base.intensity = 0.75;
 
     let mut camera_handler = camerahandler::CameraHandler::new(camerahandler::CameraState::SPHERICAL);
@@ -121,12 +132,6 @@ fn main() {
         renderer.shine_spot_light(&light2).unwrap();
         renderer.shine_spot_light(&light3).unwrap();
         renderer.shine_spot_light(&light4).unwrap();
-
-        // Blend with the result of the mirror pass
-        state::blend(&gl,state::BlendType::SRC_ALPHA__ONE_MINUS_SRC_ALPHA);
-        state::depth_write(&gl,false);
-        state::depth_test(&gl, state::DepthTestType::NONE);
-        state::cull(&gl,state::CullType::BACK);
 
         renderer.copy_to_screen().unwrap();
     }).unwrap();
