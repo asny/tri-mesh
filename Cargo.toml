@@ -12,3 +12,7 @@ keywords = ["mesh", "geometry", "3d", "half-edge", "graphics"]
 
 [dependencies]
 cgmath = "0.16.1"
+
+[dev-dependencies]
+dust = {git = "https://github.com/asny/Dust"}
+geo-proc = {git = "https://github.com/asny/geo-proc"}
