@@ -6,18 +6,19 @@ use geo_proc::prelude::*;
 
 fn main() {
     let mut window = Window::new_default("Morph tool").unwrap();
-    let (width, height) = window.size();
+    let (framebuffer_width, framebuffer_height) = window.framebuffer_size();
+    let window_size = window.size();
     let gl = window.gl();
 
     let scene_radius = 10.0;
     let scene_center = dust::vec3(0.0, 5.0, 0.0);
 
     // Renderer
-    let renderer = DeferredPipeline::new(&gl, width, height, true).unwrap();
+    let renderer = DeferredPipeline::new(&gl, framebuffer_width, framebuffer_height, true).unwrap();
 
     // Camera
     let mut camera = camera::PerspectiveCamera::new(scene_center + scene_radius * dust::vec3(1.0, 1.0, 1.0).normalize(), scene_center,
-                                                    dust::vec3(0.0, 1.0, 0.0),degrees(45.0), width as f32 / height as f32, 0.1, 1000.0);
+                                                    dust::vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
 
     // Objects
     let color = dust::vec3(1.0, 0.0, 0.0);
@@ -92,7 +93,7 @@ fn main() {
     window.render_loop(move |events, _elapsed_time|
     {
         for event in events {
-            handle_events(event, &mut camera_handler, &mut camera, &mut mesh, width/2, height/2);
+            handle_events(event, &mut camera_handler, &mut camera, &mut mesh, window_size);
         }
 
         // Update scene
@@ -135,7 +136,7 @@ fn main() {
     }).unwrap();
 }
 
-pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::CameraHandler, camera: &mut Camera, mesh: &mut Mesh, width: usize, height: usize)
+pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::CameraHandler, camera: &mut Camera, mesh: &mut Mesh, window_size: (usize, usize))
 {
     static mut CURRENT: Option<FaceID> = None;
 
@@ -155,13 +156,10 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
             else if *button == MouseButton::Right {
                 if *state == State::Pressed
                 {
-                    println!("{:?}", position);
-                    let (x, y) = (position.0 / width as f64, position.1 / height as f64);
-
-                    println!("{:?}", (x, y));
+                    let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                     let p = camera.position();
+                    println!("{:?}", (position.0, position.1));
                     let dir = get_view_direction_at(camera, (x, y));
-                    println!("{:?}", (p, dir));
                     if let Some(face_id) = pick(mesh, &p, &dir) {
                         println!("{}", face_id);
                         unsafe {CURRENT = Some(face_id)};
