@@ -89,11 +89,39 @@ fn main() {
 
     let mut camera_handler = camerahandler::CameraHandler::new(camerahandler::CameraState::SPHERICAL);
 
+    let mut current_pick: Option<(VertexID, dust::Vec3)> = None;
     // main loop
     window.render_loop(move |events, _elapsed_time|
     {
         for event in events {
-            handle_events(event, &mut camera_handler, &mut camera, &mut mesh, window_size);
+            handle_events(event, &mut camera_handler, &mut camera);
+
+            match event {
+                Event::MouseClick {state, button, position} => {
+                    if *button == MouseButton::Right {
+                        if *state == State::Pressed
+                        {
+                            let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
+                            let p = camera.position();
+                            let dir = get_view_direction_at(&camera, (x, y));
+                            if let Some(intersection) = pick(&mesh, &p, &dir) {
+                                current_pick = Some(intersection);
+                            }
+                        }
+                        else {
+                            current_pick = None;
+                        }
+                    }
+                },
+                Event::MouseMotion {delta} => {
+                    camera_handler.rotate(&mut camera, delta.0 as f32, delta.1 as f32);
+                    if let Some((vertex_id, point)) = current_pick
+                    {
+                        morph(&mut mesh, vertex_id, point, 0.001 * delta.1);
+                    }
+                },
+                _ => {}
+            }
         }
 
         // Update scene
@@ -103,7 +131,7 @@ fn main() {
         let render_scene = |camera: &Camera| {
             let model_matrix = dust::Mat4::identity();
             model.render(&model_matrix, camera);
-            //wireframe_model.render(camera);
+            wireframe_model.render(camera);
         };
 
         // Shadow pass
@@ -136,10 +164,8 @@ fn main() {
     }).unwrap();
 }
 
-pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::CameraHandler, camera: &mut Camera, mesh: &mut Mesh, window_size: (usize, usize))
+pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::CameraHandler, camera: &mut Camera)
 {
-    static mut CURRENT: Option<(VertexID, dust::Vec3)> = None;
-
     match event {
         Event::Key {state, kind} => {
             if kind == "Tab" && *state == State::Pressed
@@ -147,40 +173,17 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
                 camera_handler.next_state();
             }
         },
-        Event::MouseClick {state, button, position} => {
+        Event::MouseClick {state, button, ..} => {
             if *button == MouseButton::Left
             {
                 if *state == State::Pressed { camera_handler.start_rotation(); }
                 else { camera_handler.end_rotation() }
             }
-            else if *button == MouseButton::Right {
-                if *state == State::Pressed
-                {
-                    let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
-                    let p = camera.position();
-                    let dir = get_view_direction_at(camera, (x, y));
-                    if let Some(intersection) = pick(mesh, &p, &dir) {
-                        unsafe {CURRENT = Some(intersection)}
-                    }
-                }
-                else {
-                    unsafe {CURRENT = None};
-                }
-            }
-        },
-        Event::MouseMotion {delta} => {
-            camera_handler.rotate(camera, delta.0 as f32, delta.1 as f32);
-
-            unsafe {
-                if let Some((vertex_id, point)) = CURRENT
-                {
-                    morph(mesh, vertex_id, point, 0.001 * delta.1);
-                }
-            }
         },
         Event::MouseWheel {delta} => {
             camera_handler.zoom(camera, *delta as f32);
-        }
+        },
+        _ => {}
     }
 }
 
