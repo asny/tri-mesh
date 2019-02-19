@@ -3,7 +3,6 @@ use dust::*;
 use dust::objects::*;
 use dust::window::{event::*, Window};
 use geo_proc::prelude::*;
-use geo_proc::collision::*;
 
 fn main() {
     let mut window = Window::new_default("Morph tool").unwrap();
@@ -139,7 +138,7 @@ fn main() {
 
 pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::CameraHandler, camera: &mut Camera, mesh: &mut Mesh, window_size: (usize, usize))
 {
-    static mut CURRENT: Option<FaceID> = None;
+    static mut CURRENT: Option<(VertexID, dust::Vec3)> = None;
 
     match event {
         Event::Key {state, kind} => {
@@ -163,10 +162,7 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
                     let dir = get_view_direction_at(camera, (x, y));
                     if let Some(intersection) = pick(mesh, &p, &dir) {
                         println!("{:?}", intersection);
-                        match intersection.id {
-                            Primitive::Face(face_id) => unsafe {CURRENT = Some(face_id)},
-                            _ => {}
-                        }
+                        unsafe {CURRENT = Some(intersection)}
                     }
                 }
                 else {
@@ -178,9 +174,8 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
             camera_handler.rotate(camera, delta.0 as f32, delta.1 as f32);
 
             unsafe {
-                if let Some(face_id) = CURRENT
+                if let Some((vertex_id, point)) = CURRENT
                 {
-                    let vertex_id = mesh.face_vertices(face_id).0;
                     mesh.move_vertex_by(vertex_id,0.01 * delta.1 as f32 * mesh.vertex_normal(vertex_id));
                 }
             }
@@ -191,8 +186,9 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
     }
 }
 
-fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prelude::Vec3) -> Option<FaceLinePieceIntersection>
+fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prelude::Vec3) -> Option<(VertexID, dust::Vec3)>
 {
+    use geo_proc::collision::*;
     let mut current: Option<FaceLinePieceIntersection> = None;
     for face_id in mesh.face_iter() {
         if let Some(intersection) = find_face_line_piece_intersection(mesh, face_id, point, &(point + direction * 100.0))
@@ -207,7 +203,21 @@ fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prel
             }
         }
     }
-    current
+    if let Some(intersection) = current {
+        match intersection.id {
+            Primitive::Face(face_id) => {
+                let vertex_id = mesh.walker_from_face(face_id).vertex_id().unwrap();
+                return Some((vertex_id, intersection.point));
+            },
+            Primitive::Edge((vertex_id, _)) => {
+                return Some((vertex_id, intersection.point));
+            },
+            Primitive::Vertex(vertex_id) => {
+                return Some((vertex_id, intersection.point));
+            }
+        }
+    }
+    None
 }
 
 fn get_view_direction_at(camera: &Camera, screen_uv: (f64, f64)) -> dust::Vec3
