@@ -88,17 +88,14 @@ fn main() {
 
     let mut camera_handler = camerahandler::CameraHandler::new(camerahandler::CameraState::SPHERICAL);
 
-    let mut time = 0.0;
     // main loop
-    window.render_loop(move |events, elapsed_time|
+    window.render_loop(move |events, _elapsed_time|
     {
         for event in events {
-            handle_events(event, &mut camera_handler, &mut camera, &mut mesh);
+            handle_events(event, &mut camera_handler, &mut camera, &mut mesh, width/2, height/2);
         }
 
         // Update scene
-        time += elapsed_time * 0.001;
-        mesh.translate(geo_proc::prelude::vec3(0.01 * time.sin() as f32, 0.0, 0.0));
         model.update_attributes(&att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
 
         // Draw
@@ -138,7 +135,7 @@ fn main() {
     }).unwrap();
 }
 
-pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::CameraHandler, camera: &mut Camera, mesh: &mut Mesh)
+pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::CameraHandler, camera: &mut Camera, mesh: &mut Mesh, width: usize, height: usize)
 {
     static mut CURRENT: Option<FaceID> = None;
 
@@ -149,24 +146,29 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
                 camera_handler.next_state();
             }
         },
-        Event::MouseClick {state, button} => {
+        Event::MouseClick {state, button, position} => {
             if *button == MouseButton::Left
             {
                 if *state == State::Pressed { camera_handler.start_rotation(); }
                 else { camera_handler.end_rotation() }
             }
             else if *button == MouseButton::Right {
-                unsafe {
-                    match CURRENT {
-                        None => {
-                            if let Some(face_id) = pick(mesh, camera.position(), &(camera.target() - camera.position())) {
-                                println!("{}", face_id);
-                                CURRENT = Some(face_id);
-                            }
-                        },
-                        _ => CURRENT = None
-                    }
+                if *state == State::Pressed
+                {
+                    println!("{:?}", position);
+                    let (x, y) = (position.0 / width as f64, position.1 / height as f64);
 
+                    println!("{:?}", (x, y));
+                    let p = camera.position();
+                    let dir = get_view_direction_at(camera, (x, y));
+                    println!("{:?}", (p, dir));
+                    if let Some(face_id) = pick(mesh, &p, &dir) {
+                        println!("{}", face_id);
+                        unsafe {CURRENT = Some(face_id)};
+                    }
+                }
+                else {
+                    unsafe {CURRENT = None};
                 }
             }
         },
@@ -201,4 +203,13 @@ fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prel
         }
     }
     None
+}
+
+fn get_view_direction_at(camera: &Camera, screen_uv: (f64, f64)) -> dust::Vec3
+{
+    let screen_pos = dust::vec4(2. * screen_uv.0 as f32 - 1., 1. - 2. * screen_uv.1 as f32, 1., 1.);
+    let mut ray_eye = camera.get_projection().invert().unwrap() * screen_pos;
+    ray_eye = dust::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
+    let ray_world = camera.get_view().invert().unwrap() *  ray_eye;
+    dust::vec3(ray_world.x, ray_world.y, ray_world.z).normalize()
 }
