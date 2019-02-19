@@ -176,7 +176,7 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
             unsafe {
                 if let Some((vertex_id, point)) = CURRENT
                 {
-                    mesh.move_vertex_by(vertex_id,0.01 * delta.1 as f32 * mesh.vertex_normal(vertex_id));
+                    morph(mesh, vertex_id, point, 0.01 * delta.1);
                 }
             }
         },
@@ -184,6 +184,11 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
             camera_handler.zoom(camera, *delta as f32);
         }
     }
+}
+
+fn morph(mesh: &mut Mesh, vertex_id: VertexID, point: dust::Vec3, factor: f64)
+{
+    mesh.move_vertex_by(vertex_id, factor as f32 * mesh.vertex_normal(vertex_id));
 }
 
 fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prelude::Vec3) -> Option<(VertexID, dust::Vec3)>
