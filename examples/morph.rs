@@ -118,14 +118,12 @@ fn main() {
                     if let Some((vertex_id, point)) = current_pick
                     {
                         morph(&mut mesh, vertex_id, point, 0.001 * delta.1);
+                        model.update_attributes(&att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
                     }
                 },
                 _ => {}
             }
         }
-
-        // Update scene
-        model.update_attributes(&att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
 
         // Draw
         let render_scene = |camera: &Camera| {
