@@ -3,6 +3,7 @@ use dust::*;
 use dust::objects::*;
 use dust::window::{event::*, Window};
 use geo_proc::prelude::*;
+use geo_proc::collision::*;
 
 fn main() {
     let mut window = Window::new_default("Morph tool").unwrap();
@@ -160,9 +161,12 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
                     let p = camera.position();
                     println!("{:?}", (position.0, position.1));
                     let dir = get_view_direction_at(camera, (x, y));
-                    if let Some(face_id) = pick(mesh, &p, &dir) {
-                        println!("{}", face_id);
-                        unsafe {CURRENT = Some(face_id)};
+                    if let Some(intersection) = pick(mesh, &p, &dir) {
+                        println!("{:?}", intersection);
+                        match intersection.id {
+                            Primitive::Face(face_id) => unsafe {CURRENT = Some(face_id)},
+                            _ => {}
+                        }
                     }
                 }
                 else {
@@ -187,20 +191,23 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
     }
 }
 
-fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prelude::Vec3) -> Option<geo_proc::prelude::FaceID>
+fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prelude::Vec3) -> Option<FaceLinePieceIntersection>
 {
-    use geo_proc::collision::*;
+    let mut current: Option<FaceLinePieceIntersection> = None;
     for face_id in mesh.face_iter() {
         if let Some(intersection) = find_face_line_piece_intersection(mesh, face_id, point, &(point + direction * 100.0))
         {
-            match intersection.id {
-                Primitive::Face(id) => return Some(id),
-                _ => {}
+            if let Some(ref mut c) = current {
+                if c.point.distance2(*point) > intersection.point.distance2(*point) {
+                    *c = intersection;
+                }
             }
-
+            else {
+                current = Some(intersection);
+            }
         }
     }
-    None
+    current
 }
 
 fn get_view_direction_at(camera: &Camera, screen_uv: (f64, f64)) -> dust::Vec3
