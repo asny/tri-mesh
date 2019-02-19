@@ -174,7 +174,7 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
             unsafe {
                 if let Some((vertex_id, point)) = CURRENT
                 {
-                    morph(mesh, vertex_id, point, 0.01 * delta.1);
+                    morph(mesh, vertex_id, point, 0.001 * delta.1);
                 }
             }
         },
@@ -186,18 +186,23 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
 
 fn morph(mesh: &mut Mesh, vertex_id: VertexID, point: dust::Vec3, factor: f64)
 {
-    let max_distance = 0.5;
+    let max_distance = 1.0;
     visit_vertices(mesh, vertex_id, &mut |mesh, vertex_id| {
         let d = point.distance2(*mesh.vertex_position(vertex_id));
 
         if d < max_distance * max_distance
         {
-            let f = 1.0 - d/(max_distance * max_distance);
-            mesh.move_vertex_by(vertex_id,f * factor as f32 * mesh.vertex_normal(vertex_id));
+            mesh.move_vertex_by(vertex_id,weight(d, max_distance * max_distance) * factor as f32 * mesh.vertex_normal(vertex_id));
             return true;
         }
         false
     });
+}
+
+fn weight(distance: f32, max_distance: f32) -> f32
+{
+    let x = distance / max_distance;
+    1.0 - x*x*(3.0 - 2.0 * x)
 }
 
 fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnMut(&mut Mesh, VertexID) -> bool)
