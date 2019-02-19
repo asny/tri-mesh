@@ -27,7 +27,7 @@ fn main() {
     println!("Loading model");
     let mut meshes = geo_proc::loader::load_obj("examples/bunny.obj").unwrap();
     let mut mesh = meshes.drain(..).next().unwrap();
-    println!("Model loaded");
+    println!("Model loaded: Vertices: {}, Faces: {}", mesh.no_vertices(), mesh.no_faces());
     let (min, max) = mesh.extreme_coordinates();
     let center = 0.5 * (max + min);
     mesh.translate(-center);
@@ -158,10 +158,8 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
                 {
                     let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                     let p = camera.position();
-                    println!("{:?}", (position.0, position.1));
                     let dir = get_view_direction_at(camera, (x, y));
                     if let Some(intersection) = pick(mesh, &p, &dir) {
-                        println!("{:?}", intersection);
                         unsafe {CURRENT = Some(intersection)}
                     }
                 }
@@ -188,7 +186,42 @@ pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::Ca
 
 fn morph(mesh: &mut Mesh, vertex_id: VertexID, point: dust::Vec3, factor: f64)
 {
-    mesh.move_vertex_by(vertex_id, factor as f32 * mesh.vertex_normal(vertex_id));
+    let max_distance = 0.5;
+    visit_vertices(mesh, vertex_id, &mut |mesh, vertex_id| {
+        let d = point.distance2(*mesh.vertex_position(vertex_id));
+
+        if d < max_distance * max_distance
+        {
+            let f = 1.0 - d/(max_distance * max_distance);
+            mesh.move_vertex_by(vertex_id,f * factor as f32 * mesh.vertex_normal(vertex_id));
+            return true;
+        }
+        false
+    });
+}
+
+fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnMut(&mut Mesh, VertexID) -> bool)
+{
+    let mut component = std::collections::HashSet::new();
+    component.insert(start_vertex_id);
+    let mut to_be_tested = vec![start_vertex_id];
+
+    loop {
+        let test_id = match to_be_tested.pop() {
+            Some(id) => id,
+            None => break
+        };
+
+        let halfedges: Vec<HalfEdgeID> = mesh.vertex_halfedge_iter(test_id).collect();
+        for halfedge_id in halfedges {
+            let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
+
+            if !component.contains(&vertex_id) && callback(mesh, vertex_id) {
+                to_be_tested.push(vertex_id);
+                component.insert(vertex_id);
+            }
+        }
+    }
 }
 
 fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prelude::Vec3) -> Option<(VertexID, dust::Vec3)>
