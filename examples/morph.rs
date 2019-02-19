@@ -119,6 +119,7 @@ fn main() {
                     {
                         morph(&mut mesh, vertex_id, point, 0.001 * delta.1);
                         model.update_attributes(&att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
+                        wireframe_model.update_positions(&mesh.positions_buffer());
                     }
                 },
                 _ => {}
