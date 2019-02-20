@@ -15,4 +15,4 @@ cgmath = "0.16.1"
 
 [dev-dependencies]
 dust = {git = "https://github.com/asny/Dust"}
-geo-proc = {git = "https://github.com/asny/geo-proc"}
+wavefront_obj = "5.1.0"

@@ -2,7 +2,7 @@
 use dust::*;
 use dust::objects::*;
 use dust::window::{event::*, Window};
-use geo_proc::tri_mesh::prelude::*;
+use tri_mesh::prelude::*;
 use dust::Vec3 as Vec3;
 use dust::vec3 as vec3;
 use dust::vec4 as vec4;
@@ -25,7 +25,7 @@ fn main() {
 
     // Objects
     println!("Loading model");
-    let mut meshes = geo_proc::loader::parse_obj(include_str!("assets/bunny.obj").to_string()).unwrap();
+    let mut meshes = parse_obj(include_str!("assets/bunny.obj").to_string()).unwrap();
     let mut mesh = meshes.drain(..).next().unwrap();
     println!("Model loaded: Vertices: {}, Faces: {}", mesh.no_vertices(), mesh.no_faces());
     let (min, max) = mesh.extreme_coordinates();
@@ -109,7 +109,7 @@ fn main() {
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
                             let dir = camera.view_direction_at((x, y));
-                            if let Some(intersection) = pick(&mesh, &p, &dir) {
+                            if let Some(intersection) = mesh.ray_intersection(&p, &dir) {
                                 current_pick = Some(intersection);
                             }
                             else {
@@ -223,36 +223,27 @@ fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnM
     }
 }
 
-fn pick(mesh: &Mesh, point: &Vec3, direction: &Vec3) -> Option<(VertexID, Vec3)>
+fn parse_obj(source: String) -> Result<Vec<Mesh>, Error>
 {
-    use geo_proc::collision::*;
-    let mut current: Option<FaceLinePieceIntersection> = None;
-    for face_id in mesh.face_iter() {
-        if let Some(intersection) = find_face_line_piece_intersection(mesh, face_id, point, &(point + direction * 100.0))
-        {
-            if let Some(ref mut c) = current {
-                if c.point.distance2(*point) > intersection.point.distance2(*point) {
-                    *c = intersection;
-                }
-            }
-            else {
-                current = Some(intersection);
-            }
+    let objs = wavefront_obj::obj::parse(source).unwrap();
+    let obj = objs.objects.first().unwrap();
+
+    let mut positions = Vec::new();
+    obj.vertices.iter().for_each(|v| {positions.push(v.x as f32); positions.push(v.y as f32); positions.push(v.z as f32);});
+    let mut indices = Vec::new();
+    for shape in obj.geometry.first().unwrap().shapes.iter() {
+        match shape.primitive {
+            wavefront_obj::obj::Primitive::Triangle(i0, i1, i2) => {
+                indices.push(i0.0 as u32);
+                indices.push(i1.0 as u32);
+                indices.push(i2.0 as u32);
+            },
+            _ => {}
         }
     }
-    if let Some(intersection) = current {
-        match intersection.id {
-            Primitive::Face(face_id) => {
-                let vertex_id = mesh.walker_from_face(face_id).vertex_id().unwrap();
-                return Some((vertex_id, intersection.point));
-            },
-            Primitive::Edge((vertex_id, _)) => {
-                return Some((vertex_id, intersection.point));
-            },
-            Primitive::Vertex(vertex_id) => {
-                return Some((vertex_id, intersection.point));
-            }
-        }
-    }
-    None
+
+    let mut result = Vec::new();
+    let mesh = tri_mesh::mesh_builder::MeshBuilder::new().with_positions(positions).with_indices(indices).build().unwrap();
+    result.push(mesh);
+    Ok(result)
 }
