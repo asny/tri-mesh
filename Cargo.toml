@@ -12,7 +12,7 @@ keywords = ["mesh", "geometry", "3d", "half-edge", "graphics"]
 
 [dependencies]
 cgmath = "0.16.1"
+wavefront_obj = "5.1.0"
 
 [dev-dependencies]
 dust = {git = "https://github.com/asny/Dust"}
-wavefront_obj = "5.1.0"

@@ -24,10 +24,7 @@ fn main() {
                                                     vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
 
     // Objects
-    println!("Loading model");
-    let mut meshes = parse_obj(include_str!("assets/bunny.obj").to_string()).unwrap();
-    let mut mesh = meshes.drain(..).next().unwrap();
-    println!("Model loaded: Vertices: {}, Faces: {}", mesh.no_vertices(), mesh.no_faces());
+    let mut mesh = MeshBuilder::new().from_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
     let (min, max) = mesh.extreme_coordinates();
     let center = 0.5 * (max + min);
     mesh.translate(-center);
@@ -221,29 +218,4 @@ fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnM
             }
         }
     }
-}
-
-fn parse_obj(source: String) -> Result<Vec<Mesh>, Error>
-{
-    let objs = wavefront_obj::obj::parse(source).unwrap();
-    let obj = objs.objects.first().unwrap();
-
-    let mut positions = Vec::new();
-    obj.vertices.iter().for_each(|v| {positions.push(v.x as f32); positions.push(v.y as f32); positions.push(v.z as f32);});
-    let mut indices = Vec::new();
-    for shape in obj.geometry.first().unwrap().shapes.iter() {
-        match shape.primitive {
-            wavefront_obj::obj::Primitive::Triangle(i0, i1, i2) => {
-                indices.push(i0.0 as u32);
-                indices.push(i1.0 as u32);
-                indices.push(i2.0 as u32);
-            },
-            _ => {}
-        }
-    }
-
-    let mut result = Vec::new();
-    let mesh = tri_mesh::mesh_builder::MeshBuilder::new().with_positions(positions).with_indices(indices).build().unwrap();
-    result.push(mesh);
-    Ok(result)
 }
