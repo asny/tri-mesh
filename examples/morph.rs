@@ -256,9 +256,10 @@ fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prel
 
 fn get_view_direction_at(camera: &Camera, screen_uv: (f64, f64)) -> dust::Vec3
 {
+    let mut v = *camera.get_view();
+    v[3] = dust::vec4(0.0, 0.0, 0.0, 1.0);
+    let m = (camera.get_projection() * v).invert().unwrap();
     let screen_pos = dust::vec4(2. * screen_uv.0 as f32 - 1., 1. - 2. * screen_uv.1 as f32, 1., 1.);
-    let mut ray_eye = camera.get_projection().invert().unwrap() * screen_pos;
-    ray_eye = dust::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
-    let ray_world = camera.get_view().invert().unwrap() *  ray_eye;
+    let ray_world = m * screen_pos;
     dust::vec3(ray_world.x, ray_world.y, ray_world.z).normalize()
 }
