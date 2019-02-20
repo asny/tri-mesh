@@ -196,6 +196,10 @@ fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnM
 {
     let mut component = std::collections::HashSet::new();
     component.insert(start_vertex_id);
+    if !callback(mesh, start_vertex_id)
+    {
+        return;
+    }
     let mut to_be_tested = vec![start_vertex_id];
 
     loop {
