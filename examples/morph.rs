@@ -14,7 +14,7 @@ fn main() {
     let scene_center = dust::vec3(0.0, 5.0, 0.0);
 
     // Renderer
-    let renderer = DeferredPipeline::new(&gl, framebuffer_width, framebuffer_height, true).unwrap();
+    let renderer = DeferredPipeline::new(&gl, framebuffer_width, framebuffer_height, true, dust::vec4(0.8, 0.8, 0.8, 1.0)).unwrap();
 
     // Camera
     let mut camera = camera::PerspectiveCamera::new(scene_center + scene_radius * dust::vec3(1.0, 1.0, 1.0).normalize(), scene_center,
