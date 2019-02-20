@@ -8,7 +8,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
+tri-mesh = {path = "../../"}
 wasm-bindgen = "0.2.37"
 console_error_panic_hook = "0.1.5"
-geo-proc = {git = "https://github.com/asny/geo-proc"}
 dust = {git = "https://github.com/asny/Dust"}
