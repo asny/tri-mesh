@@ -2,7 +2,7 @@
 use dust::*;
 use dust::objects::*;
 use dust::window::{event::*, Window};
-use geo_proc::prelude::*;
+use geo_proc::tri_mesh::prelude::*;
 
 fn main() {
     let mut window = Window::new_default("Morph tool").unwrap();
@@ -91,11 +91,16 @@ fn main() {
     window.render_loop(move |events, _elapsed_time|
     {
         for event in events {
-            handle_events(event, &mut camera_handler, &mut camera);
-
             match event {
+                Event::Key {state, kind} => {
+                    if kind == "Tab" && *state == State::Pressed
+                    {
+                        camera_handler.next_state();
+                    }
+                },
                 Event::MouseClick {state, button, position} => {
-                    if *button == MouseButton::Right {
+                    if *button == MouseButton::Left
+                    {
                         if *state == State::Pressed
                         {
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
@@ -104,11 +109,18 @@ fn main() {
                             if let Some(intersection) = pick(&mesh, &p, &dir) {
                                 current_pick = Some(intersection);
                             }
+                            else {
+                                camera_handler.start_rotation();
+                            }
                         }
                         else {
                             current_pick = None;
+                            camera_handler.end_rotation()
                         }
                     }
+                },
+                Event::MouseWheel {delta} => {
+                    camera_handler.zoom(&mut camera, *delta as f32);
                 },
                 Event::MouseMotion {delta} => {
                     camera_handler.rotate(&mut camera, delta.0 as f32, delta.1 as f32);
@@ -118,8 +130,7 @@ fn main() {
                         model.update_attributes(&att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
                         wireframe_model.update_positions(&mesh.positions_buffer());
                     }
-                },
-                _ => {}
+                }
             }
         }
 
@@ -158,29 +169,6 @@ fn main() {
 
         renderer.copy_to_screen().unwrap();
     }).unwrap();
-}
-
-pub fn handle_events(event: &Event, camera_handler: &mut dust::camerahandler::CameraHandler, camera: &mut Camera)
-{
-    match event {
-        Event::Key {state, kind} => {
-            if kind == "Tab" && *state == State::Pressed
-            {
-                camera_handler.next_state();
-            }
-        },
-        Event::MouseClick {state, button, ..} => {
-            if *button == MouseButton::Left
-            {
-                if *state == State::Pressed { camera_handler.start_rotation(); }
-                else { camera_handler.end_rotation() }
-            }
-        },
-        Event::MouseWheel {delta} => {
-            camera_handler.zoom(camera, *delta as f32);
-        },
-        _ => {}
-    }
 }
 
 fn morph(mesh: &mut Mesh, vertex_id: VertexID, point: dust::Vec3, factor: f64)
