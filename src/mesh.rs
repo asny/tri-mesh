@@ -33,6 +33,7 @@ pub mod edit;
 pub mod quality;
 pub mod orientation;
 pub mod transformations;
+pub mod collision;
 pub mod merging_and_splitting;
 pub mod export;
 pub mod validity;
@@ -79,6 +80,7 @@ pub enum Error {
 /// - [Quality functionality](#quality-functionality)
 /// - [Orientation functionality](#orientation-functionality)
 /// - [Transformations](#transformations)
+/// - [Collision detection](#collision)
 /// - [Merging & splitting](#merging--splitting)
 /// - [Export functionality](#export-functionality)
 /// - [Validity](#validity)
