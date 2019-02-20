@@ -24,7 +24,7 @@ fn main() {
                                                     vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
 
     // Objects
-    let mut mesh = MeshBuilder::new().from_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
+    let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
     let (min, max) = mesh.extreme_coordinates();
     let center = 0.5 * (max + min);
     mesh.translate(-center);

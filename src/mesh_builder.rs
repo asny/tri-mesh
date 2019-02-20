@@ -97,16 +97,17 @@ impl MeshBuilder {
         self
     }
 
-    pub fn from_obj(mut self, source: String) -> Self
+    pub fn with_obj(mut self, source: String) -> Self
     {
-        let mut positions = Vec::new();
-        let mut indices= Vec::new();
+        if self.positions.is_none() { self.positions = Some(Vec::new()); }
+        let positions = self.positions.as_mut().unwrap();
+        if self.indices.is_none() { self.indices = Some(Vec::new()); }
+        let indices = self.indices.as_mut().unwrap();
 
         let objs = wavefront_obj::obj::parse(source).unwrap().objects;
-
-        let mut start_index = 0;
         for obj in objs.iter()
         {
+            let start_index = positions.len()/3;
             for vertex in obj.vertices.iter() {
                 positions.push(vertex.x as f32);
                 positions.push(vertex.y as f32);
@@ -115,18 +116,15 @@ impl MeshBuilder {
 
             for shape in obj.geometry.first().unwrap().shapes.iter() {
                 match shape.primitive {
-                    wavefront_obj::obj::Primitive::Triangle(i0, i1, i2) => {
-                        indices.push(start_index + i0.0 as u32);
-                        indices.push(start_index + i1.0 as u32);
-                        indices.push(start_index + i2.0 as u32);
+                    wavefront_obj::obj::Primitive::Triangle((i0, ..), (i1, ..), (i2, ..)) => {
+                        indices.push((start_index + i0) as u32);
+                        indices.push((start_index + i1) as u32);
+                        indices.push((start_index + i2) as u32);
                     },
                     _ => {}
                 }
             }
-            start_index = positions.len() as u32;
         }
-        self.indices = Some(indices);
-        self.positions = Some(positions);
         self
     }
 
