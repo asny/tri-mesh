@@ -3,6 +3,9 @@ use dust::*;
 use dust::objects::*;
 use dust::window::{event::*, Window};
 use geo_proc::tri_mesh::prelude::*;
+use dust::Vec3 as Vec3;
+use dust::vec3 as vec3;
+use dust::vec4 as vec4;
 
 fn main() {
     let mut window = Window::new_default("Morph tool").unwrap();
@@ -11,14 +14,14 @@ fn main() {
     let gl = window.gl();
 
     let scene_radius = 10.0;
-    let scene_center = dust::vec3(0.0, 5.0, 0.0);
+    let scene_center = vec3(0.0, 5.0, 0.0);
 
     // Renderer
-    let renderer = DeferredPipeline::new(&gl, framebuffer_width, framebuffer_height, true, dust::vec4(0.8, 0.8, 0.8, 1.0)).unwrap();
+    let renderer = DeferredPipeline::new(&gl, framebuffer_width, framebuffer_height, true, vec4(0.8, 0.8, 0.8, 1.0)).unwrap();
 
     // Camera
-    let mut camera = camera::PerspectiveCamera::new(scene_center + scene_radius * dust::vec3(1.0, 1.0, 1.0).normalize(), scene_center,
-                                                    dust::vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
+    let mut camera = camera::PerspectiveCamera::new(scene_center + scene_radius * vec3(1.0, 1.0, 1.0).normalize(), scene_center,
+                                                    vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
 
     // Objects
     println!("Loading model");
@@ -34,11 +37,11 @@ fn main() {
     mesh.translate(scene_center);
 
     let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
-    model.color = dust::vec3(0.8, 0.8, 0.8);
+    model.color = vec3(0.8, 0.8, 0.8);
 
     let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &mesh.positions_buffer(), 0.02);
     wireframe_model.set_parameters(0.8, 0.2, 5.0);
-    wireframe_model.set_color(&dust::vec3(0.9, 0.2, 0.2));
+    wireframe_model.set_color(&vec3(0.9, 0.2, 0.2));
 
     let plane_positions: Vec<f32> = vec![
         -1.0, 0.0, -1.0,
@@ -64,29 +67,29 @@ fn main() {
     let mut ambient_light = light::AmbientLight::new();
     ambient_light.base.intensity = 0.4;
 
-    let mut dir = dust::vec3(-1.0, -1.0, -1.0).normalize();
+    let mut dir = vec3(-1.0, -1.0, -1.0).normalize();
     let mut light1 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
     light1.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light1.base.intensity = 0.75;
 
-    dir = dust::vec3(-1.0, -1.0, 1.0).normalize();
+    dir = vec3(-1.0, -1.0, 1.0).normalize();
     let mut light2 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
     light2.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light2.base.intensity = 0.75;
 
-    dir = dust::vec3(1.0, -1.0, 1.0).normalize();
+    dir = vec3(1.0, -1.0, 1.0).normalize();
     let mut light3 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
     light3.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light3.base.intensity = 0.75;
 
-    dir = dust::vec3(1.0, -1.0, -1.0).normalize();
+    dir = vec3(1.0, -1.0, -1.0).normalize();
     let mut light4 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
     light4.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light4.base.intensity = 0.75;
 
     let mut camera_handler = camerahandler::CameraHandler::new(camerahandler::CameraState::SPHERICAL);
 
-    let mut current_pick: Option<(VertexID, dust::Vec3)> = None;
+    let mut current_pick: Option<(VertexID, Vec3)> = None;
     // main loop
     window.render_loop(move |events, _elapsed_time|
     {
@@ -171,7 +174,7 @@ fn main() {
     }).unwrap();
 }
 
-fn morph(mesh: &mut Mesh, vertex_id: VertexID, point: dust::Vec3, factor: f64)
+fn morph(mesh: &mut Mesh, vertex_id: VertexID, point: Vec3, factor: f64)
 {
     let max_distance = 1.0;
     visit_vertices(mesh, vertex_id, &mut |mesh, vertex_id| {
@@ -220,7 +223,7 @@ fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnM
     }
 }
 
-fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prelude::Vec3) -> Option<(VertexID, dust::Vec3)>
+fn pick(mesh: &Mesh, point: &Vec3, direction: &Vec3) -> Option<(VertexID, Vec3)>
 {
     use geo_proc::collision::*;
     let mut current: Option<FaceLinePieceIntersection> = None;
