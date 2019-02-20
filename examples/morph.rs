@@ -105,7 +105,7 @@ fn main() {
                         {
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
-                            let dir = get_view_direction_at(&camera, (x, y));
+                            let dir = camera.view_direction_at((x, y));
                             if let Some(intersection) = pick(&mesh, &p, &dir) {
                                 current_pick = Some(intersection);
                             }
@@ -252,14 +252,4 @@ fn pick(mesh: &Mesh, point: &geo_proc::prelude::Vec3, direction: &geo_proc::prel
         }
     }
     None
-}
-
-fn get_view_direction_at(camera: &Camera, screen_uv: (f64, f64)) -> dust::Vec3
-{
-    let mut v = *camera.get_view();
-    v[3] = dust::vec4(0.0, 0.0, 0.0, 1.0);
-    let m = (camera.get_projection() * v).invert().unwrap();
-    let screen_pos = dust::vec4(2. * screen_uv.0 as f32 - 1., 1. - 2. * screen_uv.1 as f32, 1., 1.);
-    let ray_world = m * screen_pos;
-    dust::vec3(ray_world.x, ray_world.y, ray_world.z).normalize()
 }
