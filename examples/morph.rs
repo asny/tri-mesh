@@ -196,25 +196,18 @@ fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnM
 {
     let mut component = std::collections::HashSet::new();
     component.insert(start_vertex_id);
-    if !callback(mesh, start_vertex_id)
-    {
-        return;
-    }
     let mut to_be_tested = vec![start_vertex_id];
-
-    loop {
-        let test_id = match to_be_tested.pop() {
-            Some(id) => id,
-            None => break
-        };
-
-        let halfedges: Vec<HalfEdgeID> = mesh.vertex_halfedge_iter(test_id).collect();
-        for halfedge_id in halfedges {
-            let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
-
-            if !component.contains(&vertex_id) && callback(mesh, vertex_id) {
-                to_be_tested.push(vertex_id);
-                component.insert(vertex_id);
+    while let Some(test_id) = to_be_tested.pop()
+    {
+        if callback(mesh, test_id)
+        {
+            for halfedge_id in mesh.vertex_halfedge_iter(test_id)
+            {
+                let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
+                if !component.contains(&vertex_id) {
+                    to_be_tested.push(vertex_id);
+                    component.insert(vertex_id);
+                }
             }
         }
     }
