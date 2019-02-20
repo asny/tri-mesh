@@ -21,11 +21,8 @@ fn main() {
                                                     dust::vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
 
     // Objects
-    let color = dust::vec3(1.0, 0.0, 0.0);
-    //let source = include_str!("bunny.obj").to_string();
-
     println!("Loading model");
-    let mut meshes = geo_proc::loader::load_obj("examples/bunny.obj").unwrap();
+    let mut meshes = geo_proc::loader::parse_obj(include_str!("bunny.obj").to_string()).unwrap();
     let mut mesh = meshes.drain(..).next().unwrap();
     println!("Model loaded: Vertices: {}, Faces: {}", mesh.no_vertices(), mesh.no_faces());
     let (min, max) = mesh.extreme_coordinates();
@@ -37,11 +34,11 @@ fn main() {
     mesh.translate(scene_center);
 
     let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
-    model.color = color;
+    model.color = dust::vec3(0.8, 0.8, 0.8);
 
     let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &mesh.positions_buffer(), 0.02);
     wireframe_model.set_parameters(0.8, 0.2, 5.0);
-    wireframe_model.set_color(&color);
+    wireframe_model.set_color(&dust::vec3(0.9, 0.2, 0.2));
 
     let plane_positions: Vec<f32> = vec![
         -1.0, 0.0, -1.0,
