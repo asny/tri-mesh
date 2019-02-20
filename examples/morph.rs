@@ -25,7 +25,7 @@ fn main() {
 
     // Objects
     println!("Loading model");
-    let mut meshes = geo_proc::loader::parse_obj(include_str!("bunny.obj").to_string()).unwrap();
+    let mut meshes = geo_proc::loader::parse_obj(include_str!("assets/bunny.obj").to_string()).unwrap();
     let mut mesh = meshes.drain(..).next().unwrap();
     println!("Model loaded: Vertices: {}, Faces: {}", mesh.no_vertices(), mesh.no_faces());
     let (min, max) = mesh.extreme_coordinates();
