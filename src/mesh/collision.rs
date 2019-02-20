@@ -31,6 +31,39 @@ pub struct FaceLinePieceIntersection {
 /// # Collision detection
 impl Mesh
 {
+    pub fn ray_intersection(&self, point: &Vec3, direction: &Vec3) -> Option<(VertexID, Vec3)>
+    {
+        let mut current: Option<FaceLinePieceIntersection> = None;
+        for face_id in self.face_iter() {
+            if let Some(intersection) = self.find_face_line_piece_intersection(face_id, point, &(point + direction * 100.0))
+            {
+                if let Some(ref mut c) = current {
+                    if c.point.distance2(*point) > intersection.point.distance2(*point) {
+                        *c = intersection;
+                    }
+                }
+                else {
+                    current = Some(intersection);
+                }
+            }
+        }
+        if let Some(intersection) = current {
+            match intersection.id {
+                Primitive::Face(face_id) => {
+                    let vertex_id = self.walker_from_face(face_id).vertex_id().unwrap();
+                    return Some((vertex_id, intersection.point));
+                },
+                Primitive::Edge((vertex_id, _)) => {
+                    return Some((vertex_id, intersection.point));
+                },
+                Primitive::Vertex(vertex_id) => {
+                    return Some((vertex_id, intersection.point));
+                }
+            }
+        }
+        None
+    }
+
     pub fn find_face_edge_intersections(&self, face_id: FaceID, other: &Mesh, edge: (VertexID, VertexID)) -> Option<(Intersection, Option<Intersection>)>
     {
         let p0 = other.vertex_position(edge.0);

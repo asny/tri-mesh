@@ -7,6 +7,7 @@ pub use crate::mesh::math::*;
 pub use crate::mesh::ids::*;
 pub use crate::mesh::traversal::Walker;
 pub use crate::mesh::iterators::*;
+pub use crate::mesh::collision::*;
 
 pub use crate::mesh::Mesh;
 
