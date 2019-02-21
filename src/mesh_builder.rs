@@ -69,6 +69,44 @@ pub enum Error {
 /// #   Ok(())
 /// # }
 /// ```
+///
+/// Build from obj source:
+/// ```
+/// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
+/// #
+/// # fn main() -> Result<(), Box<Error>> {
+///
+/// let source = "o Cube
+/// v 1.000000 -1.000000 -1.000000
+/// # v 1.000000 -1.000000 1.000000
+/// # v -1.000000 -1.000000 1.000000
+/// # v -1.000000 -1.000000 -1.000000
+/// # v 1.000000 1.000000 -1.000000
+/// # v 0.999999 1.000000 1.000001
+/// # v -1.000000 1.000000 1.000000
+/// # v -1.000000 1.000000 -1.000000
+/// # f 1 2 3
+/// # f 1 3 4
+/// # f 5 8 7
+/// # f 5 7 6
+/// # f 1 5 6
+/// # f 1 6 2
+/// # f 2 6 7
+/// # f 2 7 3
+/// # f 3 7 8
+/// # f 3 8 4
+/// # f 5 1 4
+/// f 5 4 8".to_string();
+///
+/// let mesh = MeshBuilder::new().with_obj(source).build()?;
+///
+/// assert_eq!(mesh.no_faces(), 12);
+/// assert_eq!(mesh.no_vertices(), 8);
+///
+/// #   mesh.is_valid().unwrap();
+/// #   Ok(())
+/// # }
+/// ```
 #[derive(Debug, Default)]
 pub struct MeshBuilder {
     indices: Option<Vec<u32>>,
@@ -97,6 +135,8 @@ impl MeshBuilder {
         self
     }
 
+    /// Parses the .obj file and extracts the connectivity information (indices) and positions which is used to construct a mesh when the 'build' method is called.
+    /// If the .obj file contains multiple objects, all objects are added to the mesh, but they will not be connected.
     pub fn with_obj(mut self, source: String) -> Self
     {
         let mut positions = Vec::new();
