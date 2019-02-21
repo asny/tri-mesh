@@ -15,27 +15,28 @@ pub enum Primitive {
     Face(FaceID)
 }
 
-#[derive(Debug, PartialEq)]
-pub struct Intersection {
-    pub id1: Primitive,
-    pub id2: Primitive,
-    pub point: Vec3
-}
-
-#[derive(Debug, PartialEq)]
-pub struct FaceLinePieceIntersection {
-    pub id: Primitive,
-    pub point: Vec3
+#[derive(Debug, Clone, PartialEq)]
+pub enum Intersection
+{
+    Point {
+        primitive: Primitive,
+        point: Vec3
+    },
+    LinePiece {
+        primitive: Primitive,
+        point0: Vec3,
+        point1: Vec3
+    }
 }
 
 /// # Intersection
 impl Mesh
 {
-    pub fn ray_intersection(&self, point: &Vec3, direction: &Vec3) -> Option<(VertexID, Vec3)>
+    /*pub fn ray_intersection(&self, point: &Vec3, direction: &Vec3) -> Intersection
     {
-        let mut current: Option<FaceLinePieceIntersection> = None;
+        let mut current: Option<Intersection> = None;
         for face_id in self.face_iter() {
-            if let Some(intersection) = self.find_face_line_piece_intersection(face_id, point, &(point + direction * 100.0))
+            if let Some(intersection) = self.face_line_piece_intersection(face_id, point, &(point + direction * 100.0))
             {
                 if let Some(ref mut c) = current {
                     if c.point.distance2(*point) > intersection.point.distance2(*point) {
@@ -62,83 +63,69 @@ impl Mesh
             }
         }
         None
-    }
+    }*/
 
-    pub fn find_face_edge_intersections(&self, face_id: FaceID, other: &Mesh, edge: (VertexID, VertexID)) -> Option<(Intersection, Option<Intersection>)>
+    pub fn face_edge_intersection(&self, face_id: FaceID, other: &Mesh, edge: (VertexID, VertexID)) -> Option<(Intersection, Intersection)>
     {
         let p0 = other.vertex_position(edge.0);
         let p1 = other.vertex_position(edge.1);
 
-        if let Some(intersection) = self.find_face_line_piece_intersection(face_id, &p0, &p1)
-        {
-            let mut id2 = Primitive::Edge(edge);
-            let mut intersection2 = None;
-            if (intersection.point - p0).magnitude() < MARGIN {
-                id2 = Primitive::Vertex(edge.0);
-                if let Some(id) = self.face_point_intersection(face_id, p1) {
-                    intersection2 = Some(Intersection { id1: id, id2: Primitive::Vertex(edge.1), point: *p1 });
+        self.face_line_piece_intersection(face_id, &p0, &p1)
+            .map(|intersection| {
+                match intersection {
+                    Intersection::Point {point, ..} => {
+                        (intersection, other.edge_point_intersection(edge, &point).unwrap())
+                    },
+                    Intersection::LinePiece {..} => {
+                        (intersection, Intersection::LinePiece {primitive: Primitive::Edge(edge), point0: *p0, point1: *p1})
+                    }
                 }
-            } else if (intersection.point - p1).magnitude() < MARGIN {
-                id2 = Primitive::Vertex(edge.1);
-            }
-            return Some((Intersection { id1: intersection.id, id2, point: intersection.point }, intersection2));
-        }
-
-        None
+            })
     }
 
-    pub fn find_face_line_piece_intersection(&self, face_id: FaceID, point0: &Vec3, point1: &Vec3) -> Option<FaceLinePieceIntersection>
+    pub fn face_line_piece_intersection(&self, face_id: FaceID, point0: &Vec3, point1: &Vec3) -> Option<Intersection>
     {
         let p = self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
         let n = self.face_normal(face_id);
 
-        match plane_line_piece_intersection(&point0, &point1, p, &n) {
-            Some(PlaneLinepieceIntersectionResult::LineInPlane) => {
-                if let Some(id) = self.find_face_point_intersection_when_point_in_plane(face_id, point0) {
-                    return Some(FaceLinePieceIntersection { id, point: *point0 });
+        plane_line_piece_intersection(&point0, &point1, p, &n).and_then(|intersection| {
+            match intersection {
+                PlaneLinepieceIntersectionResult::LineInPlane => {
+                    let intersection0 = self.face_point_intersection_when_point_in_plane(face_id, point0);
+                    let intersection1 = self.face_point_intersection_when_point_in_plane(face_id, point1);
+                    if let Some(Intersection::Point {point, ..}) = intersection0 {
+                        let point0 = point;
+                        if let Some(Intersection::Point {point, ..}) = intersection1 {
+                            Some(Intersection::LinePiece {primitive: Primitive::Face(face_id), point0, point1: point})
+                        }
+                        else {
+                            intersection0
+                        }
+                    }
+                    else {
+                        intersection1
+                    }
+                },
+                PlaneLinepieceIntersectionResult::P0InPlane => {
+                    self.face_point_intersection_when_point_in_plane(face_id, point0)
+                },
+                PlaneLinepieceIntersectionResult::P1InPlane => {
+                    self.face_point_intersection_when_point_in_plane(face_id, point1)
+                },
+                PlaneLinepieceIntersectionResult::Intersection(point) => {
+                    self.face_point_intersection_when_point_in_plane(face_id, &point)
                 }
-                if let Some(id) = self.find_face_point_intersection_when_point_in_plane(face_id, point1) {
-                    return Some(FaceLinePieceIntersection { id, point: *point1 });
-                }
-            },
-            Some(PlaneLinepieceIntersectionResult::P0InPlane) => {
-                if let Some(id) = self.find_face_point_intersection_when_point_in_plane(face_id, point0) {
-                    return Some(FaceLinePieceIntersection { id, point: *point0 });
-                }
-            },
-            Some(PlaneLinepieceIntersectionResult::P1InPlane) => {
-                if let Some(id) = self.find_face_point_intersection_when_point_in_plane(face_id, point1) {
-                    return Some(FaceLinePieceIntersection { id, point: *point1 });
-                }
-            },
-            Some(PlaneLinepieceIntersectionResult::Intersection(point)) => {
-                if let Some(id) = self.find_face_point_intersection_when_point_in_plane(face_id, &point) {
-                    return Some(FaceLinePieceIntersection { id, point });
-                }
-            },
-            None => {}
-        }
-
-        None
-    }
-
-    pub fn face_and_face_overlaps(&self, face_id1: FaceID, mesh2: &Mesh, face_id2: FaceID) -> bool
-    {
-        let (v0, v1, v2) = self.face_vertices(face_id1);
-        let (p0, p1, p2) = mesh2.face_positions(face_id2);
-
-        (self.vertex_point_intersection(v0, p0).is_some() || self.vertex_point_intersection(v1, p0).is_some() || self.vertex_point_intersection(v2, p2).is_some())
-            && (self.vertex_point_intersection(v0, p1).is_some() || self.vertex_point_intersection(v1, p1).is_some() || self.vertex_point_intersection(v2, p1).is_some())
-            && (self.vertex_point_intersection(v0, p2).is_some() || self.vertex_point_intersection(v1, p2).is_some() || self.vertex_point_intersection(v2, p2).is_some())
+            }
+        })
     }
 
     /// Returns the vertex primitive if the point is close to the vertex, otherwise None.
-    pub fn vertex_point_intersection(&self, vertex_id: VertexID, point: &Vec3) -> Option<Primitive>
+    pub fn vertex_point_intersection(&self, vertex_id: VertexID, point: &Vec3) -> Option<Intersection>
     {
         let p = self.vertex_position(vertex_id);
         if (p - point).magnitude2() < SQR_MARGIN
         {
-            Some(Primitive::Vertex(vertex_id))
+            Some(Intersection::Point {primitive: Primitive::Vertex(vertex_id), point: *point})
         }
         else {
             None
@@ -146,36 +133,32 @@ impl Mesh
     }
 
     // Returns the vertex or edge primitive (in that order) if the point is close to either, otherwise None.
-    pub fn edge_point_intersection(&self, edge: (VertexID, VertexID), point: &Vec3) -> Option<Primitive>
+    pub fn edge_point_intersection(&self, edge: (VertexID, VertexID), point: &Vec3) -> Option<Intersection>
     {
-        if let Some(primitive) = self.vertex_point_intersection(edge.0, point)
-        {
-            Some(primitive)
-        }
-        else if let Some(primitive) = self.vertex_point_intersection(edge.1, point)
-        {
-            Some(primitive)
-        }
-        else if point_line_segment_distance(point, self.vertex_position(edge.0), self.vertex_position(edge.1)) < MARGIN
-        {
-            Some(Primitive::Edge(edge))
-        }
-        else { None }
+        self.vertex_point_intersection(edge.0, point)
+            .or_else(|| { self.vertex_point_intersection(edge.1, point) })
+            .or_else(|| {
+                if point_line_segment_distance(point, self.vertex_position(edge.0), self.vertex_position(edge.1)) < MARGIN
+                {
+                    Some(Intersection::Point {primitive: Primitive::Edge(edge), point: *point})
+                }
+                else { None }
+            })
     }
 
     // Returns the vertex, edge or face primitive (in that order) if the point is close to either, otherwise None.
-    pub fn face_point_intersection(&self, face_id: FaceID, point: &Vec3) -> Option<Primitive>
+    pub fn face_point_intersection(&self, face_id: FaceID, point: &Vec3) -> Option<Intersection>
     {
         let p = *self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
         let n = self.face_normal(face_id);
         let v = (point - p).normalize();
         if n.dot(v).abs() > MARGIN { return None; }
 
-        self.find_face_point_intersection_when_point_in_plane(face_id, point)
+        self.face_point_intersection_when_point_in_plane(face_id, point)
     }
 
     // Assumes that the point lies in the plane spanned by the face
-    fn find_face_point_intersection_when_point_in_plane(&self, face_id: FaceID, point: &Vec3) -> Option<Primitive>
+    fn face_point_intersection_when_point_in_plane(&self, face_id: FaceID, point: &Vec3) -> Option<Intersection>
     {
         let face_vertices = self.ordered_face_vertices(face_id);
         let v0 = face_vertices.0;
@@ -187,20 +170,20 @@ impl Mesh
         let c = self.vertex_position(v2);
 
         // Test if the point is located at one of the vertices
-        if (*a - *point).magnitude2() < SQR_MARGIN { return Some(Primitive::Vertex(v0)); }
-        if (*b - *point).magnitude2() < SQR_MARGIN { return Some(Primitive::Vertex(v1)); }
-        if (*c - *point).magnitude2() < SQR_MARGIN { return Some(Primitive::Vertex(v2)); }
+        if (*a - *point).magnitude2() < SQR_MARGIN { return Some(Intersection::Point {primitive: Primitive::Vertex(v0), point: *point}); }
+        if (*b - *point).magnitude2() < SQR_MARGIN { return Some(Intersection::Point {primitive: Primitive::Vertex(v1), point: *point}); }
+        if (*c - *point).magnitude2() < SQR_MARGIN { return Some(Intersection::Point {primitive: Primitive::Vertex(v2), point: *point}); }
 
         // Test if the point is located at one of the edges
-        if point_line_segment_distance(point, a, b) < MARGIN { return Some(Primitive::Edge((v0, v1))); }
-        if point_line_segment_distance(point, b, c) < MARGIN { return Some(Primitive::Edge((v1, v2))); }
-        if point_line_segment_distance(point, a, c) < MARGIN { return Some(Primitive::Edge((v0, v2))); }
+        if point_line_segment_distance(point, a, b) < MARGIN { return Some(Intersection::Point {primitive: Primitive::Edge((v0, v1)), point: *point}); }
+        if point_line_segment_distance(point, b, c) < MARGIN { return Some(Intersection::Point {primitive: Primitive::Edge((v1, v2)), point: *point}); }
+        if point_line_segment_distance(point, a, c) < MARGIN { return Some(Intersection::Point {primitive: Primitive::Edge((v0, v2)), point: *point}); }
 
         // Test whether the intersection point is located inside the face
         let coords = barycentric(point, a, b, c);
         if 0.0 < coords.0 && coords.0 < 1.0 && 0.0 < coords.1 && coords.1 < 1.0 && 0.0 < coords.2 && coords.2 < 1.0
         {
-            return Some(Primitive::Face(face_id));
+            return Some(Intersection::Point {primitive: Primitive::Face(face_id), point: *point});
         }
         None
     }
@@ -211,7 +194,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_find_face_intersection()
+    fn test_face_point_intersection_when_point_in_plane()
     {
         let positions: Vec<f32> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
         let mut mesh = MeshBuilder::new().with_positions(positions).build().unwrap();
@@ -226,34 +209,36 @@ mod tests {
         let face_midpoint = mesh.face_center(face_id);
 
         // Vertex intersection
-        let mut result = mesh.find_face_point_intersection_when_point_in_plane(face_id, p0);
-        assert_eq!(result, Some(Primitive::Vertex(v0)));
+        let mut result = mesh.face_point_intersection_when_point_in_plane(face_id, p0);
+        assert_eq!(result, Some(Intersection::Point { primitive: Primitive::Vertex(v0), point: *p0 }));
 
         let dir_away_from_p0 = -(0.5 * (p1 + p2) - p0).normalize();
-        result = mesh.find_face_point_intersection_when_point_in_plane(face_id, &(p0 + 0.99 * MARGIN * dir_away_from_p0));
-        assert_eq!(result, Some(Primitive::Vertex(v0)));
+        let p_intersect = p0 + 0.99 * MARGIN * dir_away_from_p0;
+        result = mesh.face_point_intersection_when_point_in_plane(face_id, &p_intersect);
+        assert_eq!(result, Some(Intersection::Point { primitive: Primitive::Vertex(v0), point: p_intersect }));
 
-        result = mesh.find_face_point_intersection_when_point_in_plane(face_id, &(p0 + 1.01 * MARGIN * dir_away_from_p0));
+        result = mesh.face_point_intersection_when_point_in_plane(face_id, &(p0 + 1.01 * MARGIN * dir_away_from_p0));
         assert_eq!(result, None);
 
         // Edge intersection
-        result = mesh.find_face_point_intersection_when_point_in_plane(face_id, &edge_midpoint);
-        assert_eq!(result, Some(Primitive::Edge((v1, v2))));
+        result = mesh.face_point_intersection_when_point_in_plane(face_id, &edge_midpoint);
+        assert_eq!(result, Some(Intersection::Point { primitive: Primitive::Edge((v1, v2)), point: edge_midpoint }));
 
         let dir_away_from_edge = vec3(0.0, 1.0, 0.0);
-        result = mesh.find_face_point_intersection_when_point_in_plane(face_id, &(edge_midpoint + 0.99 * MARGIN * dir_away_from_edge));
-        assert_eq!(result, Some(Primitive::Edge((v1, v2))));
+        let p_intersect = edge_midpoint + 0.99 * MARGIN * dir_away_from_edge;
+        result = mesh.face_point_intersection_when_point_in_plane(face_id, &p_intersect);
+        assert_eq!(result, Some(Intersection::Point { primitive: Primitive::Edge((v1, v2)), point: p_intersect }));
 
-        result = mesh.find_face_point_intersection_when_point_in_plane(face_id, &(edge_midpoint + 1.01 * MARGIN * dir_away_from_edge));
+        result = mesh.face_point_intersection_when_point_in_plane(face_id, &(edge_midpoint + 1.01 * MARGIN * dir_away_from_edge));
         assert_eq!(result, None);
 
         // Face intersection
-        result = mesh.find_face_point_intersection_when_point_in_plane(face_id, &face_midpoint);
-        assert_eq!(result, Some(Primitive::Face(face_id)));
+        result = mesh.face_point_intersection_when_point_in_plane(face_id, &face_midpoint);
+        assert_eq!(result, Some(Intersection::Point { primitive: Primitive::Face(face_id), point: face_midpoint }));
     }
 
     #[test]
-    fn test_find_edge_intersection()
+    fn test_edge_point_intersection()
     {
         let positions: Vec<f32> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
         let mut mesh = MeshBuilder::new().with_positions(positions).build().unwrap();
@@ -265,11 +250,12 @@ mod tests {
 
         // Vertex intersection
         let mut result = mesh.edge_point_intersection((v0, v1), p0);
-        assert_eq!(result, Some(Primitive::Vertex(v0)));
+        assert_eq!(result, Some(Intersection::Point { primitive: Primitive::Vertex(v0), point: *p0 }));
 
         let dir_away_from_p0 = -(p1 - p0).normalize();
-        result = mesh.edge_point_intersection((v0, v1), &(p0 + 0.99 * MARGIN * dir_away_from_p0));
-        assert_eq!(result, Some(Primitive::Vertex(v0)));
+        let p_intersect = p0 + 0.99 * MARGIN * dir_away_from_p0;
+        result = mesh.edge_point_intersection((v0, v1), &p_intersect);
+        assert_eq!(result, Some(Intersection::Point { primitive: Primitive::Vertex(v0), point: p_intersect }));
 
         result = mesh.edge_point_intersection((v0, v1), &(p0 + 1.01 * MARGIN * dir_away_from_p0));
         assert_eq!(result, None);
@@ -277,44 +263,45 @@ mod tests {
         // Edge intersection
         let edge_midpoint = (p0 + p1) * 0.5;
         result = mesh.edge_point_intersection((v0, v1), &edge_midpoint);
-        assert_eq!(result, Some(Primitive::Edge((v0, v1))));
+        assert_eq!(result, Some(Intersection::Point { primitive: Primitive::Edge((v0, v1)), point: edge_midpoint }));
 
         let dir_away_from_edge = dir_away_from_p0.cross(vec3(1.0, 1.0, 1.0)).normalize();
-        result = mesh.edge_point_intersection((v0, v1), &(edge_midpoint + 0.99 * MARGIN * dir_away_from_edge));
-        assert_eq!(result, Some(Primitive::Edge((v0, v1))));
+        let p_intersect = edge_midpoint + 0.99 * MARGIN * dir_away_from_edge;
+        result = mesh.edge_point_intersection((v0, v1), &p_intersect);
+        assert_eq!(result, Some(Intersection::Point { primitive: Primitive::Edge((v0, v1)), point: p_intersect }));
 
         result = mesh.edge_point_intersection((v0, v1), &(edge_midpoint + 1.01 * MARGIN * dir_away_from_edge));
         assert_eq!(result, None);
     }
 
     #[test]
-    fn test_find_face_edge_intersection_no_intersection()
+    fn test_face_edge_intersection_when_no_intersection()
     {
         let mesh1 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]).build().unwrap();
         let mesh2 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![1.0 + MARGIN, 0.0, 0.0, 3.0, 0.0, 1.0, 4.0, 0.0, 0.0]).build().unwrap();
         let face_id = mesh1.face_iter().next().unwrap();
         let edge_id = mesh2.ordered_edge_vertices(mesh2.edge_iter().next().unwrap());
 
-        let result = mesh1.find_face_edge_intersections(face_id, &mesh2, edge_id);
+        let result = mesh1.face_edge_intersection(face_id, &mesh2, edge_id);
         assert_eq!(result, None);
     }
 
     #[test]
-    fn test_find_face_edge_intersection_vertex_face_intersection()
+    fn test_face_edge_intersection_when_face_vertex_intersects()
     {
         let mesh1 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]).build().unwrap();
         let mesh2 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![0.0, 1.0, 0.0, 0.1, 0.0, 0.1, 1.0, 1.0, 0.0]).build().unwrap();
-        let intersection_point = vec3(0.1, 0.0, 0.1);
+        let point = vec3(0.1, 0.0, 0.1);
         let face_id = mesh1.face_iter().next().unwrap();
-        let edge_id = mesh2.edge_iter().map(|halfedge_id| mesh2.ordered_edge_vertices(halfedge_id)).find(|(v1, _)| *mesh2.vertex_position(*v1) == intersection_point).unwrap();
+        let edge_id = mesh2.edge_iter().map(|halfedge_id| mesh2.ordered_edge_vertices(halfedge_id)).find(|(v1, _)| *mesh2.vertex_position(*v1) == point).unwrap();
 
-        let result = mesh1.find_face_edge_intersections(face_id, &mesh2, edge_id);
-        let vertex_id = mesh2.vertex_iter().find(|v| *mesh2.vertex_position(*v) == intersection_point).unwrap();
-        assert_eq!(result, Some((Intersection { id1: Primitive::Face(face_id), id2: Primitive::Vertex(vertex_id), point: intersection_point }, None)));
+        let result = mesh1.face_edge_intersection(face_id, &mesh2, edge_id);
+        let vertex_id = mesh2.vertex_iter().find(|v| *mesh2.vertex_position(*v) == point).unwrap();
+        assert_eq!(result, Some((Intersection::Point { primitive: Primitive::Face(face_id), point }, Intersection::Point {primitive: Primitive::Vertex(vertex_id), point})));
     }
 
     #[test]
-    fn test_find_face_edge_intersection_edge_face_intersection()
+    fn test_face_edge_intersection_when_face_edge_intersects_at_point()
     {
         let mesh1 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]).build().unwrap();
         let mesh2 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![0.1, 1.0, 0.1, 0.1, -0.1, 0.1, 1.0, 1.0, 0.0]).build().unwrap();
@@ -322,12 +309,13 @@ mod tests {
         let face_id = mesh1.face_iter().next().unwrap();
         let edge_id = mesh2.edge_iter().map(|halfedge_id| mesh2.ordered_edge_vertices(halfedge_id)).find(|(v1, v2)| mesh2.vertex_position(*v1)[0] == 0.1 && mesh2.vertex_position(*v2)[0] == 0.1).unwrap();
 
-        let result = mesh1.find_face_edge_intersections(face_id, &mesh2, edge_id);
-        assert_eq!(result, Some((Intersection { id1: Primitive::Face(face_id), id2: Primitive::Edge(edge_id), point: vec3(0.1, 0.0, 0.1) }, None)));
+        let result = mesh1.face_edge_intersection(face_id, &mesh2, edge_id);
+        let point = vec3(0.1, 0.0, 0.1);
+        assert_eq!(result, Some((Intersection::Point { primitive: Primitive::Face(face_id), point }, Intersection::Point { primitive: Primitive::Edge(edge_id), point})));
     }
 
     #[test]
-    fn test_find_face_edge_intersection_two_vertex_face_intersection()
+    fn test_face_edge_intersection_when_face_edge_intersects_at_linepiece()
     {
         let mesh1 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]).build().unwrap();
         let mesh2 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![0.1, 0.0, 0.1, 0.2, 0.0, 0.2, 1.0, 1.0, 0.0]).build().unwrap();
@@ -335,13 +323,15 @@ mod tests {
         let face_id = mesh1.face_iter().next().unwrap();
         let edge_id = mesh2.edge_iter().map(|halfedge_id| mesh2.ordered_edge_vertices(halfedge_id)).find(|(v1, v2)| mesh2.vertex_position(*v1)[1] == 0.0 && mesh2.vertex_position(*v2)[1] == 0.0).unwrap();
 
-        let result = mesh1.find_face_edge_intersections(face_id, &mesh2, edge_id);
-        assert_eq!(result, Some((Intersection { id1: Primitive::Face(face_id), id2: Primitive::Vertex(edge_id.0), point: vec3(0.1, 0.0, 0.1) },
-                                 Some(Intersection { id1: Primitive::Face(face_id), id2: Primitive::Vertex(edge_id.1), point: vec3(0.2, 0.0, 0.2) }))));
+        let result = mesh1.face_edge_intersection(face_id, &mesh2, edge_id);
+        let point0 = vec3(0.1, 0.0, 0.1);
+        let point1 = vec3(0.2, 0.0, 0.2);
+        assert_eq!(result, Some((Intersection::LinePiece { primitive: Primitive::Face(face_id), point0, point1 },
+                                 Intersection::LinePiece { primitive: Primitive::Edge(edge_id), point0, point1 })));
     }
 
     #[test]
-    fn test_find_face_edge_intersection_one_vertex_face_intersection_edge_in_plane()
+    fn test_face_edge_intersection_when_face_edge_intersects_at_point_and_edge_is_in_plane()
     {
         let mesh1 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]).build().unwrap();
         let mesh2 = MeshBuilder::new().with_indices((0..3).collect()).with_positions(vec![0.1, 0.0, 0.1, 1.2, 0.0, 0.2, 1.0, 1.0, 0.0]).build().unwrap();
@@ -349,8 +339,10 @@ mod tests {
         let face_id = mesh1.face_iter().next().unwrap();
         let edge_id = mesh2.edge_iter().map(|halfedge_id| mesh2.ordered_edge_vertices(halfedge_id)).find(|(v1, v2)| mesh2.vertex_position(*v1)[1] == 0.0 && mesh2.vertex_position(*v2)[1] == 0.0).unwrap();
 
-        let result = mesh1.find_face_edge_intersections( face_id, &mesh2, edge_id);
-        assert_eq!(result, Some((Intersection { id1: Primitive::Face(face_id), id2: Primitive::Vertex(edge_id.0), point: vec3(0.1, 0.0, 0.1) }, None)));
+        let result = mesh1.face_edge_intersection(face_id, &mesh2, edge_id);
+        let point = vec3(0.1, 0.0, 0.1);
+        assert_eq!(result, Some((Intersection::Point { primitive: Primitive::Face(face_id), point },
+                                 Intersection::Point { primitive: Primitive::Vertex(edge_id.0), point })));
     }
 }
 
