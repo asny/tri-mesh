@@ -80,7 +80,7 @@ pub enum Error {
 /// - [Quality functionality](#quality-functionality)
 /// - [Orientation functionality](#orientation-functionality)
 /// - [Transformations](#transformations)
-/// - [Collision detection](#collision-detection)
+/// - [Intersection](#intersection)
 /// - [Merging & splitting](#merging--splitting)
 /// - [Export functionality](#export-functionality)
 /// - [Validity](#validity)
