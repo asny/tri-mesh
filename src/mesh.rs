@@ -33,7 +33,7 @@ pub mod edit;
 pub mod quality;
 pub mod orientation;
 pub mod transformations;
-pub mod collision;
+pub mod intersection;
 pub mod merging_and_splitting;
 pub mod export;
 pub mod validity;

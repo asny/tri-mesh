@@ -1,6 +1,6 @@
 
 use crate::prelude::*;
-use crate::mesh::collision::utility::*;
+use crate::mesh::intersection::utility::*;
 
 ///
 /// An enum describing the types of primitives.
