@@ -99,10 +99,8 @@ impl MeshBuilder {
 
     pub fn with_obj(mut self, source: String) -> Self
     {
-        if self.positions.is_none() { self.positions = Some(Vec::new()); }
-        let positions = self.positions.as_mut().unwrap();
-        if self.indices.is_none() { self.indices = Some(Vec::new()); }
-        let indices = self.indices.as_mut().unwrap();
+        let mut positions = Vec::new();
+        let mut indices = Vec::new();
 
         let objs = wavefront_obj::obj::parse(source).unwrap().objects;
         for obj in objs.iter()
@@ -125,6 +123,8 @@ impl MeshBuilder {
                 }
             }
         }
+        self.positions = Some(positions);
+        self.indices = Some(indices);
         self
     }
 
