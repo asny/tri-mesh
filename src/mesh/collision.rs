@@ -32,38 +32,24 @@ pub enum Intersection
 /// # Intersection
 impl Mesh
 {
-    /*pub fn ray_intersection(&self, point: &Vec3, direction: &Vec3) -> Intersection
+    pub fn ray_intersection(&self, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<Intersection>
     {
         let mut current: Option<Intersection> = None;
         for face_id in self.face_iter() {
-            if let Some(intersection) = self.face_line_piece_intersection(face_id, point, &(point + direction * 100.0))
+            let new_intersection = self.face_ray_intersection(face_id, ray_start_point, ray_direction);
+            if let Some(Intersection::Point {primitive, point}) = new_intersection
             {
-                if let Some(ref mut c) = current {
-                    if c.point.distance2(*point) > intersection.point.distance2(*point) {
-                        *c = intersection;
+                let new_point = point;
+                if let Some(Intersection::Point {primitive, point}) = current {
+                    if point.distance2(*ray_start_point) > new_point.distance2(*ray_start_point) {
+                        current = new_intersection;
                     }
                 }
-                else {
-                    current = Some(intersection);
-                }
+                else {current = new_intersection;}
             }
         }
-        if let Some(intersection) = current {
-            match intersection.id {
-                Primitive::Face(face_id) => {
-                    let vertex_id = self.walker_from_face(face_id).vertex_id().unwrap();
-                    return Some((vertex_id, intersection.point));
-                },
-                Primitive::Edge((vertex_id, _)) => {
-                    return Some((vertex_id, intersection.point));
-                },
-                Primitive::Vertex(vertex_id) => {
-                    return Some((vertex_id, intersection.point));
-                }
-            }
-        }
-        None
-    }*/
+        current
+    }
 
     pub fn face_edge_intersection(&self, face_id: FaceID, other: &Mesh, edge: (VertexID, VertexID)) -> Option<(Intersection, Intersection)>
     {
@@ -80,6 +66,17 @@ impl Mesh
                         (intersection, Intersection::LinePiece {primitive: Primitive::Edge(edge), point0: *p0, point1: *p1})
                     }
                 }
+            })
+    }
+
+    pub fn face_ray_intersection(&self, face_id: FaceID, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<Intersection>
+    {
+        let p = self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
+        let n = self.face_normal(face_id);
+
+        plane_ray_intersection(ray_start_point, ray_direction, &p, &n)
+            .and_then(|parameter| {
+                self.face_point_intersection_when_point_in_plane(face_id, &(ray_start_point + parameter * ray_direction))
             })
     }
 
@@ -391,6 +388,19 @@ mod utility {
         }
     }
 
+    pub fn plane_ray_intersection(ray_start_point: &Vec3, ray_direction: &Vec3, plane_point: &Vec3, plane_normal: &Vec3) -> Option<f32>
+    {
+        let denom = plane_normal.dot( *ray_direction);
+        if denom.abs() >= MARGIN {
+            let parameter = plane_normal.dot(plane_point - ray_start_point) / denom;
+            if parameter >= 0.0 { Some(parameter) }
+            else {None}
+        }
+        else {
+            None
+        }
+    }
+
     // Compute barycentric coordinates (u, v, w) for
     // point p with respect to triangle (a, b, c)
     pub fn barycentric(p: &Vec3, a: &Vec3, b: &Vec3, c: &Vec3) -> (f32, f32, f32)
@@ -429,6 +439,45 @@ mod utility {
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_plane_ray_intersection_no_intersection()
+        {
+            let p = vec3(1.0, 1.0, 1.0);
+            let n = vec3(0.0, 0.0, -1.0);
+
+            let p0 = vec3(0.0, 0.0, 0.0);
+            let dir = vec3(1.0, 0.0, 0.0);
+
+            let result = plane_ray_intersection(&p0, &dir, &p, &n);
+            assert_eq!(result, None);
+        }
+
+        #[test]
+        fn test_plane_ray_intersection_point_in_plane()
+        {
+            let p = vec3(1.0, 1.0, 1.0);
+            let n = vec3(0.0, 0.0, -1.0);
+
+            let p0 = vec3(0.0, 0.0, 1.0);
+            let dir = vec3(0.0, 1.0,1.0);
+
+            let result = plane_ray_intersection(&p0, &dir, &p, &n);
+            assert_eq!(result, Some(0.0));
+        }
+
+        #[test]
+        fn test_plane_ray_intersection_intersection()
+        {
+            let p = vec3(1.0, 1.0, 1.0);
+            let n = vec3(0.0, 0.0, -1.0);
+
+            let p0 = vec3(0.0, 1.0, 0.0);
+            let dir = vec3(0.0, 0.0, 1.0);
+
+            let result = plane_ray_intersection(&p0, &dir, &p, &n);
+            assert_eq!(result, Some(1.0));
+        }
 
         #[test]
         fn test_plane_line_piece_intersection_no_intersection()

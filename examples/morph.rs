@@ -106,8 +106,19 @@ fn main() {
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
                             let dir = camera.view_direction_at((x, y));
-                            if let Some(intersection) = mesh.ray_intersection(&p, &dir) {
-                                current_pick = Some(intersection);
+                            if let Some(Intersection::Point {primitive, point}) = mesh.ray_intersection(&p, &dir) {
+                                current_pick = match primitive {
+                                    Primitive::Face(face_id) => {
+                                        let vertex_id = mesh.walker_from_face(face_id).vertex_id().unwrap();
+                                        Some((vertex_id, point))
+                                    },
+                                    Primitive::Edge((vertex_id, _)) => {
+                                        Some((vertex_id, point))
+                                    },
+                                    Primitive::Vertex(vertex_id) => {
+                                        Some((vertex_id, point))
+                                    }
+                                }
                             }
                             else {
                                 camera_handler.start_rotation();
