@@ -1,3 +1,4 @@
+//! See [Mesh](crate::mesh::Mesh).
 
 use crate::prelude::*;
 use crate::mesh::intersection::utility::*;
@@ -23,14 +24,14 @@ pub enum Intersection
 {
     /// The intersection occurs at a single point
     Point {
-        /// The primitive, vertex, edge or face, that is intersected
+        /// The [primitive](crate::mesh::intersection::Primitive), vertex, edge or face, that is intersected
         primitive: Primitive,
         /// The point where the intersection occurs
         point: Vec3
     },
     /// The intersection occurs at a line piece interval
     LinePiece {
-        /// The primitive, vertex, edge or face, that is intersected
+        /// The [primitive](crate::mesh::intersection::Primitive), vertex, edge or face, that is intersected
         primitive: Primitive,
         /// The first point of the line piece where the intersection occurs
         point0: Vec3,
@@ -42,6 +43,11 @@ pub enum Intersection
 /// # Intersection
 impl Mesh
 {
+    ///
+    /// Find the [intersection](crate::mesh::intersection::Intersection) between any face in the mesh and the given ray.
+    /// If the ray intersects multiple faces, the face closest to the starting point in the direction of the ray is returned.
+    /// If no faces are intersected, None is returned.
+    ///
     pub fn ray_intersection(&self, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<Intersection>
     {
         let mut current: Option<Intersection> = None;
@@ -61,6 +67,13 @@ impl Mesh
         current
     }
 
+    ///
+    /// If the given face (belonging to `self`) and edge (belonging to the `other` mesh) intersects,
+    /// a pair of [intersections](crate::mesh::intersection::Intersection) are returned, one for `self` and one for the `other` mesh.
+    /// The returned intersections are either both of type [point](crate::mesh::intersection::Intersection::Point)
+    /// or [line piece](crate::mesh::intersection::Intersection::LinePiece) depending on the type of intersection.
+    /// If the face and edge does not intersect, None is returned.
+    ///
     pub fn face_edge_intersection(&self, face_id: FaceID, other: &Mesh, edge: (VertexID, VertexID)) -> Option<(Intersection, Intersection)>
     {
         let p0 = other.vertex_position(edge.0);
@@ -79,6 +92,10 @@ impl Mesh
             })
     }
 
+    ///
+    /// Find the [intersection](crate::mesh::intersection::Intersection) between the given face and ray.
+    /// If the face is not intersected by the ray, None is returned.
+    ///
     pub fn face_ray_intersection(&self, face_id: FaceID, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<Intersection>
     {
         let p = self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
@@ -90,6 +107,10 @@ impl Mesh
             })
     }
 
+    ///
+    /// Find the [intersection](crate::mesh::intersection::Intersection) between the given face and line piece.
+    /// If the face is not intersected by the line piece, None is returned.
+    ///
     pub fn face_line_piece_intersection(&self, face_id: FaceID, point0: &Vec3, point1: &Vec3) -> Option<Intersection>
     {
         let p = self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
@@ -126,7 +147,10 @@ impl Mesh
         })
     }
 
-    /// Returns the vertex primitive if the point is close, otherwise None.
+    ///
+    /// Find the [intersection](crate::mesh::intersection::Intersection) between the given vertex and the point.
+    /// If the vertex is not close to the point, None is returned.
+    ///
     pub fn vertex_point_intersection(&self, vertex_id: VertexID, point: &Vec3) -> Option<Intersection>
     {
         let p = self.vertex_position(vertex_id);
@@ -139,7 +163,10 @@ impl Mesh
         }
     }
 
-    // Returns the vertex or edge primitive (tests are made in that order) if the point is close to either, otherwise None.
+    ///
+    /// Find the [intersection](crate::mesh::intersection::Intersection) (the primitive is either a vertex or edge) between the given edge and the point.
+    /// If the edge is not close to the point, None is returned.
+    ///
     pub fn edge_point_intersection(&self, edge: (VertexID, VertexID), point: &Vec3) -> Option<Intersection>
     {
         self.vertex_point_intersection(edge.0, point)
@@ -153,7 +180,10 @@ impl Mesh
             })
     }
 
-    // Returns the vertex, edge or face primitive (tests are made in that order) if the point is close to either, otherwise None.
+    ///
+    /// Find the [intersection](crate::mesh::intersection::Intersection) (the primitive is either a vertex, edge or face) between the given face and the point.
+    /// If the face is not close to the point, None is returned.
+    ///
     pub fn face_point_intersection(&self, face_id: FaceID, point: &Vec3) -> Option<Intersection>
     {
         let p = *self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
@@ -164,7 +194,7 @@ impl Mesh
         self.face_point_intersection_when_point_in_plane(face_id, point)
     }
 
-    // Assumes that the point lies in the plane spanned by the face
+    /// Assumes that the point lies in the plane spanned by the face
     fn face_point_intersection_when_point_in_plane(&self, face_id: FaceID, point: &Vec3) -> Option<Intersection>
     {
         let face_vertices = self.ordered_face_vertices(face_id);

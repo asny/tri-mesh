@@ -89,7 +89,7 @@ impl MeshBuilder {
     }
 
     ///
-    /// Parses the .obj file and extracts the connectivity information (indices) and positions which is used to construct a mesh.
+    /// Parses the .obj file and extracts the connectivity information (indices) and positions which is used to construct a mesh when the `build` method is called.
     /// If the .obj file contains multiple objects, all objects are added to the mesh, but they will not be connected.
     ///
     /// # Examples
