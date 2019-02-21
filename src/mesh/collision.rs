@@ -15,16 +15,26 @@ pub enum Primitive {
     Face(FaceID)
 }
 
+///
+/// An enum describing the types of intersections.
+///
 #[derive(Debug, Clone, PartialEq)]
 pub enum Intersection
 {
+    /// The intersection occurs at a single point
     Point {
+        /// The primitive, vertex, edge or face, that is intersected
         primitive: Primitive,
+        /// The point where the intersection occurs
         point: Vec3
     },
+    /// The intersection occurs at a line piece interval
     LinePiece {
+        /// The primitive, vertex, edge or face, that is intersected
         primitive: Primitive,
+        /// The first point of the line piece where the intersection occurs
         point0: Vec3,
+        /// The second point of the line piece where the intersection occurs
         point1: Vec3
     }
 }
@@ -37,10 +47,10 @@ impl Mesh
         let mut current: Option<Intersection> = None;
         for face_id in self.face_iter() {
             let new_intersection = self.face_ray_intersection(face_id, ray_start_point, ray_direction);
-            if let Some(Intersection::Point {primitive, point}) = new_intersection
+            if let Some(Intersection::Point { point, ..}) = new_intersection
             {
                 let new_point = point;
-                if let Some(Intersection::Point {primitive, point}) = current {
+                if let Some(Intersection::Point {point, ..}) = current {
                     if point.distance2(*ray_start_point) > new_point.distance2(*ray_start_point) {
                         current = new_intersection;
                     }
@@ -116,7 +126,7 @@ impl Mesh
         })
     }
 
-    /// Returns the vertex primitive if the point is close to the vertex, otherwise None.
+    /// Returns the vertex primitive if the point is close, otherwise None.
     pub fn vertex_point_intersection(&self, vertex_id: VertexID, point: &Vec3) -> Option<Intersection>
     {
         let p = self.vertex_position(vertex_id);
@@ -129,7 +139,7 @@ impl Mesh
         }
     }
 
-    // Returns the vertex or edge primitive (in that order) if the point is close to either, otherwise None.
+    // Returns the vertex or edge primitive (tests are made in that order) if the point is close to either, otherwise None.
     pub fn edge_point_intersection(&self, edge: (VertexID, VertexID), point: &Vec3) -> Option<Intersection>
     {
         self.vertex_point_intersection(edge.0, point)
@@ -143,7 +153,7 @@ impl Mesh
             })
     }
 
-    // Returns the vertex, edge or face primitive (in that order) if the point is close to either, otherwise None.
+    // Returns the vertex, edge or face primitive (tests are made in that order) if the point is close to either, otherwise None.
     pub fn face_point_intersection(&self, face_id: FaceID, point: &Vec3) -> Option<Intersection>
     {
         let p = *self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
