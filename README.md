@@ -26,6 +26,7 @@ tri-mesh = "0.1.2"
 - Quality functionality (e.g. flip edges recursively to improve triangle quality, collapse small faces)
 - Orientation functionality (e.g. flip orientation of all faces)
 - Transformations affecting the vertex positions (e.g. moving a single vertex or rotate the entire mesh)
+- Intersection functionality (e.g. ray-face intersection, face-edge intersection)
 - Merging and splitting used for high level merging and splitting of entire meshes (e.g. clone a subset of a mesh or merge overlapping primitives)
 
 Please, see the [documentation](https://docs.rs/tri-mesh) for more details.
