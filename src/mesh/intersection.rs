@@ -88,6 +88,8 @@ impl Mesh
     /// Find the [intersection](crate::mesh::intersection::Intersection) between the given face and line piece.
     /// If the face is not intersected by the line piece, None is returned.
     ///
+    /// Note: Intersections, where the line piece is in the plane spanned by the face, are not yet fully handled.
+    ///
     pub fn face_line_piece_intersection(&self, face_id: FaceID, point0: &Vec3, point1: &Vec3) -> Option<Intersection>
     {
         let p = self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
