@@ -44,40 +44,27 @@ fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -
         let x = sqr_distance / SQR_MAX_DISTANCE;
         1.0 - x*x*(3.0 - 2.0 * x)
     };
-    
+
     let mut weights = HashMap::new();
-    visit_vertices(mesh, start_vertex_id, &mut |mesh, vertex_id| {
-        let d = start_point.distance2(*mesh.vertex_position(vertex_id));
-
-        if d < SQR_MAX_DISTANCE
-        {
-            weights.insert(vertex_id, weight_function(d) * mesh.vertex_normal(vertex_id));
-            true
-        }
-        else {false}
-    });
-    weights
-}
-
-fn visit_vertices(mesh: &Mesh, start_vertex_id: VertexID, callback: &mut FnMut(&Mesh, VertexID) -> bool)
-{
-    let mut component = std::collections::HashSet::new();
-    component.insert(start_vertex_id);
     let mut to_be_tested = vec![start_vertex_id];
-    while let Some(test_id) = to_be_tested.pop()
+    while let Some(vertex_id) = to_be_tested.pop()
     {
-        if callback(mesh, test_id)
+        let sqr_distance = start_point.distance2(*mesh.vertex_position(vertex_id));
+        if sqr_distance < SQR_MAX_DISTANCE
         {
-            for halfedge_id in mesh.vertex_halfedge_iter(test_id)
+            weights.insert(vertex_id, weight_function(sqr_distance) * mesh.vertex_normal(vertex_id));
+
+            // Add neighbouring vertices to be tested if they have not been visited yet
+            for halfedge_id in mesh.vertex_halfedge_iter(vertex_id)
             {
-                let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
-                if !component.contains(&vertex_id) {
-                    to_be_tested.push(vertex_id);
-                    component.insert(vertex_id);
+                let neighbour_vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
+                if !weights.contains_key(&neighbour_vertex_id) {
+                    to_be_tested.push(neighbour_vertex_id);
                 }
             }
         }
     }
+    weights
 }
 
 fn morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f32)
