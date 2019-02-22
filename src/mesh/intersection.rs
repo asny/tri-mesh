@@ -174,32 +174,21 @@ impl Mesh
     /// Assumes that the point lies in the plane spanned by the face
     fn face_point_intersection_when_point_in_plane(&self, face_id: FaceID, point: &Vec3) -> Option<Intersection>
     {
-        let face_vertices = self.ordered_face_vertices(face_id);
-        let v0 = face_vertices.0;
-        let v1 = face_vertices.1;
-        let v2 = face_vertices.2;
-
-        let a = self.vertex_position(v0);
-        let b = self.vertex_position(v1);
-        let c = self.vertex_position(v2);
-
-        // Test if the point is located at one of the vertices
-        if (*a - *point).magnitude2() < SQR_MARGIN { return Some(Intersection::Point {primitive: Primitive::Vertex(v0), point: *point}); }
-        if (*b - *point).magnitude2() < SQR_MARGIN { return Some(Intersection::Point {primitive: Primitive::Vertex(v1), point: *point}); }
-        if (*c - *point).magnitude2() < SQR_MARGIN { return Some(Intersection::Point {primitive: Primitive::Vertex(v2), point: *point}); }
-
-        // Test if the point is located at one of the edges
-        if point_line_segment_distance(point, a, b) < MARGIN { return Some(Intersection::Point {primitive: Primitive::Edge((v0, v1)), point: *point}); }
-        if point_line_segment_distance(point, b, c) < MARGIN { return Some(Intersection::Point {primitive: Primitive::Edge((v1, v2)), point: *point}); }
-        if point_line_segment_distance(point, a, c) < MARGIN { return Some(Intersection::Point {primitive: Primitive::Edge((v0, v2)), point: *point}); }
+        // Test whether the intersection point is located at the edges or vertices of the face
+        for halfedge_id in self.face_halfedge_iter(face_id) {
+            if let Some(intersection) = self.edge_point_intersection(self.ordered_edge_vertices(halfedge_id), point) {
+                return Some(intersection);
+            }
+        }
 
         // Test whether the intersection point is located inside the face
+        let (a, b, c) = self.face_positions(face_id);
         let coords = barycentric(point, a, b, c);
         if 0.0 < coords.0 && coords.0 < 1.0 && 0.0 < coords.1 && coords.1 < 1.0 && 0.0 < coords.2 && coords.2 < 1.0
         {
-            return Some(Intersection::Point {primitive: Primitive::Face(face_id), point: *point});
+            Some(Intersection::Point {primitive: Primitive::Face(face_id), point: *point})
         }
-        None
+        else {None}
     }
 }
 
