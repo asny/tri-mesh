@@ -1,20 +1,101 @@
 
+use tri_mesh::prelude::*;
+use tri_mesh::prelude::Vec3 as Vec3;
+use tri_mesh::prelude::vec3 as vec3;
+use tri_mesh::prelude::vec4 as vec4;
+
+fn construct_mesh(scene_center: &Vec3, scene_radius: f32) -> Mesh {
+
+    let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
+    let (min, max) = mesh.extreme_coordinates();
+    let center = 0.5 * (max + min);
+    mesh.translate(-center);
+    let size = max - min;
+    let max_dim = size.x.max(size.y).max(size.z);
+    mesh.scale(0.5 * scene_radius / max_dim);
+    mesh.translate(*scene_center);
+    mesh
+}
+
+fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(VertexID, Vec3)>
+{
+    if let Some(Intersection::Point {primitive, point}) = mesh.ray_intersection(ray_start_point, ray_direction) {
+        match primitive {
+            Primitive::Face(face_id) => {
+                let vertex_id = mesh.walker_from_face(face_id).vertex_id().unwrap();
+                return Some((vertex_id, point));
+            },
+            Primitive::Edge((vertex_id, _)) => {
+                return Some((vertex_id, point));
+            },
+            Primitive::Vertex(vertex_id) => {
+                return Some((vertex_id, point));
+            }
+        }
+    }
+    None
+}
+
+fn morph(mesh: &mut Mesh, vertex_id: VertexID, point: Vec3, factor: f64)
+{
+    let max_distance = 1.0;
+    visit_vertices(mesh, vertex_id, &mut |mesh, vertex_id| {
+        let d = point.distance2(*mesh.vertex_position(vertex_id));
+
+        if d < max_distance * max_distance
+        {
+            mesh.move_vertex_by(vertex_id,weight(d, max_distance * max_distance) * factor as f32 * mesh.vertex_normal(vertex_id));
+            return true;
+        }
+        false
+    });
+}
+
+fn weight(distance: f32, max_distance: f32) -> f32
+{
+    let x = distance / max_distance;
+    1.0 - x*x*(3.0 - 2.0 * x)
+}
+
+fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnMut(&mut Mesh, VertexID) -> bool)
+{
+    let mut component = std::collections::HashSet::new();
+    component.insert(start_vertex_id);
+    let mut to_be_tested = vec![start_vertex_id];
+    while let Some(test_id) = to_be_tested.pop()
+    {
+        if callback(mesh, test_id)
+        {
+            for halfedge_id in mesh.vertex_halfedge_iter(test_id)
+            {
+                let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
+                if !component.contains(&vertex_id) {
+                    to_be_tested.push(vertex_id);
+                    component.insert(vertex_id);
+                }
+            }
+        }
+    }
+}
+
+///
+/// Above: Everything related to tri-mesh
+/// Below: Visualisation of the mesh, event handling and so on
+///
 use dust::*;
 use dust::objects::*;
 use dust::window::{event::*, Window};
-use tri_mesh::prelude::*;
-use dust::Vec3 as Vec3;
-use dust::vec3 as vec3;
-use dust::vec4 as vec4;
 
-fn main() {
+fn main()
+{
+    let scene_radius = 10.0;
+    let scene_center = vec3(0.0, 5.0, 0.0);
+    let mut mesh = construct_mesh(&scene_center, scene_radius);
+
     let mut window = Window::new_default("Morph tool").unwrap();
     let (framebuffer_width, framebuffer_height) = window.framebuffer_size();
     let window_size = window.size();
     let gl = window.gl();
-
-    let scene_radius = 10.0;
-    let scene_center = vec3(0.0, 5.0, 0.0);
 
     // Renderer
     let renderer = DeferredPipeline::new(&gl, framebuffer_width, framebuffer_height, true, vec4(0.8, 0.8, 0.8, 1.0)).unwrap();
@@ -24,15 +105,6 @@ fn main() {
                                                     vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
 
     // Objects
-    let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
-    let (min, max) = mesh.extreme_coordinates();
-    let center = 0.5 * (max + min);
-    mesh.translate(-center);
-    let size = max - min;
-    let max_dim = size.x.max(size.y).max(size.z);
-    mesh.scale(0.5 * scene_radius / max_dim);
-    mesh.translate(scene_center);
-
     let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
     model.color = vec3(0.8, 0.8, 0.8);
 
@@ -56,7 +128,7 @@ fn main() {
         0, 2, 1,
         0, 3, 2,
     ];
-    let mut plane = crate::objects::ShadedMesh::new(&gl, &plane_indices, &att!["position" => (plane_positions, 3), "normal" => (plane_normals, 3)]).unwrap();
+    let mut plane = ShadedMesh::new(&gl, &plane_indices, &att!["position" => (plane_positions, 3), "normal" => (plane_normals, 3)]).unwrap();
     plane.diffuse_intensity = 0.2;
     plane.specular_intensity = 0.4;
     plane.specular_power = 20.0;
@@ -106,19 +178,8 @@ fn main() {
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
                             let dir = camera.view_direction_at((x, y));
-                            if let Some(Intersection::Point {primitive, point}) = mesh.ray_intersection(&p, &dir) {
-                                current_pick = match primitive {
-                                    Primitive::Face(face_id) => {
-                                        let vertex_id = mesh.walker_from_face(face_id).vertex_id().unwrap();
-                                        Some((vertex_id, point))
-                                    },
-                                    Primitive::Edge((vertex_id, _)) => {
-                                        Some((vertex_id, point))
-                                    },
-                                    Primitive::Vertex(vertex_id) => {
-                                        Some((vertex_id, point))
-                                    }
-                                }
+                            if let Some(pick) = pick(&mesh,&p, &dir) {
+                                current_pick = Some(pick);
                             }
                             else {
                                 camera_handler.start_rotation();
@@ -180,46 +241,4 @@ fn main() {
 
         renderer.copy_to_screen().unwrap();
     }).unwrap();
-}
-
-fn morph(mesh: &mut Mesh, vertex_id: VertexID, point: Vec3, factor: f64)
-{
-    let max_distance = 1.0;
-    visit_vertices(mesh, vertex_id, &mut |mesh, vertex_id| {
-        let d = point.distance2(*mesh.vertex_position(vertex_id));
-
-        if d < max_distance * max_distance
-        {
-            mesh.move_vertex_by(vertex_id,weight(d, max_distance * max_distance) * factor as f32 * mesh.vertex_normal(vertex_id));
-            return true;
-        }
-        false
-    });
-}
-
-fn weight(distance: f32, max_distance: f32) -> f32
-{
-    let x = distance / max_distance;
-    1.0 - x*x*(3.0 - 2.0 * x)
-}
-
-fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnMut(&mut Mesh, VertexID) -> bool)
-{
-    let mut component = std::collections::HashSet::new();
-    component.insert(start_vertex_id);
-    let mut to_be_tested = vec![start_vertex_id];
-    while let Some(test_id) = to_be_tested.pop()
-    {
-        if callback(mesh, test_id)
-        {
-            for halfedge_id in mesh.vertex_halfedge_iter(test_id)
-            {
-                let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
-                if !component.contains(&vertex_id) {
-                    to_be_tested.push(vertex_id);
-                    component.insert(vertex_id);
-                }
-            }
-        }
-    }
 }
