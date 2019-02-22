@@ -40,24 +40,23 @@ fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(Ve
 fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -> HashMap<VertexID, Vec3>
 {
     static SQR_MAX_DISTANCE: f32 = 1.0;
+    let weight_function = |sqr_distance| {
+        let x = sqr_distance / SQR_MAX_DISTANCE;
+        1.0 - x*x*(3.0 - 2.0 * x)
+    };
+    
     let mut weights = HashMap::new();
     visit_vertices(mesh, start_vertex_id, &mut |mesh, vertex_id| {
         let d = start_point.distance2(*mesh.vertex_position(vertex_id));
 
         if d < SQR_MAX_DISTANCE
         {
-            weights.insert(vertex_id, weight(d, SQR_MAX_DISTANCE) * mesh.vertex_normal(vertex_id));
+            weights.insert(vertex_id, weight_function(d) * mesh.vertex_normal(vertex_id));
             true
         }
         else {false}
     });
     weights
-}
-
-fn weight(distance: f32, max_distance: f32) -> f32
-{
-    let x = distance / max_distance;
-    1.0 - x*x*(3.0 - 2.0 * x)
 }
 
 fn visit_vertices(mesh: &Mesh, start_vertex_id: VertexID, callback: &mut FnMut(&Mesh, VertexID) -> bool)
