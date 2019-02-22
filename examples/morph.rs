@@ -5,6 +5,7 @@ use tri_mesh::prelude::vec3 as vec3;
 use tri_mesh::prelude::vec4 as vec4;
 use std::collections::HashMap;
 
+/// Loads the mesh and scale/translate it.
 fn construct_mesh(scene_center: &Vec3, scene_radius: f32) -> Mesh
 {
     let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
@@ -18,6 +19,7 @@ fn construct_mesh(scene_center: &Vec3, scene_radius: f32) -> Mesh
     mesh
 }
 
+/// Picking used for determining whether a mouse click starts a morph operation. Returns a close vertex and the position of the click.
 fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(VertexID, Vec3)>
 {
     if let Some(Intersection::Point {primitive, point}) = mesh.ray_intersection(ray_start_point, ray_direction) {
@@ -37,6 +39,7 @@ fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(Ve
     else {None}
 }
 
+/// Compute a weight for each vertex to be used for the morph operation. This is called when a picking occurs.
 fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -> HashMap<VertexID, Vec3>
 {
     static SQR_MAX_DISTANCE: f32 = 1.0;
@@ -67,6 +70,7 @@ fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -
     weights
 }
 
+/// Morphs the vertices based on the computed weights.
 fn morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f32)
 {
     for (vertex_id, weight) in weights.iter() {
