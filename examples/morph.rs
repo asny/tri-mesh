@@ -3,9 +3,10 @@ use tri_mesh::prelude::*;
 use tri_mesh::prelude::Vec3 as Vec3;
 use tri_mesh::prelude::vec3 as vec3;
 use tri_mesh::prelude::vec4 as vec4;
+use std::collections::HashMap;
 
-fn construct_mesh(scene_center: &Vec3, scene_radius: f32) -> Mesh {
-
+fn construct_mesh(scene_center: &Vec3, scene_radius: f32) -> Mesh
+{
     let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
     let (min, max) = mesh.extreme_coordinates();
     let center = 0.5 * (max + min);
@@ -20,35 +21,37 @@ fn construct_mesh(scene_center: &Vec3, scene_radius: f32) -> Mesh {
 fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(VertexID, Vec3)>
 {
     if let Some(Intersection::Point {primitive, point}) = mesh.ray_intersection(ray_start_point, ray_direction) {
-        match primitive {
+        let start_vertex_id = match primitive {
             Primitive::Face(face_id) => {
-                let vertex_id = mesh.walker_from_face(face_id).vertex_id().unwrap();
-                return Some((vertex_id, point));
+                mesh.walker_from_face(face_id).vertex_id().unwrap()
             },
             Primitive::Edge((vertex_id, _)) => {
-                return Some((vertex_id, point));
+                vertex_id
             },
             Primitive::Vertex(vertex_id) => {
-                return Some((vertex_id, point));
+                vertex_id
             }
-        }
+        };
+        Some((start_vertex_id, point))
     }
-    None
+    else {None}
 }
 
-fn morph(mesh: &mut Mesh, vertex_id: VertexID, point: Vec3, factor: f64)
+fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -> HashMap<VertexID, Vec3>
 {
-    let max_distance = 1.0;
-    visit_vertices(mesh, vertex_id, &mut |mesh, vertex_id| {
-        let d = point.distance2(*mesh.vertex_position(vertex_id));
+    static SQR_MAX_DISTANCE: f32 = 1.0;
+    let mut weights = HashMap::new();
+    visit_vertices(mesh, start_vertex_id, &mut |mesh, vertex_id| {
+        let d = start_point.distance2(*mesh.vertex_position(vertex_id));
 
-        if d < max_distance * max_distance
+        if d < SQR_MAX_DISTANCE
         {
-            mesh.move_vertex_by(vertex_id,weight(d, max_distance * max_distance) * factor as f32 * mesh.vertex_normal(vertex_id));
-            return true;
+            weights.insert(vertex_id, weight(d, SQR_MAX_DISTANCE) * mesh.vertex_normal(vertex_id));
+            true
         }
-        false
+        else {false}
     });
+    weights
 }
 
 fn weight(distance: f32, max_distance: f32) -> f32
@@ -57,7 +60,7 @@ fn weight(distance: f32, max_distance: f32) -> f32
     1.0 - x*x*(3.0 - 2.0 * x)
 }
 
-fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnMut(&mut Mesh, VertexID) -> bool)
+fn visit_vertices(mesh: &Mesh, start_vertex_id: VertexID, callback: &mut FnMut(&Mesh, VertexID) -> bool)
 {
     let mut component = std::collections::HashSet::new();
     component.insert(start_vertex_id);
@@ -75,6 +78,13 @@ fn visit_vertices(mesh: &mut Mesh, start_vertex_id: VertexID, callback: &mut FnM
                 }
             }
         }
+    }
+}
+
+fn morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f32)
+{
+    for (vertex_id, weight) in weights.iter() {
+        mesh.move_vertex_by(*vertex_id,weight * factor);
     }
 }
 
@@ -158,7 +168,7 @@ fn main()
 
     let mut camera_handler = camerahandler::CameraHandler::new(camerahandler::CameraState::SPHERICAL);
 
-    let mut current_pick: Option<(VertexID, Vec3)> = None;
+    let mut weights: Option<HashMap<VertexID, Vec3>> = None;
     // main loop
     window.render_loop(move |events, _elapsed_time|
     {
@@ -178,15 +188,15 @@ fn main()
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
                             let dir = camera.view_direction_at((x, y));
-                            if let Some(pick) = pick(&mesh,&p, &dir) {
-                                current_pick = Some(pick);
+                            if let Some((vertex_id, point)) = pick(&mesh,&p, &dir) {
+                                weights = Some(compute_weights(&mesh, vertex_id, &point));
                             }
                             else {
                                 camera_handler.start_rotation();
                             }
                         }
                         else {
-                            current_pick = None;
+                            weights = None;
                             camera_handler.end_rotation()
                         }
                     }
@@ -196,9 +206,9 @@ fn main()
                 },
                 Event::MouseMotion {delta} => {
                     camera_handler.rotate(&mut camera, delta.0 as f32, delta.1 as f32);
-                    if let Some((vertex_id, point)) = current_pick
+                    if let Some(ref w) = weights
                     {
-                        morph(&mut mesh, vertex_id, point, 0.001 * delta.1);
+                        morph(&mut mesh, w, 0.001 * delta.1 as f32);
                         model.update_attributes(&att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
                         wireframe_model.update_positions(&mesh.positions_buffer());
                     }
