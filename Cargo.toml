@@ -15,4 +15,4 @@ cgmath = "0.16.1"
 wavefront_obj = "5.1.0"
 
 [dev-dependencies]
-dust = {git = "https://github.com/asny/Dust"}
+dust = {path = "examples/dust/"}
