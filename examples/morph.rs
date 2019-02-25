@@ -42,7 +42,8 @@ fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(Ve
             Primitive::Face(face_id) => {
                 mesh.walker_from_face(face_id).vertex_id().unwrap()
             },
-            Primitive::Edge((vertex_id, _)) => {
+            Primitive::Edge(halfedge_id) => {
+                let (vertex_id, ..) = mesh.edge_vertices(halfedge_id);
                 vertex_id
             },
             Primitive::Vertex(vertex_id) => {
