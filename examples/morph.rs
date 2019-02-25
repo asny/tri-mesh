@@ -6,7 +6,7 @@ use tri_mesh::prelude::vec4 as vec4;
 use std::collections::HashMap;
 
 /// Loads the mesh and scale/translate it.
-fn construct_mesh(scene_center: &Vec3, scene_radius: f32) -> Mesh
+fn on_startup(scene_center: &Vec3, scene_radius: f32) -> Mesh
 {
     let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
     let (min, max) = mesh.extreme_coordinates();
@@ -17,6 +17,15 @@ fn construct_mesh(scene_center: &Vec3, scene_radius: f32) -> Mesh
     mesh.scale(0.5 * scene_radius / max_dim);
     mesh.translate(*scene_center);
     mesh
+}
+
+/// When the user clicks, we see if the model is hit. If it is, we compute the morph weights from the picking point.
+fn on_click(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<HashMap<VertexID, Vec3>>
+{
+    if let Some((vertex_id, point)) = pick(&mesh,&ray_start_point, &ray_direction) {
+        Some(compute_weights(mesh, vertex_id, &point))
+    }
+    else {None}
 }
 
 /// Picking used for determining whether a mouse click starts a morph operation. Returns a close vertex and the position of the click.
@@ -71,7 +80,7 @@ fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -
 }
 
 /// Morphs the vertices based on the computed weights.
-fn morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f32)
+fn on_morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f32)
 {
     for (vertex_id, weight) in weights.iter() {
         mesh.move_vertex_by(*vertex_id,weight * factor);
@@ -90,7 +99,7 @@ fn main()
 {
     let scene_radius = 10.0;
     let scene_center = vec3(0.0, 5.0, 0.0);
-    let mut mesh = construct_mesh(&scene_center, scene_radius);
+    let mut mesh = on_startup(&scene_center, scene_radius);
 
     let mut window = Window::new_default("Morph tool").unwrap();
     let (framebuffer_width, framebuffer_height) = window.framebuffer_size();
@@ -178,10 +187,8 @@ fn main()
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
                             let dir = camera.view_direction_at((x, y));
-                            if let Some((vertex_id, point)) = pick(&mesh,&p, &dir) {
-                                weights = Some(compute_weights(&mesh, vertex_id, &point));
-                            }
-                            else {
+                            weights = on_click(&mesh,&p, &dir);
+                            if weights.is_none() {
                                 camera_handler.start_rotation();
                             }
                         }
@@ -198,7 +205,7 @@ fn main()
                     camera_handler.rotate(&mut camera, delta.0 as f32, delta.1 as f32);
                     if let Some(ref w) = weights
                     {
-                        morph(&mut mesh, w, 0.001 * delta.1 as f32);
+                        on_morph(&mut mesh, w, 0.001 * delta.1 as f32);
                         model.update_attributes(&att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
                         wireframe_model.update_positions(&mesh.positions_buffer());
                     }
