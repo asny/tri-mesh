@@ -33,48 +33,16 @@ Please, see the [documentation](https://docs.rs/tri-mesh) for more details.
 
 ## Usage
 
-### Example #1: Computing the bounding box
+### Example #1: Computing the vertex normals
 
 ```rust
 use tri_mesh::prelude::*;
 
 fn main() {
-    // Construct a mesh from positions and indices
-    let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
-    let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
-    let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
-    
-    // Compute the extreme coordinates which defines the axis aligned bounding box..
-    let mut min_coordinates = vec3(std::f32::MAX, std::f32::MAX, std::f32::MAX);
-    let mut max_coordinates = vec3(std::f32::MIN, std::f32::MIN, std::f32::MIN);
-    for vertex_id in mesh.vertex_iter()
-    {
-        let position = mesh.vertex_position(vertex_id);
-        for i in 0..3 {
-            min_coordinates[i] = min_coordinates[i].min(position[i]);
-            max_coordinates[i] = max_coordinates[i].max(position[i]);
-        }
-    }
-    
-    // .. or use the built-in method..
-    let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
-    
-    // .. or construct an actual mesh representing the axis aligned bounding box
-    let aabb = mesh.axis_aligned_bounding_box();
-    assert_eq!((min_coordinates, max_coordinates), aabb.extreme_coordinates());
-}
-```
-
-### Example #2: Computing the vertex normals
-
-```rust
-use tri_mesh::prelude::*;
-
-fn main() {
-    // Construct a cube mesh
+    // Construct any mesh, for simplicity, let's use a cube mesh
     let mesh = MeshBuilder::new().cube().build().unwrap();
     
-    // Get the indices and position buffer to be able to visualise the model..
+    // Let's say that we want to visualise this model, then we need the indices and position buffer..
     let indices = mesh.indices_buffer();
     let positions = mesh.positions_buffer();
     
@@ -107,6 +75,38 @@ fn main() {
     
     // .. or simply just use the built-in method
     let normals = mesh.normals_buffer();
+}
+```
+
+### Example #2: Computing the bounding box
+
+```rust
+use tri_mesh::prelude::*;
+
+fn main() {
+    // Construct any mesh, this time, we will construct a mesh from positions and indices
+    let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
+    let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
+    let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
+    
+    // Compute the extreme coordinates which defines the axis aligned bounding box..
+    let mut min_coordinates = vec3(std::f32::MAX, std::f32::MAX, std::f32::MAX);
+    let mut max_coordinates = vec3(std::f32::MIN, std::f32::MIN, std::f32::MIN);
+    for vertex_id in mesh.vertex_iter()
+    {
+        let position = mesh.vertex_position(vertex_id);
+        for i in 0..3 {
+            min_coordinates[i] = min_coordinates[i].min(position[i]);
+            max_coordinates[i] = max_coordinates[i].max(position[i]);
+        }
+    }
+    
+    // .. or use the built-in method..
+    let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
+    
+    // .. or construct an actual mesh representing the axis aligned bounding box
+    let aabb = mesh.axis_aligned_bounding_box();
+    assert_eq!((min_coordinates, max_coordinates), aabb.extreme_coordinates());
 }
 ```
 
