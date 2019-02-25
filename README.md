@@ -10,11 +10,13 @@ Why another triangle mesh data structure crate you might ask.
 Well, if you want a more feature complete crate than [half_edge_mesh](https://crates.io/crates/half_edge_mesh) and a less generic crate than [plexus](https://crates.io/crates/plexus),
 then `tri-mesh` is probably something for you!
 
-Check out this [morph tool](https://asny.github.io/morph-web/) [[source code](https://github.com/asny/tri-mesh/tree/master/examples/morph.rs)] for a live example of using this crate.
+Check out this [morph tool](https://asny.github.io/morph-web/) (and [source code](https://github.com/asny/tri-mesh/tree/master/examples/morph.rs)) for a live example of using this crate.
 
+## Usage
+Add the following to your `Cargo.toml`:
 ```toml
 [dependencies]
-tri-mesh = "0.1.2"
+tri-mesh = "0.2.0"
 ```
 
 ## Features
@@ -33,7 +35,7 @@ tri-mesh = "0.1.2"
 
 Please, see the [documentation](https://docs.rs/tri-mesh) for more details.
 
-## Usage
+## Examples
 
 ### Example #1: Computing the vertex normals
 

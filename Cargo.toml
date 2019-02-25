@@ -1,6 +1,6 @@
 [package]
 name = "tri-mesh"
-version = "0.1.2" # REMEMBER TO UPDATE VERSION IN README!!
+version = "0.2.0" # REMEMBER TO UPDATE VERSION IN README!!
 authors = ["Asger Nyman Christiansen <asgernyman@gmail.com>"]
 edition = "2018"
 description = "A triangle mesh data structure including basic operations."
