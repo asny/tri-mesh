@@ -10,6 +10,8 @@ Why another triangle mesh data structure crate you might ask.
 Well, if you want a more feature complete crate than [half_edge_mesh](https://crates.io/crates/half_edge_mesh) and a less generic crate than [plexus](https://crates.io/crates/plexus),
 then `tri-mesh` is probably something for you!
 
+Check out this [morph tool](https://asny.github.io/morph-web/) [[source code](https://github.com/asny/tri-mesh/tree/master/examples/morph.rs)] for a live example of using this crate.
+
 ```toml
 [dependencies]
 tri-mesh = "0.1.2"
