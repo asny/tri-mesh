@@ -10,12 +10,10 @@ fn on_startup(scene_center: &Vec3, scene_radius: f32) -> Mesh
 {
     let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
     let (min, max) = mesh.extreme_coordinates();
-    let center = 0.5 * (max + min);
-    mesh.translate(-center);
+    mesh.translate(-0.5 * (max + min)); // Translate such that the mesh center is in origo.
     let size = max - min;
-    let max_dim = size.x.max(size.y).max(size.z);
-    mesh.scale(0.5 * scene_radius / max_dim);
-    mesh.translate(*scene_center);
+    mesh.scale(0.5 * scene_radius / size.x.max(size.y).max(size.z)); // Scale the mesh such that the size of the biggest side of the bounding box is half a scene radius
+    mesh.translate(*scene_center); // Translate the mesh to the scene center
     mesh
 }
 
@@ -28,7 +26,15 @@ fn on_click(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option
     else {None}
 }
 
-/// Picking used for determining whether a mouse click starts a morph operation. Returns a close vertex and the position of the click.
+/// Morphs the vertices based on the computed weights.
+fn on_morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f32)
+{
+    for (vertex_id, weight) in weights.iter() {
+        mesh.move_vertex_by(*vertex_id,weight * factor);
+    }
+}
+
+/// Picking used for determining whether a mouse click starts a morph operation. Returns a close vertex and the position of the click on the mesh surface.
 fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(VertexID, Vec3)>
 {
     if let Some(Intersection::Point {primitive, point}) = mesh.ray_intersection(ray_start_point, ray_direction) {
@@ -48,15 +54,18 @@ fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(Ve
     else {None}
 }
 
-/// Compute a weight for each vertex to be used for the morph operation. This is called when a picking occurs.
+/// Compute a directional weight for each vertex to be used for the morph operation.
 fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -> HashMap<VertexID, Vec3>
 {
     static SQR_MAX_DISTANCE: f32 = 1.0;
-    let weight_function = |sqr_distance| {
+
+    // Use the smoothstep function to get a smooth morphing
+    let smoothstep_function = |sqr_distance| {
         let x = sqr_distance / SQR_MAX_DISTANCE;
         1.0 - x*x*(3.0 - 2.0 * x)
     };
 
+    // Visit all the vertices close to the start vertex.
     let mut weights = HashMap::new();
     let mut to_be_tested = vec![start_vertex_id];
     while let Some(vertex_id) = to_be_tested.pop()
@@ -64,7 +73,9 @@ fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -
         let sqr_distance = start_point.distance2(*mesh.vertex_position(vertex_id));
         if sqr_distance < SQR_MAX_DISTANCE
         {
-            weights.insert(vertex_id, weight_function(sqr_distance) * mesh.vertex_normal(vertex_id));
+            // The weight is computed as the smoothstep function to the square euclidean distance
+            // to the start point on the surface multiplied by the vertex normal.
+            weights.insert(vertex_id, smoothstep_function(sqr_distance) * mesh.vertex_normal(vertex_id));
 
             // Add neighbouring vertices to be tested if they have not been visited yet
             for halfedge_id in mesh.vertex_halfedge_iter(vertex_id)
@@ -77,14 +88,6 @@ fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -
         }
     }
     weights
-}
-
-/// Morphs the vertices based on the computed weights.
-fn on_morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f32)
-{
-    for (vertex_id, weight) in weights.iter() {
-        mesh.move_vertex_by(*vertex_id,weight * factor);
-    }
 }
 
 ///
