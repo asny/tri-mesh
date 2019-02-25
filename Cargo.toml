@@ -15,4 +15,4 @@ cgmath = "0.16.1"
 wavefront_obj = "5.1.0"
 
 [dev-dependencies]
-dust = {path = "examples/dust/"}
+dust = {path = "examples/dust/", version = "0.1.0"}
