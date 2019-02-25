@@ -28,11 +28,14 @@ pub mod connectivity;
 pub mod vertex_measures;
 pub mod edge_measures;
 pub mod face_measures;
+pub mod bounding_box;
 pub mod edit;
 pub mod quality;
 pub mod orientation;
 pub mod transformations;
+pub mod intersection;
 pub mod merging_and_splitting;
+pub mod export;
 pub mod validity;
 
 mod connectivity_info;
@@ -72,11 +75,14 @@ pub enum Error {
 /// - [Vertex measures](#vertex-measures)
 /// - [Edge measures](#edge-measures)
 /// - [Face measures](#face-measures)
+/// - [Bounding box functionality](#bounding-box-functionality)
 /// - [Edit functionality](#edit-functionality)
 /// - [Quality functionality](#quality-functionality)
 /// - [Orientation functionality](#orientation-functionality)
 /// - [Transformations](#transformations)
+/// - [Intersection](#intersection)
 /// - [Merging & splitting](#merging--splitting)
+/// - [Export functionality](#export-functionality)
 /// - [Validity](#validity)
 ///
 #[derive(Debug)]
@@ -161,98 +167,6 @@ impl Mesh
     pub fn no_faces(&self) -> usize
     {
         self.connectivity_info.no_faces()
-    }
-
-    ///
-    /// Returns the face indices in an array `(i0, i1, i2) = (indices[3*x], indices[3*x+1], indices[3*x+2])`.
-    /// ```
-    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
-    /// let indices = mesh.indices_buffer();
-    /// for i in 0..indices.len()/3
-    /// {
-    ///     println!("The indices of face {} is: ({}, {}, {})", i, indices[3*i], indices[3*i+1], indices[3*i+2]);
-    /// }
-    /// # assert_eq!(indices.len(), 36);
-    /// ```
-    ///
-    pub fn indices_buffer(&self) -> Vec<u32>
-    {
-        let vertices: Vec<VertexID> = self.vertex_iter().collect();
-        let mut indices = Vec::with_capacity(self.no_faces() * 3);
-        for face_id in self.face_iter()
-        {
-            for halfedge_id in self.face_halfedge_iter(face_id) {
-                let vertex_id = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
-                let index = vertices.iter().position(|v| v == &vertex_id).unwrap();
-                indices.push(index as u32);
-            }
-        }
-        indices
-    }
-
-    ///
-    /// Returns the positions of the vertices in an array.
-    ///
-    /// ```
-    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
-    /// let positions = mesh.positions_buffer();
-    /// for i in 0..positions.len()/3
-    /// {
-    ///     println!("The position of vertex with index {} is: ({}, {}, {})", i, positions[3*i], positions[3*i+1], positions[3*i+2]);
-    /// }
-    /// # assert_eq!(positions.len(), 24);
-    /// ```
-    ///
-    pub fn positions_buffer(&self) -> Vec<f32>
-    {
-        let mut positions = Vec::with_capacity(self.no_vertices() * 3);
-        for v3 in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
-            positions.push(v3.x); positions.push(v3.y); positions.push(v3.z);
-        }
-        positions
-    }
-
-
-    ///
-    /// Returns the normals of the vertices in an array.
-    /// Note: The normals are computed from the connectivity and positions each time this method is invoked.
-    ///
-    /// ```
-    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
-    /// let normals = mesh.normals_buffer();
-    /// for i in 0..normals.len()/3
-    /// {
-    ///     println!("The normal of vertex with index {} is: ({}, {}, {})", i, normals[3*i], normals[3*i+1], normals[3*i+2]);
-    /// }
-    /// # assert_eq!(normals.len(), 24);
-    /// ```
-    ///
-    pub fn normals_buffer(&self) -> Vec<f32>
-    {
-        let mut normals = Vec::with_capacity(self.no_vertices() * 3);
-        for vertex_id in self.vertex_iter() {
-            let normal = self.vertex_normal(vertex_id);
-            normals.push(normal.x);
-            normals.push(normal.y);
-            normals.push(normal.z);
-        }
-        normals
-    }
-
-    /// Returns minimum and maximum coordinates of the axis aligned bounding box of the mesh.
-    pub fn extreme_coordinates(&self) -> (Vec3, Vec3)
-    {
-        let mut min_coordinates = vec3(std::f32::MAX, std::f32::MAX, std::f32::MAX);
-        let mut max_coordinates = vec3(std::f32::MIN, std::f32::MIN, std::f32::MIN);
-        for vertex_id in self.vertex_iter()
-        {
-            let position = self.vertex_position(vertex_id);
-            for i in 0..3 {
-                min_coordinates[i] = min_coordinates[i].min(position[i]);
-                max_coordinates[i] = max_coordinates[i].max(position[i]);
-            }
-        }
-        (min_coordinates, max_coordinates)
     }
 
     fn create_vertex(&mut self, position: Vec3) -> VertexID
