@@ -1,6 +1,5 @@
 
 use std::collections::{HashMap, HashSet};
-
 use crate::prelude::*;
 
 impl Mesh
