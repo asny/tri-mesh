@@ -3,16 +3,25 @@ use tri_mesh::prelude::*;
 use tri_mesh::prelude::Vec3 as Vec3;
 use tri_mesh::prelude::vec3 as vec3;
 use tri_mesh::prelude::vec4 as vec4;
-use std::collections::HashMap;
 
-/// Loads the mesh and scale/translate it.
+/// Loads the meshes and scale/translate it.
 fn on_startup(scene_center: &Vec3, scene_radius: f32) -> (Mesh, Mesh)
 {
     let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
     transform(&mut mesh, scene_center, scene_radius);
     let mut other_mesh = MeshBuilder::new().with_obj(include_str!("assets/box.obj").to_string()).build().unwrap();
-    transform(&mut other_mesh, scene_center, 0.2 * scene_radius);
+    transform(&mut other_mesh, scene_center, 0.5 * scene_radius);
     (mesh, other_mesh)
+}
+
+/// Translates the mesh to the scene center and scales it such that the size of the biggest side of the bounding box is half a scene radius
+fn transform(mesh: &mut Mesh, scene_center: &Vec3, scene_radius: f32)
+{
+    let (min, max) = mesh.extreme_coordinates();
+    mesh.translate(-0.5 * (max + min)); // Translate such that the mesh center is in origo.
+    let size = max - min;
+    mesh.scale(0.5 * scene_radius / size.x.max(size.y).max(size.z)); // Scale the mesh such that the size of the biggest side of the bounding box is half a scene radius
+    mesh.translate(*scene_center); // Translate the mesh to the scene center
 }
 
 /// When the user clicks, we see if the model is hit. If it is, we compute the morph weights from the picking point.
@@ -26,15 +35,6 @@ fn on_click(mesh: &mut Mesh, other_mesh: &mut Mesh, ray_start_point: &Vec3, ray_
         Some(result_mesh)
     }
     else {None}
-}
-
-fn transform(mesh: &mut Mesh, scene_center: &Vec3, scene_radius: f32)
-{
-    let (min, max) = mesh.extreme_coordinates();
-    mesh.translate(-0.5 * (max + min)); // Translate such that the mesh center is in origo.
-    let size = max - min;
-    mesh.scale(0.5 * scene_radius / size.x.max(size.y).max(size.z)); // Scale the mesh such that the size of the biggest side of the bounding box is half a scene radius
-    mesh.translate(*scene_center); // Translate the mesh to the scene center
 }
 
 ///
