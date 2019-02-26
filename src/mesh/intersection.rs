@@ -154,7 +154,8 @@ impl Mesh
             .or_else(|| {
                 if point_line_segment_distance(point, self.vertex_position(v0), self.vertex_position(v1)) < MARGIN
                 {
-                    Some(Intersection::Point {primitive: Primitive::Edge(halfedge_id), point: *point})
+                    let twin_id = self.walker_from_halfedge(halfedge_id).twin_id().unwrap();
+                    Some(Intersection::Point {primitive: Primitive::Edge(if twin_id < halfedge_id { twin_id } else { halfedge_id }), point: *point})
                 }
                 else { None }
             })
