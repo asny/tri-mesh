@@ -3,7 +3,7 @@
 use crate::mesh::Mesh;
 use crate::mesh::math::*;
 
-/// # Bounding box functionality
+/// # Bounding box
 impl Mesh
 {
     /// Returns minimum and maximum coordinates of the axis aligned bounding box of the mesh.

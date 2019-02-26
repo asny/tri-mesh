@@ -3,7 +3,7 @@
 use crate::mesh::Mesh;
 use crate::mesh::ids::*;
 
-/// # Orientation functionality
+/// # Orientation
 impl Mesh {
 
     /// Flip the orientation of all faces in the mesh, ie. such that the normal points in the opposite direction.

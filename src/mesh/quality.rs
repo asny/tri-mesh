@@ -5,7 +5,7 @@ use crate::mesh::math::*;
 use crate::mesh::ids::*;
 use std::collections::{HashSet, HashMap};
 
-/// # Quality functionality
+/// # Quality
 impl Mesh
 {
     /// Moves the vertices to `pos + factor * (avg_pos - pos)` where `pos` is the current position

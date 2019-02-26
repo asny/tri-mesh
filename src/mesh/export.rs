@@ -4,7 +4,7 @@ use crate::mesh::Mesh;
 use crate::mesh::ids::*;
 
 ///
-/// # Export functionality
+/// # Export
 ///
 /// Methods for extracting raw mesh data which for example can be used for visualisation.
 ///

@@ -3,7 +3,7 @@
 use crate::mesh::Mesh;
 use crate::mesh::ids::*;
 
-/// # Connectivity functionality
+/// # Connectivity
 impl Mesh
 {
     ///

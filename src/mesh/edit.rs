@@ -4,7 +4,7 @@ use crate::mesh::*;
 use crate::mesh::math::*;
 use crate::mesh::ids::*;
 
-/// # Edit functionality
+/// # Edit
 impl Mesh
 {
     /// Flip the given edge such that the edge after the flip is connected to the
