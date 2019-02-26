@@ -4,16 +4,25 @@ use std::collections::HashSet;
 
 impl Mesh
 {
+    ///
+    /// Finds the connected set of faces starting from the given face.
+    ///
     pub fn connected_component(&self, start_face_id: FaceID) -> HashSet<FaceID>
     {
         self.connected_component_with_limit(start_face_id, &|_| false )
     }
 
+    ///
+    /// Finds all the sets of connected faces.
+    ///
     pub fn connected_components(&self) -> Vec<HashSet<FaceID>>
     {
         self.connected_components_with_limit(&|_| false )
     }
 
+    ///
+    /// Finds the connected set of faces starting from the given face and limited by the given limit function.
+    ///
     pub fn connected_component_with_limit(&self, start_face_id: FaceID, limit: &Fn(HalfEdgeID) -> bool) -> HashSet<FaceID>
     {
         let mut component = HashSet::new();
@@ -36,6 +45,9 @@ impl Mesh
         component
     }
 
+    ///
+    /// Finds all the sets of connected faces which are limited by the given limit function.
+    ///
     pub fn connected_components_with_limit(&self, limit: &Fn(HalfEdgeID) -> bool) -> Vec<HashSet<FaceID>>
     {
         let mut components: Vec<HashSet<FaceID>> = Vec::new();
