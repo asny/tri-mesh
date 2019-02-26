@@ -34,7 +34,7 @@ pub mod quality;
 pub mod orientation;
 pub mod transformations;
 pub mod intersection;
-pub mod merging_and_splitting;
+pub mod merge;
 pub mod split_primitives_at_intersection;
 pub mod split;
 pub mod export;
@@ -84,7 +84,8 @@ pub enum Error {
 /// - [Orientation functionality](#orientation-functionality)
 /// - [Transformations](#transformations)
 /// - [Intersection](#intersection)
-/// - [Merging & splitting](#merging--splitting)
+/// - [Merge](#merge)
+/// - [Split](#split)
 /// - [Export functionality](#export-functionality)
 /// - [Connected components](#connected-components)
 /// - [Validity](#validity)

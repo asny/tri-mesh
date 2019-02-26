@@ -5,7 +5,7 @@ use crate::mesh::math::*;
 use crate::mesh::ids::*;
 use std::collections::{HashSet, HashMap};
 
-/// # Merging & splitting
+/// # Merge
 impl Mesh
 {
     /// Merges the mesh together with the `other` mesh.
