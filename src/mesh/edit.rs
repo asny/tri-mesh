@@ -160,14 +160,21 @@ impl Mesh
     {
         let mut walker = self.walker_from_halfedge(halfedge_id);
         let vertex_id1 = walker.vertex_id().unwrap();
+        let old_face_id = walker.face_id().unwrap();
 
         walker.as_next();
-        let vertex_id2 = walker.vertex_id().unwrap();
-        let halfedge_to_update1 = walker.twin_id().unwrap();
-        let halfedge_to_update2 = walker.halfedge_id().unwrap();
+        let halfedge_to_reuse_vertex = walker.vertex_id().unwrap();
+        let halfedge_to_reuse = walker.halfedge_id().unwrap();
+        let halfedge_to_reuse_next = walker.next_id().unwrap();
 
+        // Create new face
+        let new_face_id = self.connectivity_info.create_face_with_existing_halfedge(vertex_id1, halfedge_to_reuse_vertex, new_vertex_id, halfedge_to_reuse);
+
+        // Update old face
+        let new_halfedge_id = self.connectivity_info.new_halfedge(Some(halfedge_to_reuse_vertex), Some(halfedge_to_reuse_next), Some(old_face_id));
         self.connectivity_info.set_halfedge_vertex(halfedge_id, new_vertex_id);
-        let new_face_id = self.connectivity_info.create_face(vertex_id1, vertex_id2, new_vertex_id);
+        self.connectivity_info.set_halfedge_next(halfedge_id, Some(new_halfedge_id));
+        self.connectivity_info.set_face_halfedge(old_face_id, halfedge_id);
 
         // Update twin information
         for halfedge_id in self.face_halfedge_iter(new_face_id) {
@@ -175,14 +182,8 @@ impl Mesh
             if vid == vertex_id1 {
                 self.connectivity_info.set_halfedge_twin(twin_halfedge_id, halfedge_id);
             }
-            else if vid == vertex_id2 {
-                self.connectivity_info.set_halfedge_twin(halfedge_to_update1, halfedge_id);
-            }
             else if vid == new_vertex_id {
-                self.connectivity_info.set_halfedge_twin(halfedge_to_update2, halfedge_id);
-            }
-            else {
-                panic!("Split one face failed")
+                self.connectivity_info.set_halfedge_twin(new_halfedge_id, halfedge_id);
             }
         }
     }
