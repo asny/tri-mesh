@@ -104,38 +104,34 @@ impl Mesh
         let new_vertex_id = self.create_vertex(position);
 
         let mut walker = self.walker_from_face(face_id);
+        let halfedge_id1 = walker.halfedge_id().unwrap();
         let vertex_id1 = walker.vertex_id().unwrap();
 
         walker.as_next();
         let halfedge_id2 = walker.halfedge_id().unwrap();
-        let twin_id2 = walker.twin_id().unwrap();
         let vertex_id2 = walker.vertex_id().unwrap();
 
         walker.as_next();
         let halfedge_id3 = walker.halfedge_id().unwrap();
-        let twin_id3 = walker.twin_id().unwrap();
         let vertex_id3 = walker.vertex_id().unwrap();
 
-        let face_id1 = self.connectivity_info.create_face(vertex_id1, vertex_id2, new_vertex_id);
-        let face_id2 = self.connectivity_info.create_face(vertex_id2, vertex_id3, new_vertex_id);
+        let face_id1 = self.connectivity_info.create_face_with_existing_halfedge(vertex_id1, vertex_id2, new_vertex_id, halfedge_id2);
+        let face_id2 = self.connectivity_info.create_face_with_existing_halfedge(vertex_id2, vertex_id3, new_vertex_id, halfedge_id3);
 
-        self.connectivity_info.set_halfedge_vertex(halfedge_id2, new_vertex_id);
+        let new_halfedge_id2 = self.connectivity_info.new_halfedge(Some(vertex_id3), Some(halfedge_id1), Some(face_id));
+        let new_halfedge_id1 = self.connectivity_info.new_halfedge(Some(new_vertex_id), Some(new_halfedge_id2), Some(face_id));
+        self.connectivity_info.set_halfedge_next(halfedge_id1, Some(new_halfedge_id1));
+        self.connectivity_info.set_face_halfedge(face_id, halfedge_id1);
 
         // Update twin information
         let mut new_halfedge_id = HalfEdgeID::new(0);
         for halfedge_id in self.face_halfedge_iter(face_id1) {
             let vid = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
             if vid == vertex_id1 {
-                self.connectivity_info.set_halfedge_twin(halfedge_id2, halfedge_id);
-            }
-            else if vid == vertex_id2 {
-                self.connectivity_info.set_halfedge_twin(twin_id2, halfedge_id);
+                self.connectivity_info.set_halfedge_twin(new_halfedge_id1, halfedge_id);
             }
             else if vid == new_vertex_id {
                 new_halfedge_id = halfedge_id;
-            }
-            else {
-                panic!("Split face failed")
             }
         }
         for halfedge_id in self.face_halfedge_iter(face_id2) {
@@ -143,14 +139,8 @@ impl Mesh
             if vid == vertex_id2 {
                 self.connectivity_info.set_halfedge_twin(new_halfedge_id, halfedge_id);
             }
-            else if vid == vertex_id3 {
-                self.connectivity_info.set_halfedge_twin(twin_id3, halfedge_id);
-            }
             else if vid == new_vertex_id {
-                self.connectivity_info.set_halfedge_twin(halfedge_id3, halfedge_id);
-            }
-            else {
-                panic!("Split face failed")
+                self.connectivity_info.set_halfedge_twin(new_halfedge_id2, halfedge_id);
             }
         }
         new_vertex_id
