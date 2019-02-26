@@ -36,6 +36,7 @@ pub mod transformations;
 pub mod intersection;
 pub mod merging_and_splitting;
 pub mod export;
+pub mod connected_components;
 pub mod validity;
 
 mod connectivity_info;
@@ -83,6 +84,7 @@ pub enum Error {
 /// - [Intersection](#intersection)
 /// - [Merging & splitting](#merging--splitting)
 /// - [Export functionality](#export-functionality)
+/// - [Connected components](#connected-components)
 /// - [Validity](#validity)
 ///
 #[derive(Debug)]
