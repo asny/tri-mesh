@@ -37,6 +37,7 @@ pub mod intersection;
 pub mod merging_and_splitting;
 pub mod export;
 pub mod connected_components;
+pub mod split_primitives_at_intersection;
 pub mod validity;
 
 mod connectivity_info;
