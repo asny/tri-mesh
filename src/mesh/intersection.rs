@@ -250,7 +250,9 @@ mod tests {
         let positions: Vec<f32> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
         let mut mesh = MeshBuilder::new().with_positions(positions).build().unwrap();
         mesh.scale(3.0);
-        let edge_id = mesh.halfedge_iter().next().unwrap();
+        let mut edge_id = mesh.halfedge_iter().next().unwrap();
+        let twin_id = mesh.walker_from_halfedge(edge_id).twin_id().unwrap();
+        if twin_id < edge_id { edge_id = twin_id; };
         let (v0, v1) = mesh.ordered_edge_vertices(edge_id);
         let p0 = mesh.vertex_position(v0);
         let p1 = mesh.vertex_position(v1);
