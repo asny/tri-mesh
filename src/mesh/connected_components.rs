@@ -1,7 +1,9 @@
+//! See [Mesh](crate::mesh::Mesh).
 
 use crate::prelude::*;
 use std::collections::HashSet;
 
+/// # Connected components
 impl Mesh
 {
     ///

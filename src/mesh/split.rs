@@ -56,12 +56,18 @@ impl Mesh
         Mesh::new_internal(positions, info)
     }
 
+    ///
+    /// Splits the mesh into subsets bounded by the edges where the is_at_split function returns true.
+    ///
     pub fn split(&self, is_at_split: &Fn(&Mesh, HalfEdgeID) -> bool) -> Vec<Mesh>
     {
         let components = self.connected_components_with_limit(&|halfedge_id| is_at_split(self, halfedge_id));
         components.iter().map(|cc| self.clone_subset(&|_, face_id| cc.contains(&face_id))).collect()
     }
 
+    ///
+    /// Splits the two meshes into subsets bounded by the intersection between the two meshes.
+    ///
     pub fn split_at_intersection(&mut self, other: &mut Mesh) -> (Vec<Mesh>, Vec<Mesh>)
     {
         self.split_primitives_at_intersection(other);
@@ -70,6 +76,9 @@ impl Mesh
         (meshes1, meshes2)
     }
 
+    ///
+    /// Splits the primitives of the two meshes at the intersection between the two meshes.
+    ///
     pub fn split_primitives_at_intersection(&mut self, other: &mut Mesh)
     {
         let mut intersections = find_intersections(self, other);
