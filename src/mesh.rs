@@ -35,7 +35,6 @@ pub mod orientation;
 pub mod transformations;
 pub mod intersection;
 pub mod merge;
-pub mod split_primitives_at_intersection;
 pub mod split;
 pub mod export;
 pub mod connected_components;
