@@ -134,23 +134,29 @@ fn main()
                     {
                         if *state == State::Pressed
                         {
-                            let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
-                            let p = camera.position();
-                            let dir = camera.view_direction_at((x, y));
-                            if let Some(mesh) = on_click(&mut mesh, &mut other_mesh, &p, &dir) {
-                                let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
-                                model.color = vec3(0.8, 0.8, 0.8);
+                            if results.is_none() {
+                                let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
+                                let p = camera.position();
+                                let dir = camera.view_direction_at((x, y));
+                                if let Some(mesh) = on_click(&mut mesh, &mut other_mesh, &p, &dir) {
+                                    let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
+                                    model.color = vec3(0.8, 0.8, 0.8);
 
-                                let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &mesh.positions_buffer(), 0.02);
-                                wireframe_model.set_parameters(0.8, 0.2, 5.0);
-                                wireframe_model.set_color(&vec3(0.9, 0.2, 0.2));
-                                results = Some((model, wireframe_model))
+                                    let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &mesh.positions_buffer(), 0.02);
+                                    wireframe_model.set_parameters(0.8, 0.2, 5.0);
+                                    wireframe_model.set_color(&vec3(0.9, 0.2, 0.2));
+                                    results = Some((model, wireframe_model))
+                                }
                             }
                             camera_handler.start_rotation();
                         }
                         else {
                             camera_handler.end_rotation()
                         }
+                    }
+                    else if *button == MouseButton::Right && *state == State::Pressed
+                    {
+                        results = None;
                     }
                 },
                 Event::MouseWheel {delta} => {
