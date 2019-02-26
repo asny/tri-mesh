@@ -6,6 +6,7 @@ use crate::mesh::ids::*;
 use crate::mesh::intersection::*;
 use std::collections::{HashSet, HashMap};
 
+/// # Split
 impl Mesh
 {
     /// Returns a clone of a subset of this mesh.

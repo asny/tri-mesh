@@ -31,7 +31,8 @@ tri-mesh = "0.2.0"
 - Orientation functionality (e.g. flip orientation of all faces)
 - Transformations affecting the vertex positions (e.g. moving a single vertex or rotate the entire mesh)
 - Intersection functionality (e.g. face/ray intersection, edge/point intersection)
-- Merging and splitting used for high level merging and splitting of entire meshes (e.g. clone a subset of a mesh or merge overlapping primitives)
+- Merge used for merging of entire meshes (e.g. append one mesh to another or merge overlapping primitives in a mesh)
+- Split functionality (e.g. clone a subset of a mesh or split two meshes at their intersection)
 
 Please, see the [documentation](https://docs.rs/tri-mesh) for more details.
 

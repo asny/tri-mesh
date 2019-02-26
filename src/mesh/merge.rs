@@ -8,9 +8,15 @@ use std::collections::{HashSet, HashMap};
 /// # Merge
 impl Mesh
 {
+    ///
     /// Merges the mesh together with the `other` mesh.
     /// The `other` mesh primitives are copied to the current mesh (and `other` is therefore not changed)
     /// followed by merging of overlapping primitives.
+    ///
+    /// # Error
+    ///
+    /// Returns an error if the merging will result in a non-manifold mesh.
+    ///
     pub fn merge_with(&mut self, other: &Self) -> Result<(), Error>
     {
         self.append(other);
@@ -18,8 +24,9 @@ impl Mesh
         Ok(())
     }
 
-    /// Appends the `other` mesh to this mesh which means that all the primitivess of
-    /// the `other` mesh are copied to the current mesh. The `other`mesh is therefore not changed.
+    /// Appends the `other` mesh to this mesh without creating a connection between them.
+    /// Use `merge_with` if merging of overlapping primitives is desired, thereby creating a connection.
+    /// All the primitives of the `other` mesh are copied to the current mesh and the `other` mesh is therefore not changed.
     pub fn append(&mut self, other: &Self)
     {
         let mut mapping: HashMap<VertexID, VertexID> = HashMap::new();
