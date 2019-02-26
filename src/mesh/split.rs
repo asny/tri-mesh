@@ -1,8 +1,9 @@
+//! See [Mesh](crate::mesh::Mesh).
 
 use crate::mesh::*;
 use crate::mesh::math::*;
 use crate::mesh::ids::*;
-use std::collections::{HashSet, HashMap};
+use std::collections::HashMap;
 
 impl Mesh
 {
@@ -116,6 +117,25 @@ fn point_and_point_intersects(point1: &Vec3, point2: &Vec3) -> bool
 mod tests {
     use super::*;
     use crate::MeshBuilder;
+
+    #[test]
+    fn test_clone_subset()
+    {
+        let indices: Vec<u32> = vec![0, 1, 2,  2, 1, 3,  3, 1, 4,  3, 4, 5];
+        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5,  0.0, 0.0, 2.0,  1.0, 0.0, 2.5];
+        let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
+
+        let mut faces = std::collections::HashSet::new();
+        for face_id in mesh.face_iter() {
+            faces.insert(face_id);
+            break;
+        }
+
+        let sub_mesh = mesh.clone_subset(&faces);
+
+        mesh.is_valid().unwrap();
+        sub_mesh.is_valid().unwrap();
+    }
 
     #[test]
     fn test_split()
