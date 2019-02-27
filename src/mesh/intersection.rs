@@ -466,6 +466,34 @@ mod utility {
         use super::*;
 
         #[test]
+        fn test_barycentric()
+        {
+            let a = vec3(0.0, 0.0, 0.0);
+            let b = vec3(1.0, 0.0, 0.0);
+            let c = vec3(0.0, 0.0, 1.0);
+
+            assert_eq!(barycentric(&vec3(0.0, 0.0, 0.0), &a, &b, &c), (1.0, 0.0, 0.0));
+            assert_eq!(barycentric(&vec3(1.0, 0.0, 0.0), &a, &b, &c), (0.0, 1.0, 0.0));
+            assert_eq!(barycentric(&vec3(0.0, 0.0, 1.0), &a, &b, &c), (0.0, 0.0, 1.0));
+            assert_eq!(barycentric(&vec3(0.5, 0.0, 0.5), &a, &b, &c), (0.0, 0.5, 0.5));
+            assert_eq!(barycentric(&vec3(0.25, 0.0, 0.25), &a, &b, &c), (0.5, 0.25, 0.25));
+        }
+
+        #[test]
+        fn test_point_line_segment_distance()
+        {
+            let a = vec3(0.0, 0.0, 0.0);
+            let b = vec3(1.0, 0.0, 1.0);
+
+            assert_eq!(point_line_segment_distance(&vec3(0.0, 0.0, 0.0), &a, &b), 0.0);
+            assert_eq!(point_line_segment_distance(&vec3(1.0, 0.0, 1.0), &a, &b), 0.0);
+            assert_eq!(point_line_segment_distance(&vec3(0.0, 0.0, 1.0), &a, &b), 0.5 * 2.0f32.sqrt());
+            assert_eq!(point_line_segment_distance(&vec3(0.5, 0.0, 0.5), &a, &b), 0.0);
+            assert_eq!(point_line_segment_distance(&vec3(0.0, 0.0, -0.25), &a, &b), 0.25);
+            assert_eq!(point_line_segment_distance(&vec3(0.25, 0.0, 0.0), &a, &b), 0.5 * (2.0 * 0.25f32 * 0.25f32).sqrt());
+        }
+
+        #[test]
         fn test_plane_ray_intersection_no_intersection()
         {
             let p = vec3(1.0, 1.0, 1.0);
