@@ -25,16 +25,17 @@ fn transform(mesh: &mut Mesh, scene_center: &Vec3, scene_radius: f32)
 }
 
 /// When the user clicks, we see if the model is hit. If it is, we compute the morph weights from the picking point.
-fn on_click(mesh: &mut Mesh, other_mesh: &mut Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<Mesh>
+fn on_click(mesh: &mut Mesh, other_mesh: &mut Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Result<Option<Mesh>, tri_mesh::mesh::Error>
 {
     if let Some(Intersection::Point {point, ..}) = mesh.ray_intersection(ray_start_point, ray_direction) {
         other_mesh.translate(point - other_mesh.axis_aligned_bounding_box_center());
         let (meshes1, meshes2) = mesh.split_at_intersection(other_mesh);
         let mut result_mesh = meshes1.first().unwrap().clone();
-        result_mesh.merge_with(meshes2.first().unwrap()).unwrap();
-        Some(result_mesh)
+
+        result_mesh.merge_with(meshes2.first().unwrap())?;
+        Ok(Some(result_mesh))
     }
-    else {None}
+    else {Ok(None)}
 }
 
 ///
@@ -138,7 +139,8 @@ fn main()
                                 let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                                 let p = camera.position();
                                 let dir = camera.view_direction_at((x, y));
-                                if let Some(mesh) = on_click(&mut mesh, &mut other_mesh, &p, &dir) {
+                                let result_click = on_click(&mut mesh, &mut other_mesh, &p, &dir).unwrap_or_else(|e|{println!("Error: {:?}", e); None});
+                                if let Some(mesh) = result_click {
                                     let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
                                     model.color = vec3(0.8, 0.8, 0.8);
 
