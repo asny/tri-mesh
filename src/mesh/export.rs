@@ -173,6 +173,19 @@ impl Mesh
     ///
     /// Parses the mesh into a text string that follows the .obj file format and which can then be saved into a file.
     ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # fn main() -> std::io::Result<()> {
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// // Write the mesh data to a string
+    /// let obj_source = mesh.parse_as_obj();
+    ///
+    /// // Write the string to an .obj file
+    /// std::fs::write("foo.obj", obj_source)?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn parse_as_obj(&self) -> String
     {
         let mut output = String::from("o object\n");
