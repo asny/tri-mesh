@@ -35,7 +35,7 @@ Please, see the [documentation](https://docs.rs/tri-mesh) for more details.
 Add the following to your `Cargo.toml`:
 ```toml
 [dependencies]
-tri-mesh = "0.2.0"
+tri-mesh = "0.3.0"
 ```
 
 ### I have a mesh without normals, how can I use `tri-mesh` to compute them?
