@@ -532,4 +532,21 @@ mod tests {
             assert!(mesh1.vertex_iter().find(|v| mesh1.vertex_position(*v) == pos).is_some());
         }
     }
+
+    #[test]
+    fn test_box_box_merge()
+    {
+        let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
+        let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
+        mesh2.translate(vec3(0.5, 0.5, 0.5));
+
+        let (mut meshes1, mut meshes2) = mesh1.split_at_intersection(&mut mesh2);
+
+        let mut result = meshes1.first().unwrap().clone();
+        result.merge_with(meshes2.first().unwrap()).unwrap();
+
+        mesh1.is_valid().unwrap();
+        mesh2.is_valid().unwrap();
+        result.is_valid().unwrap();
+    }
 }

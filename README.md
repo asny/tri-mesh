@@ -76,6 +76,26 @@ fn main() {
 }
 ```
 
+### I want to stitch two meshes together, how do I do that?
+
+```rust
+use tri_mesh::prelude::*;
+
+fn main() {
+    // Construct two meshes
+    let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
+    let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
+    mesh2.translate(vec3(0.5, 0.5, 0.5));
+
+    // Split the two meshes at their intersection creating two sets of sub meshes
+    let (mut meshes1, mut meshes2) = mesh1.split_at_intersection(&mut mesh2);
+
+    // Choose two sub meshes to merge (here we just choose one sub mesh from each of the original meshes)
+    let mut result = meshes1.first().unwrap().clone();
+    result.merge_with(meshes2.first().unwrap()).unwrap();
+}
+```
+
 ### How can I use `tri-mesh` to compute my own very special curvature measure?
 
 ```rust

@@ -800,9 +800,8 @@ mod tests {
     {
         let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
         let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
-        for vertex_id in mesh2.vertex_iter() {
-            mesh2.move_vertex_by(vertex_id, vec3(0.5, 0.5, 0.5));
-        }
+        mesh2.translate(vec3(0.5, 0.5, 0.5));
+
         mesh1.split_primitives_at_intersection(&mut mesh2);
 
         mesh1.is_valid().unwrap();
