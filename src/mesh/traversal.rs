@@ -85,7 +85,7 @@ impl Mesh
 /// walker.as_next();
 /// circumference += mesh.edge_length(walker.halfedge_id().unwrap());
 /// circumference += mesh.edge_length(walker.next_id().unwrap());
-/// # assert_eq!(circumference, 4.0f32 + 8.0f32.sqrt());
+/// # assert_eq!(circumference, 4.0f64 + 8.0f64.sqrt());
 /// ```
 ///
 /// ## \# 5
@@ -105,7 +105,7 @@ impl Mesh
 /// # use tri_mesh::prelude::*;
 /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
 /// // Compute the average edge length
-/// let mut avg_edge_length = 0.0f32;
+/// let mut avg_edge_length = 0.0f64;
 /// for halfedge_id in mesh.edge_iter()
 /// {
 ///     let mut walker = mesh.walker_from_halfedge(halfedge_id);
@@ -113,7 +113,7 @@ impl Mesh
 ///     let p1 = mesh.vertex_position(walker.as_twin().vertex_id().unwrap());
 ///     avg_edge_length += (p0 - p1).magnitude();
 /// }
-/// avg_edge_length /= mesh.no_edges() as f32;
+/// avg_edge_length /= mesh.no_edges() as f64;
 /// ```
 ///
 #[derive(Clone, Debug)]

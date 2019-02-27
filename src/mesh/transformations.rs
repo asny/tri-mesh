@@ -39,7 +39,7 @@ impl Mesh
     /// # }
     /// ```
     ///
-    pub fn scale(&mut self, scale: f32)
+    pub fn scale(&mut self, scale: f64)
     {
         for vertex_id in self.vertex_iter() {
             let p = *self.vertex_position(vertex_id);
@@ -68,7 +68,7 @@ impl Mesh
     /// # }
     /// ```
     ///
-    pub fn non_uniform_scale(&mut self, scale_x: f32, scale_y: f32, scale_z: f32)
+    pub fn non_uniform_scale(&mut self, scale_x: f64, scale_y: f64, scale_z: f64)
     {
         for vertex_id in self.vertex_iter() {
             let p = *self.vertex_position(vertex_id);

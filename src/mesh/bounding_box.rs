@@ -3,14 +3,14 @@
 use crate::mesh::Mesh;
 use crate::mesh::math::*;
 
-/// # Bounding box functionality
+/// # Bounding box
 impl Mesh
 {
     /// Returns minimum and maximum coordinates of the axis aligned bounding box of the mesh.
     pub fn extreme_coordinates(&self) -> (Vec3, Vec3)
     {
-        let mut min_coordinates = vec3(std::f32::MAX, std::f32::MAX, std::f32::MAX);
-        let mut max_coordinates = vec3(std::f32::MIN, std::f32::MIN, std::f32::MIN);
+        let mut min_coordinates = vec3(std::f64::MAX, std::f64::MAX, std::f64::MAX);
+        let mut max_coordinates = vec3(std::f64::MIN, std::f64::MIN, std::f64::MIN);
         for vertex_id in self.vertex_iter()
         {
             let position = self.vertex_position(vertex_id);

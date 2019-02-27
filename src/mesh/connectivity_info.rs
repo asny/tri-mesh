@@ -55,6 +55,26 @@ impl ConnectivityInfo {
         id
     }
 
+    pub fn create_face_with_existing_halfedge(&self, vertex_id1: VertexID, vertex_id2: VertexID, vertex_id3: VertexID, halfedge_id: HalfEdgeID) -> FaceID
+    {
+        let id = self.new_face();
+
+        // Create inner half-edges
+        let halfedge3 = self.new_halfedge(Some(vertex_id1), Some(halfedge_id), Some(id));
+        let halfedge2 = self.new_halfedge(Some(vertex_id3), Some(halfedge3), Some(id));
+
+        self.set_halfedge_next(halfedge_id, Some(halfedge2));
+        self.set_halfedge_face(halfedge_id, Some(id));
+
+        self.set_vertex_halfedge(vertex_id1, Some(halfedge_id));
+        self.set_vertex_halfedge(vertex_id2, Some(halfedge2));
+        self.set_vertex_halfedge(vertex_id3, Some(halfedge3));
+
+        self.set_face_halfedge(id, halfedge_id);
+
+        id
+    }
+
     pub fn new_vertex(&self) -> VertexID
     {
         let vertices = &mut *RefCell::borrow_mut(&self.vertices);

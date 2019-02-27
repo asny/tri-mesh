@@ -5,12 +5,18 @@ use crate::mesh::math::*;
 use crate::mesh::ids::*;
 use std::collections::{HashSet, HashMap};
 
-/// # Merging & splitting
+/// # Merge
 impl Mesh
 {
+    ///
     /// Merges the mesh together with the `other` mesh.
     /// The `other` mesh primitives are copied to the current mesh (and `other` is therefore not changed)
     /// followed by merging of overlapping primitives.
+    ///
+    /// # Error
+    ///
+    /// Returns an error if the merging will result in a non-manifold mesh.
+    ///
     pub fn merge_with(&mut self, other: &Self) -> Result<(), Error>
     {
         self.append(other);
@@ -18,8 +24,9 @@ impl Mesh
         Ok(())
     }
 
-    /// Appends the `other` mesh to this mesh which means that all the primitivess of
-    /// the `other` mesh are copied to the current mesh. The `other`mesh is therefore not changed.
+    /// Appends the `other` mesh to this mesh without creating a connection between them.
+    /// Use `merge_with` if merging of overlapping primitives is desired, thereby creating a connection.
+    /// All the primitives of the `other` mesh are copied to the current mesh and the `other` mesh is therefore not changed.
     pub fn append(&mut self, other: &Self)
     {
         let mut mapping: HashMap<VertexID, VertexID> = HashMap::new();
@@ -67,51 +74,6 @@ impl Mesh
         }
 
         self.create_boundary_edges();
-    }
-
-    /// Returns a clone a subset of this mesh.
-    pub fn clone_subset(&self, faces: &std::collections::HashSet<FaceID>) -> Mesh
-    {
-        let info = crate::mesh::ConnectivityInfo::new(faces.len(), faces.len());
-        for face_id in faces {
-            let face = self.connectivity_info.face(*face_id).unwrap();
-            for halfedge_id in self.face_halfedge_iter(*face_id) {
-                let mut walker = self.walker_from_halfedge(halfedge_id);
-                let halfedge = self.connectivity_info.halfedge(halfedge_id).unwrap();
-                info.add_halfedge(halfedge_id, halfedge);
-
-                let vertex_id = walker.vertex_id().unwrap();
-                let vertex = self.connectivity_info.vertex(vertex_id).unwrap();
-                info.add_vertex(vertex_id, vertex);
-                info.set_vertex_halfedge(vertex_id, walker.next_id());
-
-                walker.as_twin();
-                if walker.face_id().is_none()
-                {
-                    let twin_id = walker.halfedge_id().unwrap();
-                    let twin = self.connectivity_info.halfedge(twin_id).unwrap();
-                    info.add_halfedge(twin_id, twin);
-
-                }
-                else if !faces.contains(&walker.face_id().unwrap())
-                {
-                    let twin_id = walker.halfedge_id().unwrap();
-                    let mut twin = self.connectivity_info.halfedge(twin_id).unwrap();
-                    twin.face = None;
-                    twin.next = None;
-                    info.add_halfedge(twin_id, twin);
-                }
-            }
-
-            info.add_face(*face_id, face);
-        }
-
-        let mut positions = HashMap::with_capacity(info.no_vertices());
-        for vertex_id in info.vertex_iterator() {
-            positions.insert(vertex_id, self.vertex_position(vertex_id).clone());
-        }
-
-        Mesh::new_internal(positions, info)
     }
 
     ///
@@ -381,28 +343,9 @@ mod tests {
     use crate::MeshBuilder;
 
     #[test]
-    fn test_clone_subset()
-    {
-        let indices: Vec<u32> = vec![0, 1, 2,  2, 1, 3,  3, 1, 4,  3, 4, 5];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5,  0.0, 0.0, 2.0,  1.0, 0.0, 2.5];
-        let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
-
-        let mut faces = std::collections::HashSet::new();
-        for face_id in mesh.face_iter() {
-            faces.insert(face_id);
-            break;
-        }
-
-        let sub_mesh = mesh.clone_subset(&faces);
-
-        mesh.is_valid().unwrap();
-        sub_mesh.is_valid().unwrap();
-    }
-
-    #[test]
     fn test_merge_overlapping_primitives()
     {
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
                                        0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5];
 
@@ -430,7 +373,7 @@ mod tests {
     #[test]
     fn test_merge_overlapping_individual_faces()
     {
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
 
@@ -447,7 +390,7 @@ mod tests {
     fn test_merge_two_overlapping_faces()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  1, 3, 2,  4, 6, 5,  6, 7, 5];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,
                                        -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,  -1.0, 0.0, 1.5];
 
         let mut mesh = Mesh::new(indices, positions);
@@ -463,7 +406,7 @@ mod tests {
     fn test_merge_three_overlapping_faces()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  1, 3, 2,  4, 6, 5,  6, 7, 5,  8, 10, 9];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,
                                        -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,  -1.0, 0.0, 1.5,
                                         -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0];
 
@@ -479,7 +422,7 @@ mod tests {
     #[test]
     fn test_merge_vertices()
     {
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
         let mut mesh = Mesh::new((0..6).collect(), positions);
 
@@ -503,7 +446,7 @@ mod tests {
     #[test]
     fn test_merge_halfedges()
     {
-        let positions: Vec<f32> = vec![1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0,
+        let positions: Vec<f64> = vec![1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0,
                                        0.0, 0.0, 0.0,  1.0, 0.0, 0.0,  0.0, 0.0, 1.0];
         let mut mesh = Mesh::new((0..6).collect(), positions);
 
@@ -533,11 +476,11 @@ mod tests {
     fn test_face_face_merging_at_edge()
     {
         let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f32> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
+        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
         let mut mesh1 = MeshBuilder::new().with_indices(indices1).with_positions(positions1).build().unwrap();
 
         let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f32> = vec![-2.0, 0.0, 2.0, -2.0, 0.0, -2.0, -2.0, 0.5, 0.0];
+        let positions2: Vec<f64> = vec![-2.0, 0.0, 2.0, -2.0, 0.0, -2.0, -2.0, 0.5, 0.0];
         let mesh2 = MeshBuilder::new().with_indices(indices2).with_positions(positions2).build().unwrap();
 
         mesh1.merge_with(&mesh2).unwrap();
@@ -553,11 +496,11 @@ mod tests {
     fn test_face_face_merging_at_edge_when_orientation_is_opposite()
     {
         let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f32> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
+        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
         let mut mesh1 = MeshBuilder::new().with_indices(indices1).with_positions(positions1).build().unwrap();
 
         let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f32> = vec![-2.0, 0.0, 2.0, -2.0, 0.5, 0.0, -2.0, 0.0, -2.0];
+        let positions2: Vec<f64> = vec![-2.0, 0.0, 2.0, -2.0, 0.5, 0.0, -2.0, 0.0, -2.0];
         let mesh2 = MeshBuilder::new().with_indices(indices2).with_positions(positions2).build().unwrap();
 
         mesh1.merge_with(&mesh2).unwrap();
@@ -588,5 +531,22 @@ mod tests {
         for pos in mesh2.vertex_iter().map(|v| mesh2.vertex_position(v)) {
             assert!(mesh1.vertex_iter().find(|v| mesh1.vertex_position(*v) == pos).is_some());
         }
+    }
+
+    #[test]
+    fn test_box_box_merge()
+    {
+        let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
+        let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
+        mesh2.translate(vec3(0.5, 0.5, 0.5));
+
+        let (mut meshes1, mut meshes2) = mesh1.split_at_intersection(&mut mesh2);
+
+        let mut result = meshes1.first().unwrap().clone();
+        result.merge_with(meshes2.first().unwrap()).unwrap();
+
+        mesh1.is_valid().unwrap();
+        mesh2.is_valid().unwrap();
+        result.is_valid().unwrap();
     }
 }

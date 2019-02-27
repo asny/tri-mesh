@@ -4,7 +4,7 @@ use crate::mesh::*;
 use crate::mesh::math::*;
 use crate::mesh::ids::*;
 
-/// # Edit functionality
+/// # Edit
 impl Mesh
 {
     /// Flip the given edge such that the edge after the flip is connected to the
@@ -104,38 +104,34 @@ impl Mesh
         let new_vertex_id = self.create_vertex(position);
 
         let mut walker = self.walker_from_face(face_id);
+        let halfedge_id1 = walker.halfedge_id().unwrap();
         let vertex_id1 = walker.vertex_id().unwrap();
 
         walker.as_next();
         let halfedge_id2 = walker.halfedge_id().unwrap();
-        let twin_id2 = walker.twin_id().unwrap();
         let vertex_id2 = walker.vertex_id().unwrap();
 
         walker.as_next();
         let halfedge_id3 = walker.halfedge_id().unwrap();
-        let twin_id3 = walker.twin_id().unwrap();
         let vertex_id3 = walker.vertex_id().unwrap();
 
-        let face_id1 = self.connectivity_info.create_face(vertex_id1, vertex_id2, new_vertex_id);
-        let face_id2 = self.connectivity_info.create_face(vertex_id2, vertex_id3, new_vertex_id);
+        let face_id1 = self.connectivity_info.create_face_with_existing_halfedge(vertex_id1, vertex_id2, new_vertex_id, halfedge_id2);
+        let face_id2 = self.connectivity_info.create_face_with_existing_halfedge(vertex_id2, vertex_id3, new_vertex_id, halfedge_id3);
 
-        self.connectivity_info.set_halfedge_vertex(halfedge_id2, new_vertex_id);
+        let new_halfedge_id2 = self.connectivity_info.new_halfedge(Some(vertex_id3), Some(halfedge_id1), Some(face_id));
+        let new_halfedge_id1 = self.connectivity_info.new_halfedge(Some(new_vertex_id), Some(new_halfedge_id2), Some(face_id));
+        self.connectivity_info.set_halfedge_next(halfedge_id1, Some(new_halfedge_id1));
+        self.connectivity_info.set_face_halfedge(face_id, halfedge_id1);
 
         // Update twin information
         let mut new_halfedge_id = HalfEdgeID::new(0);
         for halfedge_id in self.face_halfedge_iter(face_id1) {
             let vid = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
             if vid == vertex_id1 {
-                self.connectivity_info.set_halfedge_twin(halfedge_id2, halfedge_id);
-            }
-            else if vid == vertex_id2 {
-                self.connectivity_info.set_halfedge_twin(twin_id2, halfedge_id);
+                self.connectivity_info.set_halfedge_twin(new_halfedge_id1, halfedge_id);
             }
             else if vid == new_vertex_id {
                 new_halfedge_id = halfedge_id;
-            }
-            else {
-                panic!("Split face failed")
             }
         }
         for halfedge_id in self.face_halfedge_iter(face_id2) {
@@ -143,14 +139,8 @@ impl Mesh
             if vid == vertex_id2 {
                 self.connectivity_info.set_halfedge_twin(new_halfedge_id, halfedge_id);
             }
-            else if vid == vertex_id3 {
-                self.connectivity_info.set_halfedge_twin(twin_id3, halfedge_id);
-            }
             else if vid == new_vertex_id {
-                self.connectivity_info.set_halfedge_twin(halfedge_id3, halfedge_id);
-            }
-            else {
-                panic!("Split face failed")
+                self.connectivity_info.set_halfedge_twin(new_halfedge_id2, halfedge_id);
             }
         }
         new_vertex_id
@@ -160,14 +150,21 @@ impl Mesh
     {
         let mut walker = self.walker_from_halfedge(halfedge_id);
         let vertex_id1 = walker.vertex_id().unwrap();
+        let old_face_id = walker.face_id().unwrap();
 
         walker.as_next();
-        let vertex_id2 = walker.vertex_id().unwrap();
-        let halfedge_to_update1 = walker.twin_id().unwrap();
-        let halfedge_to_update2 = walker.halfedge_id().unwrap();
+        let halfedge_to_reuse_vertex = walker.vertex_id().unwrap();
+        let halfedge_to_reuse = walker.halfedge_id().unwrap();
+        let halfedge_to_reuse_next = walker.next_id().unwrap();
 
+        // Create new face
+        let new_face_id = self.connectivity_info.create_face_with_existing_halfedge(vertex_id1, halfedge_to_reuse_vertex, new_vertex_id, halfedge_to_reuse);
+
+        // Update old face
+        let new_halfedge_id = self.connectivity_info.new_halfedge(Some(halfedge_to_reuse_vertex), Some(halfedge_to_reuse_next), Some(old_face_id));
         self.connectivity_info.set_halfedge_vertex(halfedge_id, new_vertex_id);
-        let new_face_id = self.connectivity_info.create_face(vertex_id1, vertex_id2, new_vertex_id);
+        self.connectivity_info.set_halfedge_next(halfedge_id, Some(new_halfedge_id));
+        self.connectivity_info.set_face_halfedge(old_face_id, halfedge_id);
 
         // Update twin information
         for halfedge_id in self.face_halfedge_iter(new_face_id) {
@@ -175,14 +172,8 @@ impl Mesh
             if vid == vertex_id1 {
                 self.connectivity_info.set_halfedge_twin(twin_halfedge_id, halfedge_id);
             }
-            else if vid == vertex_id2 {
-                self.connectivity_info.set_halfedge_twin(halfedge_to_update1, halfedge_id);
-            }
             else if vid == new_vertex_id {
-                self.connectivity_info.set_halfedge_twin(halfedge_to_update2, halfedge_id);
-            }
-            else {
-                panic!("Split one face failed")
+                self.connectivity_info.set_halfedge_twin(new_halfedge_id, halfedge_id);
             }
         }
     }
@@ -524,7 +515,7 @@ mod tests {
     fn test_collapse_edge_on_boundary1()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  1, 3, 2,  2, 3, 4  ];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0,  2.0, 0.0, 0.5];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0,  2.0, 0.0, 0.5];
         let mut mesh = Mesh::new(indices, positions);
 
         for halfedge_id in mesh.halfedge_iter()
@@ -549,7 +540,7 @@ mod tests {
     fn test_collapse_edge_on_boundary2()
     {
         let indices: Vec<u32> = vec![0, 2, 3,  0, 3, 1];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0];
         let mut mesh = Mesh::new(indices, positions);
         for halfedge_id in mesh.halfedge_iter()
         {
@@ -591,7 +582,7 @@ mod tests {
     fn test_recursive_collapse_edge()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  1, 3, 2,  2, 3, 4  ];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0,  2.0, 0.0, 0.5];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0,  2.0, 0.0, 0.5];
         let mut mesh = Mesh::new(indices, positions);
 
         while mesh.no_faces() > 1 {
@@ -612,7 +603,7 @@ mod tests {
     #[test]
     fn test_remove_face_when_unconnected()
     {
-        let positions: Vec<f32> = vec![1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0,
+        let positions: Vec<f64> = vec![1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0,
                                        1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0];
         let mut mesh = Mesh::new((0..6).collect(), positions);
 

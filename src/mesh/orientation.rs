@@ -3,7 +3,7 @@
 use crate::mesh::Mesh;
 use crate::mesh::ids::*;
 
-/// # Orientation functionality
+/// # Orientation
 impl Mesh {
 
     /// Flip the orientation of all faces in the mesh, ie. such that the normal points in the opposite direction.
@@ -80,7 +80,7 @@ mod tests {
     fn test_flip_orientation_of_face()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  1, 2, 3];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5];
         let mut mesh = crate::MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
 
         mesh.flip_orientation_of_face(mesh.face_iter().next().unwrap());

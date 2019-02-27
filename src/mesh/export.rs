@@ -4,7 +4,7 @@ use crate::mesh::Mesh;
 use crate::mesh::ids::*;
 
 ///
-/// # Export functionality
+/// # Export
 ///
 /// Methods for extracting raw mesh data which for example can be used for visualisation.
 ///
@@ -103,7 +103,7 @@ impl Mesh
     ///
     /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
     ///
-    pub fn positions_buffer(&self) -> Vec<f32>
+    pub fn positions_buffer(&self) -> Vec<f64>
     {
         let mut positions = Vec::with_capacity(self.no_vertices() * 3);
         for position in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
@@ -123,7 +123,7 @@ impl Mesh
     ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
-    pub fn normals_buffer(&self) -> Vec<f32>
+    pub fn normals_buffer(&self) -> Vec<f64>
     {
         let mut normals = Vec::with_capacity(self.no_vertices() * 3);
         for vertex_id in self.vertex_iter() {
@@ -136,7 +136,7 @@ impl Mesh
     /// Returns the positions of the face corners in an array which is meant to be used for visualisation.
     /// See [this](#non-index-based-arrays) example.
     ///
-    pub fn non_indexed_positions_buffer(&self) -> Vec<f32>
+    pub fn non_indexed_positions_buffer(&self) -> Vec<f64>
     {
         let mut positions = Vec::with_capacity(self.no_faces() * 3 * 3);
         for face_id in self.face_iter()
@@ -157,7 +157,7 @@ impl Mesh
     ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
-    pub fn non_indexed_normals_buffer(&self) -> Vec<f32>
+    pub fn non_indexed_normals_buffer(&self) -> Vec<f64>
     {
         let mut normals = Vec::with_capacity(self.no_faces() * 3 * 3);
         for face_id in self.face_iter()
@@ -169,9 +169,53 @@ impl Mesh
         }
         normals
     }
+
+    ///
+    /// Parses the mesh into a text string that follows the .obj file format and which can then be saved into a file.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # fn main() -> std::io::Result<()> {
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// // Write the mesh data to a string
+    /// let obj_source = mesh.parse_as_obj();
+    ///
+    /// // Write the string to an .obj file
+    /// std::fs::write("foo.obj", obj_source)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn parse_as_obj(&self) -> String
+    {
+        let mut output = String::from("o object\n");
+
+        let positions = self.positions_buffer();
+        for i in 0..self.no_vertices()
+        {
+            output = format!("{}v {} {} {}\n", output, positions[i*3], positions[i*3 + 1], positions[i*3 + 2]);
+        }
+
+        let normals = self.normals_buffer();
+        for i in 0..self.no_vertices()
+        {
+            output = format!("{}vn {} {} {}\n", output, normals[i*3], normals[i*3 + 1], normals[i*3 + 2]);
+        }
+
+        let indices = self.indices_buffer();
+        for i in 0..self.no_faces() {
+            let mut face = String::new();
+            for j in 0..3 {
+                let index = indices[i*3 + j] + 1;
+                face = format!("{} {}//{}", face, index, index);
+            }
+            output = format!("{}f{}\n", output, face);
+        }
+        output
+    }
 }
 
-fn push_vec3(vec: &mut Vec<f32>, vec3: crate::mesh::math::Vec3)
+fn push_vec3(vec: &mut Vec<f64>, vec3: crate::mesh::math::Vec3)
 {
     for i in 0..3 {
         vec.push(vec3[i]);
