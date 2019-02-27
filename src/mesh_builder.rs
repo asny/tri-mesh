@@ -21,7 +21,7 @@ pub enum Error {
 #[derive(Debug, Default)]
 pub struct MeshBuilder {
     indices: Option<Vec<u32>>,
-    positions: Option<Vec<f32>>
+    positions: Option<Vec<f64>>
 }
 
 impl MeshBuilder {
@@ -41,7 +41,7 @@ impl MeshBuilder {
     /// #
     /// # fn main() -> Result<(), Box<Error>> {
     /// let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
-    /// let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
+    /// let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
     /// let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build()?;
     ///
     /// assert_eq!(mesh.no_faces(), 3);
@@ -69,7 +69,7 @@ impl MeshBuilder {
     /// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
     /// #
     /// # fn main() -> Result<(), Box<Error>> {
-    /// let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
+    /// let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
     ///                                    0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
     ///                                    0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5];
     /// let mesh = MeshBuilder::new().with_positions(positions).build()?;
@@ -82,7 +82,7 @@ impl MeshBuilder {
     /// # }
     /// ```
     ///
-    pub fn with_positions(mut self, positions: Vec<f32>) -> Self
+    pub fn with_positions(mut self, positions: Vec<f64>) -> Self
     {
         self.positions = Some(positions);
         self
@@ -141,9 +141,9 @@ impl MeshBuilder {
         {
             let start_index = positions.len()/3;
             for vertex in obj.vertices.iter() {
-                positions.push(vertex.x as f32);
-                positions.push(vertex.y as f32);
-                positions.push(vertex.z as f32);
+                positions.push(vertex.x);
+                positions.push(vertex.y);
+                positions.push(vertex.z);
             }
 
             for shape in obj.geometry.first().unwrap().shapes.iter() {
@@ -297,9 +297,9 @@ impl MeshBuilder {
         if x_subdivisions < 2 || angle_subdivisions < 3 { return self; }
         let mut positions = Vec::new();
         for i in 0..x_subdivisions + 1 {
-            let x = i as f32 / x_subdivisions as f32;
+            let x = i as f64 / x_subdivisions as f64;
             for j in 0..angle_subdivisions {
-                let angle = 2.0 * std::f32::consts::PI * j as f32 / angle_subdivisions as f32;
+                let angle = 2.0 * std::f64::consts::PI * j as f64 / angle_subdivisions as f64;
 
                 positions.push(x);
                 positions.push(angle.cos());

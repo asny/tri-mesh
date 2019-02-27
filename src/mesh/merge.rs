@@ -345,7 +345,7 @@ mod tests {
     #[test]
     fn test_merge_overlapping_primitives()
     {
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
                                        0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5];
 
@@ -373,7 +373,7 @@ mod tests {
     #[test]
     fn test_merge_overlapping_individual_faces()
     {
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
 
@@ -390,7 +390,7 @@ mod tests {
     fn test_merge_two_overlapping_faces()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  1, 3, 2,  4, 6, 5,  6, 7, 5];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,
                                        -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,  -1.0, 0.0, 1.5];
 
         let mut mesh = Mesh::new(indices, positions);
@@ -406,7 +406,7 @@ mod tests {
     fn test_merge_three_overlapping_faces()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  1, 3, 2,  4, 6, 5,  6, 7, 5,  8, 10, 9];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,
                                        -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0,  -1.0, 0.0, 1.5,
                                         -1.0, 0.0, 0.0,  -0.5, 0.0, 1.0,  -1.5, 0.0, 1.0];
 
@@ -422,7 +422,7 @@ mod tests {
     #[test]
     fn test_merge_vertices()
     {
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
         let mut mesh = Mesh::new((0..6).collect(), positions);
 
@@ -446,7 +446,7 @@ mod tests {
     #[test]
     fn test_merge_halfedges()
     {
-        let positions: Vec<f32> = vec![1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0,
+        let positions: Vec<f64> = vec![1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0,
                                        0.0, 0.0, 0.0,  1.0, 0.0, 0.0,  0.0, 0.0, 1.0];
         let mut mesh = Mesh::new((0..6).collect(), positions);
 
@@ -476,11 +476,11 @@ mod tests {
     fn test_face_face_merging_at_edge()
     {
         let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f32> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
+        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
         let mut mesh1 = MeshBuilder::new().with_indices(indices1).with_positions(positions1).build().unwrap();
 
         let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f32> = vec![-2.0, 0.0, 2.0, -2.0, 0.0, -2.0, -2.0, 0.5, 0.0];
+        let positions2: Vec<f64> = vec![-2.0, 0.0, 2.0, -2.0, 0.0, -2.0, -2.0, 0.5, 0.0];
         let mesh2 = MeshBuilder::new().with_indices(indices2).with_positions(positions2).build().unwrap();
 
         mesh1.merge_with(&mesh2).unwrap();
@@ -496,11 +496,11 @@ mod tests {
     fn test_face_face_merging_at_edge_when_orientation_is_opposite()
     {
         let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f32> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
+        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
         let mut mesh1 = MeshBuilder::new().with_indices(indices1).with_positions(positions1).build().unwrap();
 
         let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f32> = vec![-2.0, 0.0, 2.0, -2.0, 0.5, 0.0, -2.0, 0.0, -2.0];
+        let positions2: Vec<f64> = vec![-2.0, 0.0, 2.0, -2.0, 0.5, 0.0, -2.0, 0.0, -2.0];
         let mesh2 = MeshBuilder::new().with_indices(indices2).with_positions(positions2).build().unwrap();
 
         mesh1.merge_with(&mesh2).unwrap();

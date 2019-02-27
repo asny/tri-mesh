@@ -91,7 +91,7 @@ mod tests {
 
     fn create_connected_test_object() -> Mesh
     {
-        let positions: Vec<f32> = vec![
+        let positions: Vec<f64> = vec![
             1.0, -1.0, -1.0,
             1.0, -1.0, 1.0,
             -1.0, -1.0, 1.0,
@@ -121,7 +121,7 @@ mod tests {
 
     fn create_unconnected_test_object() -> Mesh
     {
-        let positions: Vec<f32> = vec![
+        let positions: Vec<f64> = vec![
             1.0, -1.0, -1.0,
             1.0, -1.0, 1.0,
             -1.0, -1.0, 1.0,

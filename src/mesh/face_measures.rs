@@ -29,7 +29,7 @@ impl Mesh
     }
 
     /// Returns the area of the face.
-    pub fn face_area(&self, face_id: FaceID) -> f32
+    pub fn face_area(&self, face_id: FaceID) -> f64
     {
         let mut walker = self.walker_from_face(face_id);
         let p0 = *self.vertex_position(walker.vertex_id().unwrap());

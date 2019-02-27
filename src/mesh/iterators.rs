@@ -154,7 +154,7 @@ impl Mesh
     ///     halfedge_length_average += mesh.edge_length(halfedge_id);
     ///     i += 1;
     /// }
-    /// halfedge_length_average /= i as f32;
+    /// halfedge_length_average /= i as f64;
     /// # assert_eq!(i, 36);
     /// ```
     ///
@@ -179,7 +179,7 @@ impl Mesh
     ///     edge_length_average += mesh.edge_length(halfedge_id);
     ///     i += 1;
     /// }
-    /// edge_length_average /= i as f32;
+    /// edge_length_average /= i as f64;
     /// # assert_eq!(i, 18);
     /// ```
     ///
@@ -227,7 +227,7 @@ impl Mesh
     ///     one_ring_average_position += *mesh.vertex_position(walker.vertex_id().unwrap());
     ///     i = i+1;
     /// }
-    /// one_ring_average_position /= i as f32;
+    /// one_ring_average_position /= i as f64;
     /// ```
     ///
     pub fn vertex_halfedge_iter(&self, vertex_id: VertexID) -> VertexHalfedgeIter
@@ -244,11 +244,11 @@ impl Mesh
     /// # use tri_mesh::prelude::*;
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
     /// # let face_id = mesh.face_iter().next().unwrap();
-    /// let mut face_circumference = 0.0f32;
+    /// let mut face_circumference = 0.0f64;
     /// for halfedge_id in mesh.face_halfedge_iter(face_id) {
     ///     face_circumference += mesh.edge_length(halfedge_id);
     /// }
-    /// # assert_eq!(face_circumference, 4.0f32 + 8.0f32.sqrt());
+    /// # assert_eq!(face_circumference, 4.0f64 + 8.0f64.sqrt());
     /// ```
     ///
     pub fn face_halfedge_iter(&self, face_id: FaceID) -> FaceHalfedgeIter
@@ -361,7 +361,7 @@ mod tests {
     #[test]
     fn test_vertex_halfedge_iterator_with_holes() {
         let indices: Vec<u32> = vec![0, 2, 3,  0, 4, 1,  0, 1, 2];
-        let positions: Vec<f32> = vec![0.0; 5 * 3];
+        let positions: Vec<f64> = vec![0.0; 5 * 3];
         let mesh = Mesh::new(indices, positions);
 
         let mut i = 0;

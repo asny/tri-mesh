@@ -11,14 +11,14 @@ pub mod math {
     pub use cgmath::*;
 
     /// Vector with three elements.
-    pub type Vec3 = Vector3<f32>;
+    pub type Vec3 = Vector3<f64>;
     /// Vector with four elements.
-    pub type Vec4 = Vector4<f32>;
+    pub type Vec4 = Vector4<f64>;
 
     /// 3x3 matrix.
-    pub type Mat3 = Matrix3<f32>;
+    pub type Mat3 = Matrix3<f64>;
     /// 4x4 matrix.
-    pub type Mat4 = Matrix4<f32>;
+    pub type Mat4 = Matrix4<f64>;
 }
 
 pub mod ids;
@@ -97,7 +97,7 @@ pub struct Mesh {
 
 impl Mesh
 {
-    pub(crate) fn new(indices: Vec<u32>, positions: Vec<f32>) -> Mesh
+    pub(crate) fn new(indices: Vec<u32>, positions: Vec<f64>) -> Mesh
     {
         let no_vertices = positions.len()/3;
         let no_faces = indices.len()/3;
@@ -272,7 +272,7 @@ mod tests {
     #[test]
     fn test_new_from_positions()
     {
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
                                        0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5];
 
@@ -287,7 +287,7 @@ mod tests {
     fn test_extreme_coordinates()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
         let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
 
         let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();

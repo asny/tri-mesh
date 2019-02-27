@@ -6,7 +6,7 @@ use tri_mesh::prelude::vec4 as vec4;
 use std::collections::HashMap;
 
 /// Loads the mesh and scale/translate it.
-fn on_startup(scene_center: &Vec3, scene_radius: f32) -> Mesh
+fn on_startup(scene_center: &Vec3, scene_radius: f64) -> Mesh
 {
     let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
     let (min, max) = mesh.extreme_coordinates();
@@ -27,7 +27,7 @@ fn on_click(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option
 }
 
 /// Morphs the vertices based on the computed weights.
-fn on_morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f32)
+fn on_morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f64)
 {
     for (vertex_id, weight) in weights.iter() {
         mesh.move_vertex_by(*vertex_id,weight * factor);
@@ -58,7 +58,7 @@ fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(Ve
 /// Compute a directional weight for each vertex to be used for the morph operation.
 fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -> HashMap<VertexID, Vec3>
 {
-    static SQR_MAX_DISTANCE: f32 = 1.0;
+    static SQR_MAX_DISTANCE: f64 = 1.0;
 
     // Use the smoothstep function to get a smooth morphing
     let smoothstep_function = |sqr_distance| {
@@ -102,8 +102,10 @@ use dust::window::{event::*, Window};
 fn main()
 {
     let scene_radius = 10.0;
-    let scene_center = vec3(0.0, 5.0, 0.0);
-    let mut mesh = on_startup(&scene_center, scene_radius);
+    let scene_center = dust::vec3(0.0, 5.0, 0.0);
+    let mut mesh = on_startup(&vec3(scene_center.x as f64, scene_center.y as f64, scene_center.z as f64), scene_radius as f64);
+    let positions: Vec<f32> = mesh.positions_buffer().iter().map(|v| *v as f32).collect();
+    let normals: Vec<f32> = mesh.normals_buffer().iter().map(|v| *v as f32).collect();
 
     let mut window = Window::new_default("Morph tool").unwrap();
     let (framebuffer_width, framebuffer_height) = window.framebuffer_size();
@@ -118,12 +120,12 @@ fn main()
                                                     vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
 
     // Objects
-    let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
-    model.color = vec3(0.8, 0.8, 0.8);
-
-    let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &mesh.positions_buffer(), 0.02);
+    let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &positions, 0.02);
     wireframe_model.set_parameters(0.8, 0.2, 5.0);
     wireframe_model.set_color(&vec3(0.9, 0.2, 0.2));
+
+    let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (positions, 3), "normal" => (normals, 3)]).unwrap();
+    model.color = vec3(0.8, 0.8, 0.8);
 
     let plane_positions: Vec<f32> = vec![
         -1.0, 0.0, -1.0,
@@ -191,7 +193,7 @@ fn main()
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
                             let dir = camera.view_direction_at((x, y));
-                            weights = on_click(&mesh,&p, &dir);
+                            weights = on_click(&mesh,&vec3(p.x as f64, p.y as f64, p.z as f64), &vec3(dir.x as f64, dir.y as f64, dir.z as f64));
                             if weights.is_none() {
                                 camera_handler.start_rotation();
                             }
@@ -209,9 +211,11 @@ fn main()
                     camera_handler.rotate(&mut camera, delta.0 as f32, delta.1 as f32);
                     if let Some(ref w) = weights
                     {
-                        on_morph(&mut mesh, w, 0.001 * delta.1 as f32);
-                        model.update_attributes(&att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
-                        wireframe_model.update_positions(&mesh.positions_buffer());
+                        on_morph(&mut mesh, w, 0.001 * delta.1);
+                        let positions: Vec<f32> = mesh.positions_buffer().iter().map(|v| *v as f32).collect();
+                        let normals: Vec<f32> = mesh.normals_buffer().iter().map(|v| *v as f32).collect();
+                        wireframe_model.update_positions(&positions);
+                        model.update_attributes(&att!["position" => (positions, 3), "normal" => (normals, 3)]).unwrap();
                     }
                 }
             }

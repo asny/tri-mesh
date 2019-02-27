@@ -10,7 +10,7 @@ impl Mesh
 {
     /// Moves the vertices to `pos + factor * (avg_pos - pos)` where `pos` is the current position
     /// and `avg_pos` is the average position of the neighbouring vertices.
-    pub fn smooth_vertices(&mut self, factor: f32)
+    pub fn smooth_vertices(&mut self, factor: f64)
     {
         let mut map = HashMap::new();
         for vertex_id in self.vertex_iter() {
@@ -21,7 +21,7 @@ impl Mesh
                 avg_pos = avg_pos + *self.vertex_position(vid);
                 i = i + 1;
             }
-            avg_pos = avg_pos / i as f32;
+            avg_pos = avg_pos / i as f64;
             let p = self.vertex_position(vertex_id);
             map.insert(vertex_id, p + factor * (avg_pos - p));
         }
@@ -32,7 +32,7 @@ impl Mesh
     }
 
     /// Collapse an edge of faces which has an area smaller than `area_threshold`.
-    pub fn collapse_small_faces(&mut self, area_threshold: f32)
+    pub fn collapse_small_faces(&mut self, area_threshold: f64)
     {
         let mut faces_to_test = HashSet::new();
         self.face_iter().for_each(|f| { faces_to_test.insert(f); } );
@@ -69,7 +69,7 @@ impl Mesh
     /// (1: Completely flat, 0: 90 degrees angle between normals)
     /// * where the flip will not result in inverted triangles
     ///
-    pub fn flip_edges(&mut self, flatness_threshold: f32)
+    pub fn flip_edges(&mut self, flatness_threshold: f64)
     {
         let insert_or_remove = |mesh: &Mesh, to_be_flipped: &mut HashSet<HalfEdgeID>, halfedge_id: HalfEdgeID| {
             let twin_id = mesh.walker_from_halfedge(halfedge_id).twin_id().unwrap();
@@ -98,7 +98,7 @@ impl Mesh
         }
     }
 
-    fn should_flip(&self, halfedge_id: HalfEdgeID, flatness_threshold: f32) -> bool
+    fn should_flip(&self, halfedge_id: HalfEdgeID, flatness_threshold: f64) -> bool
     {
         !self.is_edge_on_boundary(halfedge_id)
             && self.flatness(halfedge_id) > flatness_threshold
@@ -107,7 +107,7 @@ impl Mesh
     }
 
     // 1 = Completely flat, 0 = 90 degrees angle between normals
-    fn flatness(&self, haledge_id: HalfEdgeID) -> f32
+    fn flatness(&self, haledge_id: HalfEdgeID) -> f64
     {
         let mut walker = self.walker_from_halfedge(haledge_id);
         let face_id1 = walker.face_id().unwrap();
@@ -140,7 +140,7 @@ impl Mesh
 }
 
 // Quality measure of 1 = good (equilateral) and >> 1 = bad (needle or flattened)
-fn triangle_quality(p0: &Vec3, p1: &Vec3, p2: &Vec3) -> f32
+fn triangle_quality(p0: &Vec3, p1: &Vec3, p2: &Vec3) -> f64
 {
     let length01 = (p0-p1).magnitude();
     let length02 = (p0-p2).magnitude();
@@ -161,7 +161,7 @@ mod tests {
     fn test_collapse_small_faces()
     {
         let indices: Vec<u32> = vec![0, 2, 3,  0, 3, 1,  0, 1, 2];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 0.1,  0.1, 0.0, -0.1,  -1.0, 0.0, -0.5];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 0.1,  0.1, 0.0, -0.1,  -1.0, 0.0, -0.5];
         let mut mesh = Mesh::new(indices, positions);
 
         mesh.collapse_small_faces(0.2);

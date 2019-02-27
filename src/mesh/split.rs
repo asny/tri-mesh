@@ -130,8 +130,8 @@ fn face_and_face_overlaps(mesh1: &Mesh, face_id1: FaceID, mesh2: &Mesh, face_id2
 
 fn point_and_point_intersects(point1: &Vec3, point2: &Vec3) -> bool
 {
-    const MARGIN: f32 = 0.00001;
-    const SQR_MARGIN: f32 = MARGIN * MARGIN;
+    const MARGIN: f64 = 0.00001;
+    const SQR_MARGIN: f64 = MARGIN * MARGIN;
     (point1 - point2).magnitude2() < SQR_MARGIN
 }
 
@@ -372,7 +372,7 @@ mod tests {
     fn test_clone_subset()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  2, 1, 3,  3, 1, 4,  3, 4, 5];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5,  0.0, 0.0, 2.0,  1.0, 0.0, 2.5];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5,  0.0, 0.0, 2.0,  1.0, 0.0, 2.5];
         let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
 
         let mut faces = std::collections::HashSet::new();
@@ -394,7 +394,7 @@ mod tests {
     fn test_split()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  2, 1, 3,  3, 1, 4,  3, 4, 5];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5,  0.0, 0.0, 2.0,  1.0, 0.0, 2.5];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5,  0.0, 0.0, 2.0,  1.0, 0.0, 2.5];
         let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
 
         let meshes = mesh.split(&|mesh,
@@ -419,11 +419,11 @@ mod tests {
     fn test_face_face_stitching_at_edge()
     {
         let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f32> = vec![-2.0, 0.0, -2.0,  -2.0, 0.0, 2.0,  2.0, 0.0, 0.0];
+        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0,  -2.0, 0.0, 2.0,  2.0, 0.0, 0.0];
         let mut mesh1 = MeshBuilder::new().with_positions(positions1).with_indices(indices1).build().unwrap();
 
         let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f32> = vec![-2.0, 0.0, 2.0,  -2.0, 0.0, -2.0,  -2.0, 0.5, 0.0];
+        let positions2: Vec<f64> = vec![-2.0, 0.0, 2.0,  -2.0, 0.0, -2.0,  -2.0, 0.5, 0.0];
         let mut mesh2 = MeshBuilder::new().with_positions(positions2).with_indices(indices2).build().unwrap();
 
         let (meshes1, meshes2) = mesh1.split_at_intersection(&mut mesh2);
@@ -448,11 +448,11 @@ mod tests {
     fn test_face_face_stitching_at_mid_edge()
     {
         let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f32> = vec![-2.0, 0.0, -2.0,  -2.0, 0.0, 2.0,  2.0, 0.0, 0.0];
+        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0,  -2.0, 0.0, 2.0,  2.0, 0.0, 0.0];
         let mut mesh1 = MeshBuilder::new().with_positions(positions1).with_indices(indices1).build().unwrap();
 
         let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f32> = vec![-2.0, 0.0, 1.0,  -2.0, 0.0, -1.0,  -2.0, 0.5, 0.0];
+        let positions2: Vec<f64> = vec![-2.0, 0.0, 1.0,  -2.0, 0.0, -1.0,  -2.0, 0.5, 0.0];
         let mut mesh2 = MeshBuilder::new().with_positions(positions2).with_indices(indices2).build().unwrap();
 
         let (meshes1, meshes2) = mesh1.split_at_intersection(&mut mesh2);
@@ -594,7 +594,7 @@ mod tests {
     {
         let mesh1 = create_simple_mesh_x_z();
         let indices: Vec<u32> = vec![0, 1, 2];
-        let positions: Vec<f32> = vec![0.5, -0.5, 0.0,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
+        let positions: Vec<f64> = vec![0.5, -0.5, 0.0,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
         let mesh2 = MeshBuilder::new().with_positions(positions).with_indices(indices).build().unwrap();
 
         let intersections = find_intersections(&mesh1, &mesh2);
@@ -606,7 +606,7 @@ mod tests {
     {
         let mesh1 = create_simple_mesh_x_z();
         let indices: Vec<u32> = vec![0, 1, 2];
-        let positions: Vec<f32> = vec![0.5, 0.0, 0.5,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
+        let positions: Vec<f64> = vec![0.5, 0.0, 0.5,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
         let mesh2 = MeshBuilder::new().with_positions(positions).with_indices(indices).build().unwrap();
 
         let intersections = find_intersections(&mesh1, &mesh2);
@@ -618,7 +618,7 @@ mod tests {
     {
         let mesh1 = create_simple_mesh_x_z();
         let indices: Vec<u32> = vec![0, 1, 2];
-        let positions: Vec<f32> = vec![0.5, 0.0, 0.25,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
+        let positions: Vec<f64> = vec![0.5, 0.0, 0.25,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
         let mesh2 = MeshBuilder::new().with_positions(positions).with_indices(indices).build().unwrap();
 
         let intersections = find_intersections(&mesh1, &mesh2);
@@ -630,7 +630,7 @@ mod tests {
     {
         let mesh1 = create_simple_mesh_x_z();
         let indices: Vec<u32> = vec![0, 1, 2];
-        let positions: Vec<f32> = vec![1.0, 0.0, 0.5,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
+        let positions: Vec<f64> = vec![1.0, 0.0, 0.5,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
         let mesh2 = MeshBuilder::new().with_positions(positions).with_indices(indices).build().unwrap();
 
         let intersections = find_intersections(&mesh1, &mesh2);
@@ -693,12 +693,12 @@ mod tests {
     fn test_split_face_two_times()
     {
         let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f32> = vec![-2.0, 0.0, -2.0,  -2.0, 0.0, 2.0,  2.0, 0.0, 0.0];
+        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0,  -2.0, 0.0, 2.0,  2.0, 0.0, 0.0];
         let mut mesh1 = MeshBuilder::new().with_positions(positions1).with_indices(indices1).build().unwrap();
         let area1 = mesh1.face_area(mesh1.face_iter().next().unwrap());
 
         let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f32> = vec![0.2, -0.2, 0.5,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
+        let positions2: Vec<f64> = vec![0.2, -0.2, 0.5,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
         let mut mesh2 = MeshBuilder::new().with_positions(positions2).with_indices(indices2).build().unwrap();
 
         let intersections = find_intersections(&mesh1, &mesh2);
@@ -732,11 +732,11 @@ mod tests {
     fn test_split_edge_two_times()
     {
         let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 2.0,  2.0, 0.0, 0.0];
+        let positions1: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 2.0,  2.0, 0.0, 0.0];
         let mut mesh1 = MeshBuilder::new().with_positions(positions1).with_indices(indices1).build().unwrap();
 
         let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f32> = vec![0.0, -0.2, 0.5,  0.0, -0.2, 1.5,  0.0, 1.5, 0.0];
+        let positions2: Vec<f64> = vec![0.0, -0.2, 0.5,  0.0, -0.2, 1.5,  0.0, 1.5, 0.0];
         let mut mesh2 = MeshBuilder::new().with_positions(positions2).with_indices(indices2).build().unwrap();
 
         let intersections = find_intersections(&mesh1, &mesh2);
@@ -764,11 +764,11 @@ mod tests {
     fn test_face_face_splitting()
     {
         let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f32> = vec![-2.0, 0.0, -2.0,  -2.0, 0.0, 2.0,  2.0, 0.0, 0.0];
+        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0,  -2.0, 0.0, 2.0,  2.0, 0.0, 0.0];
         let mut mesh1 = MeshBuilder::new().with_positions(positions1).with_indices(indices1).build().unwrap();
 
         let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f32> = vec![0.2, -0.2, 0.5,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
+        let positions2: Vec<f64> = vec![0.2, -0.2, 0.5,  0.5, 0.5, 0.75,  0.5, 0.5, 0.0];
         let mut mesh2 = MeshBuilder::new().with_positions(positions2).with_indices(indices2).build().unwrap();
 
         mesh1.split_primitives_at_intersection(&mut mesh2);
@@ -812,21 +812,21 @@ mod tests {
     fn create_simple_mesh_x_z() -> Mesh
     {
         let indices: Vec<u32> = vec![0, 1, 2,  2, 1, 3,  3, 1, 4,  3, 4, 5];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5,  0.0, 0.0, 2.0,  1.0, 0.0, 2.5];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.5,  1.0, 0.0, 1.5,  0.0, 0.0, 2.0,  1.0, 0.0, 2.5];
         MeshBuilder::new().with_positions(positions).with_indices(indices).build().unwrap()
     }
 
     fn create_simple_mesh_y_z() -> Mesh
     {
         let indices: Vec<u32> = vec![0, 1, 2,  2, 1, 3,  3, 1, 4,  3, 4, 5];
-        let positions: Vec<f32> = vec![0.5, -0.5, 0.0,  0.5, -0.5, 1.0,  0.5, 0.5, 0.5,  0.5, 0.5, 1.5,  0.5, -0.5, 2.0,  0.5, 0.5, 2.5];
+        let positions: Vec<f64> = vec![0.5, -0.5, 0.0,  0.5, -0.5, 1.0,  0.5, 0.5, 0.5,  0.5, 0.5, 1.5,  0.5, -0.5, 2.0,  0.5, 0.5, 2.5];
         MeshBuilder::new().with_positions(positions).with_indices(indices).build().unwrap()
     }
 
     fn create_shifted_simple_mesh_y_z() -> Mesh
     {
         let indices: Vec<u32> = vec![0, 1, 2,  2, 1, 3,  3, 1, 4,  3, 4, 5];
-        let positions: Vec<f32> = vec![0.5, -0.5, -0.2,  0.5, -0.5, 0.8,  0.5, 0.5, 0.3,  0.5, 0.5, 1.3,  0.5, -0.5, 1.8,  0.5, 0.5, 2.3];
+        let positions: Vec<f64> = vec![0.5, -0.5, -0.2,  0.5, -0.5, 0.8,  0.5, 0.5, 0.3,  0.5, 0.5, 1.3,  0.5, -0.5, 1.8,  0.5, 0.5, 2.3];
         MeshBuilder::new().with_positions(positions).with_indices(indices).build().unwrap()
     }
 }

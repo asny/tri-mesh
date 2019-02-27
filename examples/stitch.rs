@@ -5,7 +5,7 @@ use tri_mesh::prelude::vec3 as vec3;
 use tri_mesh::prelude::vec4 as vec4;
 
 /// Loads the meshes and scale/translate it.
-fn on_startup(scene_center: &Vec3, scene_radius: f32) -> (Mesh, Mesh)
+fn on_startup(scene_center: &Vec3, scene_radius: f64) -> (Mesh, Mesh)
 {
     let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
     transform(&mut mesh, scene_center, scene_radius);
@@ -15,7 +15,7 @@ fn on_startup(scene_center: &Vec3, scene_radius: f32) -> (Mesh, Mesh)
 }
 
 /// Translates the mesh to the scene center and scales it such that the size of the biggest side of the bounding box is half a scene radius
-fn transform(mesh: &mut Mesh, scene_center: &Vec3, scene_radius: f32)
+fn transform(mesh: &mut Mesh, scene_center: &Vec3, scene_radius: f64)
 {
     let (min, max) = mesh.extreme_coordinates();
     mesh.translate(-0.5 * (max + min)); // Translate such that the mesh center is in origo.
@@ -49,8 +49,8 @@ use dust::window::{event::*, Window};
 fn main()
 {
     let scene_radius = 10.0;
-    let scene_center = vec3(0.0, 5.0, 0.0);
-    let (mut mesh, mut other_mesh) = on_startup(&scene_center, scene_radius);
+    let scene_center = dust::vec3(0.0, 5.0, 0.0);
+    let (mut mesh, mut other_mesh) = on_startup(&vec3(scene_center.x as f64, scene_center.y as f64, scene_center.z as f64), scene_radius as f64);
 
     let mut window = Window::new_default("Stitch tool").unwrap();
     let (framebuffer_width, framebuffer_height) = window.framebuffer_size();
@@ -65,12 +65,15 @@ fn main()
                                                     vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
 
     // Objects
-    let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
-    model.color = vec3(0.8, 0.8, 0.8);
+    let positions: Vec<f32> = mesh.positions_buffer().iter().map(|v| *v as f32).collect();
+    let normals: Vec<f32> = mesh.normals_buffer().iter().map(|v| *v as f32).collect();
 
-    let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &mesh.positions_buffer(), 0.02);
+    let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &positions, 0.02);
     wireframe_model.set_parameters(0.8, 0.2, 5.0);
     wireframe_model.set_color(&vec3(0.9, 0.2, 0.2));
+
+    let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (positions, 3), "normal" => (normals, 3)]).unwrap();
+    model.color = vec3(0.8, 0.8, 0.8);
 
     let plane_positions: Vec<f32> = vec![
         -1.0, 0.0, -1.0,
@@ -96,22 +99,22 @@ fn main()
     let mut ambient_light = light::AmbientLight::new();
     ambient_light.base.intensity = 0.4;
 
-    let mut dir = vec3(-1.0, -1.0, -1.0).normalize();
+    let mut dir = dust::vec3(-1.0, -1.0, -1.0).normalize();
     let mut light1 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
     light1.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light1.base.intensity = 0.75;
 
-    dir = vec3(-1.0, -1.0, 1.0).normalize();
+    dir = dust::vec3(-1.0, -1.0, 1.0).normalize();
     let mut light2 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
     light2.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light2.base.intensity = 0.75;
 
-    dir = vec3(1.0, -1.0, 1.0).normalize();
+    dir = dust::vec3(1.0, -1.0, 1.0).normalize();
     let mut light3 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
     light3.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light3.base.intensity = 0.75;
 
-    dir = vec3(1.0, -1.0, -1.0).normalize();
+    dir = dust::vec3(1.0, -1.0, -1.0).normalize();
     let mut light4 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
     light4.enable_shadows(&gl, scene_radius * 4.0).unwrap();
     light4.base.intensity = 0.75;
@@ -139,14 +142,18 @@ fn main()
                                 let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                                 let p = camera.position();
                                 let dir = camera.view_direction_at((x, y));
-                                let result_click = on_click(&mut mesh, &mut other_mesh, &p, &dir).unwrap_or_else(|e|{println!("Error: {:?}", e); None});
+                                let result_click = on_click(&mut mesh, &mut other_mesh, &vec3(p.x as f64, p.y as f64, p.z as f64), &vec3(dir.x as f64, dir.y as f64, dir.z as f64)).unwrap_or_else(|e|{println!("Error: {:?}", e); None});
                                 if let Some(mesh) = result_click {
-                                    let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (mesh.positions_buffer(), 3), "normal" => (mesh.normals_buffer(), 3)]).unwrap();
-                                    model.color = vec3(0.8, 0.8, 0.8);
+                                    let positions: Vec<f32> = mesh.positions_buffer().iter().map(|v| *v as f32).collect();
+                                    let normals: Vec<f32> = mesh.normals_buffer().iter().map(|v| *v as f32).collect();
 
-                                    let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &mesh.positions_buffer(), 0.02);
+                                    let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &positions, 0.02);
                                     wireframe_model.set_parameters(0.8, 0.2, 5.0);
                                     wireframe_model.set_color(&vec3(0.9, 0.2, 0.2));
+
+                                    let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (positions, 3), "normal" => (normals, 3)]).unwrap();
+                                    model.color = vec3(0.8, 0.8, 0.8);
+
                                     results = Some((model, wireframe_model))
                                 }
                             }

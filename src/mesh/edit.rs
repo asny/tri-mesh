@@ -515,7 +515,7 @@ mod tests {
     fn test_collapse_edge_on_boundary1()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  1, 3, 2,  2, 3, 4  ];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0,  2.0, 0.0, 0.5];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0,  2.0, 0.0, 0.5];
         let mut mesh = Mesh::new(indices, positions);
 
         for halfedge_id in mesh.halfedge_iter()
@@ -540,7 +540,7 @@ mod tests {
     fn test_collapse_edge_on_boundary2()
     {
         let indices: Vec<u32> = vec![0, 2, 3,  0, 3, 1];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0];
         let mut mesh = Mesh::new(indices, positions);
         for halfedge_id in mesh.halfedge_iter()
         {
@@ -582,7 +582,7 @@ mod tests {
     fn test_recursive_collapse_edge()
     {
         let indices: Vec<u32> = vec![0, 1, 2,  1, 3, 2,  2, 3, 4  ];
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0,  2.0, 0.0, 0.5];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  1.0, 0.0, 1.0,  2.0, 0.0, 0.5];
         let mut mesh = Mesh::new(indices, positions);
 
         while mesh.no_faces() > 1 {
@@ -603,7 +603,7 @@ mod tests {
     #[test]
     fn test_remove_face_when_unconnected()
     {
-        let positions: Vec<f32> = vec![1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0,
+        let positions: Vec<f64> = vec![1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0,
                                        1.0, 0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, -1.0];
         let mut mesh = Mesh::new((0..6).collect(), positions);
 

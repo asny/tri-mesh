@@ -202,7 +202,7 @@ mod tests {
     #[test]
     fn test_face_point_intersection_when_point_in_plane()
     {
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
         let mut mesh = MeshBuilder::new().with_positions(positions).build().unwrap();
         mesh.scale(3.0);
         let face_id = mesh.face_iter().next().unwrap();
@@ -246,7 +246,7 @@ mod tests {
     #[test]
     fn test_edge_point_intersection()
     {
-        let positions: Vec<f32> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
         let mut mesh = MeshBuilder::new().with_positions(positions).build().unwrap();
         mesh.scale(3.0);
         let mut edge_id = mesh.halfedge_iter().next().unwrap();
@@ -371,8 +371,8 @@ mod tests {
 mod utility {
     use crate::prelude::*;
 
-    pub const MARGIN: f32 = 0.00001;
-    pub const SQR_MARGIN: f32 = MARGIN * MARGIN;
+    pub const MARGIN: f64 = 0.0000001;
+    pub const SQR_MARGIN: f64 = MARGIN * MARGIN;
 
     #[derive(Debug, PartialEq)]
     pub enum PlaneLinepieceIntersectionResult
@@ -413,7 +413,7 @@ mod utility {
         }
     }
 
-    pub fn plane_ray_intersection(ray_start_point: &Vec3, ray_direction: &Vec3, plane_point: &Vec3, plane_normal: &Vec3) -> Option<f32>
+    pub fn plane_ray_intersection(ray_start_point: &Vec3, ray_direction: &Vec3, plane_point: &Vec3, plane_normal: &Vec3) -> Option<f64>
     {
         let denom = plane_normal.dot( *ray_direction);
         if denom.abs() >= MARGIN {
@@ -428,7 +428,7 @@ mod utility {
 
     // Compute barycentric coordinates (u, v, w) for
     // point p with respect to triangle (a, b, c)
-    pub fn barycentric(p: &Vec3, a: &Vec3, b: &Vec3, c: &Vec3) -> (f32, f32, f32)
+    pub fn barycentric(p: &Vec3, a: &Vec3, b: &Vec3, c: &Vec3) -> (f64, f64, f64)
     {
         let v0 = b - a;
         let v1 = c - a;
@@ -445,7 +445,7 @@ mod utility {
         (u, v, w)
     }
 
-    pub fn point_line_segment_distance( point: &Vec3, p0: &Vec3, p1: &Vec3 ) -> f32
+    pub fn point_line_segment_distance( point: &Vec3, p0: &Vec3, p1: &Vec3 ) -> f64
     {
         let v  = p1 - p0;
         let w  = point - p0;
@@ -487,10 +487,10 @@ mod utility {
 
             assert_eq!(point_line_segment_distance(&vec3(0.0, 0.0, 0.0), &a, &b), 0.0);
             assert_eq!(point_line_segment_distance(&vec3(1.0, 0.0, 1.0), &a, &b), 0.0);
-            assert_eq!(point_line_segment_distance(&vec3(0.0, 0.0, 1.0), &a, &b), 0.5 * 2.0f32.sqrt());
+            assert_eq!(point_line_segment_distance(&vec3(0.0, 0.0, 1.0), &a, &b), 0.5 * 2.0f64.sqrt());
             assert_eq!(point_line_segment_distance(&vec3(0.5, 0.0, 0.5), &a, &b), 0.0);
             assert_eq!(point_line_segment_distance(&vec3(0.0, 0.0, -0.25), &a, &b), 0.25);
-            assert_eq!(point_line_segment_distance(&vec3(0.25, 0.0, 0.0), &a, &b), 0.5 * (2.0 * 0.25f32 * 0.25f32).sqrt());
+            assert_eq!(point_line_segment_distance(&vec3(0.25, 0.0, 0.0), &a, &b), 0.5 * (2.0 * 0.25f64 * 0.25f64).sqrt());
         }
 
         #[test]
@@ -539,7 +539,7 @@ mod utility {
             let n = vec3(0.0, 0.0, -1.0);
 
             let p0 = vec3(0.0, 0.0, 0.0);
-            let p1 = vec3(0.0, 1.0, 1.0 - MARGIN);
+            let p1 = vec3(0.0, 1.0, 1.0 - 1.0001 * MARGIN);
 
             let result = plane_line_piece_intersection(&p0, &p1, &p, &n);
             assert_eq!(result, None);

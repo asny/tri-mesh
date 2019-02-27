@@ -103,7 +103,7 @@ impl Mesh
     ///
     /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
     ///
-    pub fn positions_buffer(&self) -> Vec<f32>
+    pub fn positions_buffer(&self) -> Vec<f64>
     {
         let mut positions = Vec::with_capacity(self.no_vertices() * 3);
         for position in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
@@ -123,7 +123,7 @@ impl Mesh
     ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
-    pub fn normals_buffer(&self) -> Vec<f32>
+    pub fn normals_buffer(&self) -> Vec<f64>
     {
         let mut normals = Vec::with_capacity(self.no_vertices() * 3);
         for vertex_id in self.vertex_iter() {
@@ -136,7 +136,7 @@ impl Mesh
     /// Returns the positions of the face corners in an array which is meant to be used for visualisation.
     /// See [this](#non-index-based-arrays) example.
     ///
-    pub fn non_indexed_positions_buffer(&self) -> Vec<f32>
+    pub fn non_indexed_positions_buffer(&self) -> Vec<f64>
     {
         let mut positions = Vec::with_capacity(self.no_faces() * 3 * 3);
         for face_id in self.face_iter()
@@ -157,7 +157,7 @@ impl Mesh
     ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
-    pub fn non_indexed_normals_buffer(&self) -> Vec<f32>
+    pub fn non_indexed_normals_buffer(&self) -> Vec<f64>
     {
         let mut normals = Vec::with_capacity(self.no_faces() * 3 * 3);
         for face_id in self.face_iter()
@@ -202,7 +202,7 @@ impl Mesh
     }
 }
 
-fn push_vec3(vec: &mut Vec<f32>, vec3: crate::mesh::math::Vec3)
+fn push_vec3(vec: &mut Vec<f64>, vec3: crate::mesh::math::Vec3)
 {
     for i in 0..3 {
         vec.push(vec3[i]);
