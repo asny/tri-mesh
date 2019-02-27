@@ -169,8 +169,7 @@ impl Mesh
     {
         let p = *self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
         let n = self.face_normal(face_id);
-        let v = (point - p).normalize();
-        if n.dot(v).abs() > MARGIN { return None; }
+        if n.dot(point - p).abs() > MARGIN { return None; }
 
         self.face_point_intersection_when_point_in_plane(face_id, point)
     }
