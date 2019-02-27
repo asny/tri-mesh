@@ -17,11 +17,10 @@
 //! - [Merge](mesh/struct.Mesh.html#merge) used for merging of entire meshes (e.g. append one mesh to another or merge overlapping primitives in a mesh)
 //! - [Split](mesh/struct.Mesh.html#split) functionality (e.g. clone a subset of a mesh or split two meshes at their intersection)
 //! - [Export](mesh/struct.Mesh.html#export) functionality (methods for extracting raw float buffers which can be used for visualisation)
+//! - And more..
 //!
 //! All functionality is implemented as methods on the [Mesh](crate::mesh::Mesh) struct, so take a look at that rather long list of methods for a complete overview.
 //! Also, to construct a new mesh, use the [Mesh builder](crate::mesh_builder::MeshBuilder).
-//!
-//! For more advanced mesh algorithms, take a look at the [geo-proc](https://github.com/asny/geo-proc) crate.
 //!
 
 #![warn(missing_docs)]
