@@ -540,7 +540,7 @@ mod tests {
         let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
         mesh2.translate(vec3(0.5, 0.5, 0.5));
 
-        let (mut meshes1, mut meshes2) = mesh1.split_at_intersection(&mut mesh2);
+        let (meshes1, meshes2) = mesh1.split_at_intersection(&mut mesh2);
 
         let mut result = meshes1.first().unwrap().clone();
         result.merge_with(meshes2.first().unwrap()).unwrap();
