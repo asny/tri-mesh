@@ -25,17 +25,24 @@ fn transform(mesh: &mut Mesh, scene_center: &Vec3, scene_radius: f64)
 }
 
 /// When the user clicks, we see if the model is hit. If it is, we compute the morph weights from the picking point.
-fn on_click(mesh: &mut Mesh, other_mesh: &mut Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Result<Option<Mesh>, tri_mesh::mesh::Error>
+fn on_click(mesh: &mut Mesh, other_mesh: &mut Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<Vec<Mesh>>
 {
     if let Some(Intersection::Point {point, ..}) = mesh.ray_intersection(ray_start_point, ray_direction) {
         other_mesh.translate(point - other_mesh.axis_aligned_bounding_box_center());
-        let (meshes1, meshes2) = mesh.split_at_intersection(other_mesh);
-        let mut result_mesh = meshes1.first().unwrap().clone();
+        let (mut meshes1, mut meshes2) = mesh.split_at_intersection(other_mesh);
 
-        result_mesh.merge_with(meshes2.first().unwrap())?;
-        Ok(Some(result_mesh))
+        let mut result_meshes = Vec::new();
+        for mut mesh1 in meshes1.drain(..) {
+            for mesh2 in meshes2.iter_mut() {
+                if mesh1.merge_with(mesh2).is_ok()
+                {
+                    result_meshes.push(mesh1.clone());
+                }
+            }
+        }
+        if result_meshes.len() == 0 { None } else {Some(result_meshes)}
     }
-    else {Ok(None)}
+    else {None}
 }
 
 ///
@@ -121,7 +128,8 @@ fn main()
 
     let mut camera_handler = camerahandler::CameraHandler::new(camerahandler::CameraState::SPHERICAL);
 
-    let mut results: Option<(ShadedMesh, Wireframe)> = None;
+    let mut chosen = 0;
+    let mut results: Option<Vec<(Mesh, ShadedMesh, Wireframe)>> = None;
     // main loop
     window.render_loop(move |events, _elapsed_time|
     {
@@ -138,26 +146,41 @@ fn main()
                     {
                         if *state == State::Pressed
                         {
-                            if results.is_none() {
-                                let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
-                                let p = camera.position();
-                                let dir = camera.view_direction_at((x, y));
-                                let result_click = on_click(&mut mesh, &mut other_mesh, &vec3(p.x as f64, p.y as f64, p.z as f64), &vec3(dir.x as f64, dir.y as f64, dir.z as f64)).unwrap_or_else(|e|{println!("Error: {:?}", e); None});
-                                if let Some(mesh) = result_click {
-                                    let positions: Vec<f32> = mesh.positions_buffer().iter().map(|v| *v as f32).collect();
-                                    let normals: Vec<f32> = mesh.normals_buffer().iter().map(|v| *v as f32).collect();
-
-                                    let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &positions, 0.02);
-                                    wireframe_model.set_parameters(0.8, 0.2, 5.0);
-                                    wireframe_model.set_color(&vec3(0.9, 0.2, 0.2));
-
-                                    let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (positions, 3), "normal" => (normals, 3)]).unwrap();
-                                    model.color = vec3(0.8, 0.8, 0.8);
-
-                                    results = Some((model, wireframe_model))
+                            let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
+                            let p = camera.position();
+                            let dir = camera.view_direction_at((x, y));
+                            if let Some(ref result) = results {
+                                if let Some(Intersection::Point {..}) = result[chosen].0.ray_intersection(&vec3(p.x as f64, p.y as f64, p.z as f64), &vec3(dir.x as f64, dir.y as f64, dir.z as f64)) {
+                                    chosen = (chosen + 1) % result.len();
+                                    println!("{}", chosen);
+                                }
+                                else {
+                                    camera_handler.start_rotation();
                                 }
                             }
-                            camera_handler.start_rotation();
+                            else {
+                                if let Some(mut meshes) = on_click(&mut mesh, &mut other_mesh, &vec3(p.x as f64, p.y as f64, p.z as f64), &vec3(dir.x as f64, dir.y as f64, dir.z as f64)) {
+                                    let mut result = Vec::new();
+                                    for mesh in meshes.drain(..) {
+                                        let positions: Vec<f32> = mesh.positions_buffer().iter().map(|v| *v as f32).collect();
+                                        let normals: Vec<f32> = mesh.normals_buffer().iter().map(|v| *v as f32).collect();
+
+                                        let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &positions, 0.02);
+                                        wireframe_model.set_parameters(0.8, 0.2, 5.0);
+                                        wireframe_model.set_color(&vec3(0.9, 0.2, 0.2));
+
+                                        let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (positions, 3), "normal" => (normals, 3)]).unwrap();
+                                        model.color = vec3(0.8, 0.8, 0.8);
+
+                                        result.push((mesh, model, wireframe_model));
+                                    }
+                                    results = Some(result);
+
+                                }
+                                else {
+                                    camera_handler.start_rotation();
+                                }
+                            }
                         }
                         else {
                             camera_handler.end_rotation()
@@ -166,6 +189,7 @@ fn main()
                     else if *button == MouseButton::Right && *state == State::Pressed
                     {
                         results = None;
+                        chosen = 0;
                     }
                 },
                 Event::MouseWheel {delta} => {
@@ -180,10 +204,10 @@ fn main()
         // Draw
         let render_scene = |camera: &Camera| {
             let model_matrix = dust::Mat4::identity();
-            if let Some((ref m, ref w)) = results
+            if let Some(ref result) = results
             {
-                m.render(&model_matrix, camera);
-                w.render(camera);
+                result[chosen].1.render(&model_matrix, camera);
+                result[chosen].2.render(camera);
             }
             else {
                 model.render(&model_matrix, camera);
