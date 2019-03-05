@@ -24,19 +24,20 @@ fn transform(mesh: &mut Mesh, scene_center: &Vec3, scene_radius: f64)
     mesh.translate(*scene_center); // Translate the mesh to the scene center
 }
 
-/// When the user clicks, we see if the model is hit. If it is, we compute the morph weights from the picking point.
+/// When the user clicks, we see if the model is hit.
 fn on_click(mesh: &mut Mesh, other_mesh: &mut Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<Vec<Mesh>>
 {
     if let Some(Intersection::Point {point, ..}) = mesh.ray_intersection(ray_start_point, ray_direction) {
         other_mesh.translate(point - other_mesh.axis_aligned_bounding_box_center());
-        let (mut meshes1, mut meshes2) = mesh.split_at_intersection(other_mesh);
+        let (meshes1, mut meshes2) = mesh.split_at_intersection(other_mesh);
 
         let mut result_meshes = Vec::new();
-        for mut mesh1 in meshes1.drain(..) {
+        for mesh1 in meshes1.iter() {
             for mesh2 in meshes2.iter_mut() {
-                if mesh1.merge_with(mesh2).is_ok()
+                let mut result = mesh1.clone();
+                if result.merge_with(mesh2).is_ok()
                 {
-                    result_meshes.push(mesh1.clone());
+                    result_meshes.push(result);
                 }
             }
         }
@@ -148,18 +149,20 @@ fn main()
                         {
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
+                            let ray_start_point = vec3(p.x as f64, p.y as f64, p.z as f64);
                             let dir = camera.view_direction_at((x, y));
+                            let ray_direction = vec3(dir.x as f64, dir.y as f64, dir.z as f64);
+
                             if let Some(ref result) = results {
-                                if let Some(Intersection::Point {..}) = result[chosen].0.ray_intersection(&vec3(p.x as f64, p.y as f64, p.z as f64), &vec3(dir.x as f64, dir.y as f64, dir.z as f64)) {
+                                if let Some(Intersection::Point {..}) = result[chosen].0.ray_intersection(&ray_start_point, &ray_direction) {
                                     chosen = (chosen + 1) % result.len();
-                                    println!("{}", chosen);
                                 }
                                 else {
                                     camera_handler.start_rotation();
                                 }
                             }
                             else {
-                                if let Some(mut meshes) = on_click(&mut mesh, &mut other_mesh, &vec3(p.x as f64, p.y as f64, p.z as f64), &vec3(dir.x as f64, dir.y as f64, dir.z as f64)) {
+                                if let Some(mut meshes) = on_click(&mut mesh, &mut other_mesh, &ray_start_point, &ray_direction) {
                                     let mut result = Vec::new();
                                     for mesh in meshes.drain(..) {
                                         let positions: Vec<f32> = mesh.positions_buffer().iter().map(|v| *v as f32).collect();
