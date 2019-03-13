@@ -75,8 +75,8 @@ impl Mesh
         let mut map2 = HashMap::new();
         stitches.iter().for_each(|(v0, v1)| {map1.insert(*v0, *v1); map2.insert(*v1, *v0);});
 
-        let meshes1 = self.split(&|mesh, halfedge_id| is_at_intersection(self, other, halfedge_id, &map1));
-        let meshes2 = other.split(&|mesh, halfedge_id| is_at_intersection(other, self, halfedge_id, &map2));
+        let meshes1 = self.split(&|_, halfedge_id| is_at_intersection(self, other, halfedge_id, &map1));
+        let meshes2 = other.split(&|_, halfedge_id| is_at_intersection(other, self, halfedge_id, &map2));
         (meshes1, meshes2)
     }
 
@@ -135,13 +135,6 @@ fn face_and_face_overlaps(mesh1: &Mesh, face_id1: FaceID, mesh2: &Mesh, face_id2
     (mesh1.vertex_point_intersection(v0, p0).is_some() || mesh1.vertex_point_intersection(v1, p0).is_some() || mesh1.vertex_point_intersection(v2, p0).is_some())
         && (mesh1.vertex_point_intersection(v0, p1).is_some() || mesh1.vertex_point_intersection(v1, p1).is_some() || mesh1.vertex_point_intersection(v2, p1).is_some())
         && (mesh1.vertex_point_intersection(v0, p2).is_some() || mesh1.vertex_point_intersection(v1, p2).is_some() || mesh1.vertex_point_intersection(v2, p2).is_some())
-}
-
-fn point_and_point_intersects(point1: &Vec3, point2: &Vec3) -> bool
-{
-    const MARGIN: f64 = 0.00001;
-    const SQR_MARGIN: f64 = MARGIN * MARGIN;
-    (point1 - point2).magnitude2() < SQR_MARGIN
 }
 
 fn split_at_intersections(mesh1: &mut Mesh, mesh2: &mut Mesh, intersections: &HashMap<(Primitive, Primitive), Vec3>, stitches: &mut Vec<(VertexID, VertexID)>) -> Option<(Vec<HalfEdgeID>, Vec<HalfEdgeID>)>
