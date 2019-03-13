@@ -306,4 +306,20 @@ mod tests {
         assert_eq!(min_coordinates, vec3(-1.0, 0.0, -0.5));
         assert_eq!(max_coordinates, vec3(1.0, 0.0, 1.0));
     }
+
+    #[test]
+    fn test_is_closed_when_not_closed()
+    {
+        let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
+        let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
+        assert!(!mesh.is_closed());
+    }
+
+    #[test]
+    fn test_is_closed_when_closed()
+    {
+        let mesh = MeshBuilder::new().cube().build().unwrap();
+        assert!(mesh.is_closed());
+    }
 }
