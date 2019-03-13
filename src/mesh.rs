@@ -109,7 +109,6 @@ impl Mesh
         }
 
         // Create faces and twin connectivity
-        let mut walker = mesh.walker();
         for face in 0..no_faces {
             let v0 = VertexID::new(indices[face * 3] as usize);
             let v1 = VertexID::new(indices[face * 3 + 1] as usize);
@@ -117,6 +116,35 @@ impl Mesh
 
             let face_id = mesh.connectivity_info.create_face(v0, v1, v2);
 
+        }
+
+        let mut walker = mesh.walker();
+        let mut halfedges: Vec<HalfEdgeID> = mesh.halfedge_iter().collect();
+        while let Some(halfedge_id) = halfedges.pop()
+        {
+            walker.as_halfedge_walker(halfedge_id);
+            let (sink_vertex_id, source_vertex_id) = (walker.vertex_id().unwrap(), walker.as_previous().vertex_id().unwrap());
+            for twin_id in halfedges.iter()
+            {
+                walker.as_halfedge_walker(*twin_id);
+                if walker.vertex_id().unwrap() == source_vertex_id && walker.as_previous().vertex_id().unwrap() == sink_vertex_id
+                {
+                    mesh.connectivity_info.set_halfedge_twin(halfedge_id, *twin_id);
+                    break;
+                }
+            }
+
+            walker.as_halfedge_walker(halfedge_id);
+            if walker.twin_id().is_none()
+            {
+                let boundary_halfedge_id = mesh.connectivity_info.new_halfedge(Some(source_vertex_id), None, None);
+                mesh.connectivity_info.set_halfedge_twin(halfedge_id, boundary_halfedge_id);
+            }
+        }
+
+        /*for face_id in mesh.face_iter()
+        {
+            let (v0, v1, v2) = mesh.face_vertices(face_id);
             for twin_id in mesh.halfedge_iter() {
                 walker.as_halfedge_walker(twin_id);
                 if walker.twin_id().is_none() && walker.face_id().unwrap() != face_id {
@@ -139,7 +167,7 @@ impl Mesh
             }
         }
 
-        mesh.create_boundary_edges();
+        mesh.create_boundary_edges();*/
 
         mesh
     }
