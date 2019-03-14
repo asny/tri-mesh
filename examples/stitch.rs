@@ -24,13 +24,20 @@ fn transform(mesh: &mut Mesh, scene_center: &Vec3, scene_radius: f64)
     mesh.translate(*scene_center); // Translate the mesh to the scene center
 }
 
-/// When the user clicks, we see if the model is hit.
+/// When the user clicks, we see if the model is hit. If it is, we
+/// * translate the other mesh to the picked position,
+/// * splits the meshes at their intersection and
+/// * merges the sub meshes into new combinations.
 fn on_click(mesh: &mut Mesh, other_mesh: &mut Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<Vec<Mesh>>
 {
     if let Some(Intersection::Point {point, ..}) = mesh.ray_intersection(ray_start_point, ray_direction) {
+        // Translate
         other_mesh.translate(point - other_mesh.axis_aligned_bounding_box_center());
+
+        // Split at intersection
         let (meshes1, meshes2) = mesh.split_at_intersection(other_mesh);
 
+        // Merge sub meshes
         let mut result_meshes = Vec::new();
         for mesh1 in meshes1.iter() {
             for mesh2 in meshes2.iter() {
