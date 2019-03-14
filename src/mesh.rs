@@ -109,37 +109,37 @@ impl Mesh
         }
 
         // Create faces and twin connectivity
-        let mut walker = mesh.walker();
         for face in 0..no_faces {
             let v0 = VertexID::new(indices[face * 3] as usize);
             let v1 = VertexID::new(indices[face * 3 + 1] as usize);
             let v2 = VertexID::new(indices[face * 3 + 2] as usize);
 
-            let face_id = mesh.connectivity_info.create_face(v0, v1, v2);
-
-            for twin_id in mesh.halfedge_iter() {
-                walker.as_halfedge_walker(twin_id);
-                if walker.twin_id().is_none() && walker.face_id().unwrap() != face_id {
-                    let vertex_id0 = walker.vertex_id().unwrap();
-                    let vertex_id1 = walker.as_previous().vertex_id().unwrap();
-
-                    if vertex_id0 == v0 && vertex_id1 == v1 || vertex_id0 == v1 && vertex_id1 == v0 {
-                        let halfedge_id = mesh.walker_from_face(face_id).halfedge_id().unwrap();
-                        mesh.connectivity_info.set_halfedge_twin(halfedge_id, twin_id);
-                    }
-                    if vertex_id0 == v1 && vertex_id1 == v2 || vertex_id0 == v2 && vertex_id1 == v1 {
-                        let halfedge_id = mesh.walker_from_face(face_id).as_next().halfedge_id().unwrap();
-                        mesh.connectivity_info.set_halfedge_twin(halfedge_id, twin_id);
-                    }
-                    if vertex_id0 == v2 && vertex_id1 == v0 || vertex_id0 == v0 && vertex_id1 == v2 {
-                        let halfedge_id = mesh.walker_from_face(face_id).as_previous().halfedge_id().unwrap();
-                        mesh.connectivity_info.set_halfedge_twin(halfedge_id, twin_id);
-                    }
-                }
-            }
+            mesh.connectivity_info.create_face(v0, v1, v2);
         }
 
-        mesh.create_boundary_edges();
+        let mut walker = mesh.walker();
+        let mut halfedges: Vec<HalfEdgeID> = mesh.halfedge_iter().collect();
+        while let Some(halfedge_id) = halfedges.pop()
+        {
+            walker.as_halfedge_walker(halfedge_id);
+            if walker.twin_id().is_none() {
+                let (sink_vertex_id, source_vertex_id) = (walker.vertex_id().unwrap(), walker.as_previous().vertex_id().unwrap());
+                let mut found_twin_id = None;
+                for twin_id_to_test in halfedges.iter()
+                {
+                    walker.as_halfedge_walker(*twin_id_to_test);
+                    if walker.twin_id().is_none() && (walker.vertex_id().unwrap() == source_vertex_id && walker.as_previous().vertex_id().unwrap() == sink_vertex_id ||
+                        walker.vertex_id().unwrap() == sink_vertex_id && walker.as_previous().vertex_id().unwrap() == source_vertex_id)
+                    {
+                        found_twin_id = Some(*twin_id_to_test);
+                        break;
+                    }
+                }
+                
+                let twin_id = found_twin_id.unwrap_or_else(|| mesh.connectivity_info.new_halfedge(Some(source_vertex_id), None, None));
+                mesh.connectivity_info.set_halfedge_twin(halfedge_id, twin_id);
+            }
+        }
 
         mesh
     }
@@ -171,6 +171,17 @@ impl Mesh
     pub fn no_faces(&self) -> usize
     {
         self.connectivity_info.no_faces()
+    }
+
+    /// Returns whether or not the mesh is closed, ie. contains no holes.
+    pub fn is_closed(&self) -> bool {
+        for halfedge_id in self.edge_iter() {
+            if self.is_edge_on_boundary(halfedge_id)
+            {
+                return false;
+            }
+        }
+        true
     }
 
     fn create_vertex(&mut self, position: Vec3) -> VertexID
@@ -294,5 +305,21 @@ mod tests {
 
         assert_eq!(min_coordinates, vec3(-1.0, 0.0, -0.5));
         assert_eq!(max_coordinates, vec3(1.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn test_is_closed_when_not_closed()
+    {
+        let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
+        let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
+        let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
+        assert!(!mesh.is_closed());
+    }
+
+    #[test]
+    fn test_is_closed_when_closed()
+    {
+        let mesh = MeshBuilder::new().cube().build().unwrap();
+        assert!(mesh.is_closed());
     }
 }
