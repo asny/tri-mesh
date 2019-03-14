@@ -9,7 +9,7 @@ fn on_startup(scene_center: &Vec3, scene_radius: f64) -> (Mesh, Mesh)
 {
     let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
     transform(&mut mesh, scene_center, scene_radius);
-    let mut other_mesh = MeshBuilder::new().with_obj(include_str!("assets/box.obj").to_string()).build().unwrap();
+    let mut other_mesh = MeshBuilder::new().with_obj(include_str!("assets/blob.obj").to_string()).build().unwrap();
     transform(&mut other_mesh, scene_center, 0.5 * scene_radius);
     (mesh, other_mesh)
 }
