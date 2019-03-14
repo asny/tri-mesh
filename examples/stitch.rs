@@ -29,11 +29,11 @@ fn on_click(mesh: &mut Mesh, other_mesh: &mut Mesh, ray_start_point: &Vec3, ray_
 {
     if let Some(Intersection::Point {point, ..}) = mesh.ray_intersection(ray_start_point, ray_direction) {
         other_mesh.translate(point - other_mesh.axis_aligned_bounding_box_center());
-        let (meshes1, mut meshes2) = mesh.split_at_intersection(other_mesh);
+        let (meshes1, meshes2) = mesh.split_at_intersection(other_mesh);
 
         let mut result_meshes = Vec::new();
         for mesh1 in meshes1.iter() {
-            for mesh2 in meshes2.iter_mut() {
+            for mesh2 in meshes2.iter() {
                 let mut result = mesh1.clone();
                 if result.merge_with(mesh2).is_ok()
                 {
@@ -82,6 +82,11 @@ fn main()
 
     let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (positions, 3), "normal" => (normals, 3)]).unwrap();
     model.color = vec3(0.8, 0.8, 0.8);
+
+    let other_positions: Vec<f32> = other_mesh.positions_buffer().iter().map(|v| *v as f32).collect();
+    let other_normals: Vec<f32> = other_mesh.normals_buffer().iter().map(|v| *v as f32).collect();
+    let mut other_model = ShadedMesh::new(&gl, &other_mesh.indices_buffer(), &att!["position" => (other_positions, 3), "normal" => (other_normals, 3)]).unwrap();
+    other_model.color = vec3(0.8, 0.8, 0.8);
 
     let plane_positions: Vec<f32> = vec![
         -1.0, 0.0, -1.0,
@@ -215,6 +220,10 @@ fn main()
             else {
                 model.render(&model_matrix, camera);
                 wireframe_model.render(camera);
+
+                let camera_pos = camera.position();
+                let trans = dust::Mat4::from_translation(0.5 * scene_radius * vec3(-camera_pos.z, 0.0, camera_pos.x).normalize() - vec3(scene_center.x, 0.0, scene_center.z));
+                other_model.render(&trans, camera);
             }
         };
 
