@@ -1,21 +1,50 @@
 use std::cell::{RefCell};
 use std::collections::HashMap;
 use crate::mesh::ids::*;
+use std::hash::BuildHasherDefault;
+
+struct PrimitiveIdHasher {
+    value: u64
+}
+
+impl std::default::Default for PrimitiveIdHasher {
+    fn default() -> Self {
+        PrimitiveIdHasher { value: 0 }
+    }
+}
+
+impl std::hash::Hasher for PrimitiveIdHasher {
+    fn finish(&self) -> u64 {
+        self.value
+    }
+
+    fn write(&mut self, _bytes: &[u8]) {
+        unimplemented!();
+    }
+
+    fn write_usize(&mut self, i: usize) {
+        self.value = i as u64;
+    }
+
+    fn write_u32(&mut self, i: u32) {
+        self.value = i as u64;
+    }
+}
 
 #[derive(Clone, Debug)]
 pub(crate) struct ConnectivityInfo {
-    vertices: RefCell<HashMap<VertexID, Vertex>>,
-    halfedges: RefCell<HashMap<HalfEdgeID, HalfEdge>>,
-    faces: RefCell<HashMap<FaceID, Face>>
+    vertices: RefCell<HashMap<VertexID, Vertex, BuildHasherDefault<PrimitiveIdHasher>>>,
+    halfedges: RefCell<HashMap<HalfEdgeID, HalfEdge, BuildHasherDefault<PrimitiveIdHasher>>>,
+    faces: RefCell<HashMap<FaceID, Face, BuildHasherDefault<PrimitiveIdHasher>>>
 }
 
 impl ConnectivityInfo {
     pub fn new(no_vertices: usize, no_faces: usize) -> ConnectivityInfo
     {
         ConnectivityInfo {
-            vertices: RefCell::new(HashMap::with_capacity(no_vertices)),
-            halfedges: RefCell::new(HashMap::with_capacity(4 * no_faces)),
-            faces: RefCell::new(HashMap::with_capacity(no_faces))
+            vertices: RefCell::new(HashMap::with_capacity_and_hasher(no_vertices, BuildHasherDefault::<PrimitiveIdHasher>::default())),
+            halfedges: RefCell::new(HashMap::with_capacity_and_hasher(4 * no_faces, BuildHasherDefault::<PrimitiveIdHasher>::default())),
+            faces: RefCell::new(HashMap::with_capacity_and_hasher(no_faces, BuildHasherDefault::<PrimitiveIdHasher>::default()))
         }
     }
 
