@@ -12,7 +12,7 @@ impl Mesh
     /// Clones a subset of this mesh defined by the is_included function.
     pub fn clone_subset(&self, is_included: &Fn(&Mesh, FaceID) -> bool) -> Mesh
     {
-        let info = ConnectivityInfo::new(0, 0);
+        let info = connectivity_info::ConnectivityInfo::new(0, 0);
         for face_id in self.face_iter() {
             if is_included(self, face_id) {
                 let face = self.connectivity_info.face(face_id).unwrap();
@@ -48,7 +48,7 @@ impl Mesh
             }
         }
 
-        let mut positions = HashMap::with_capacity(info.no_vertices());
+        let mut positions = HashMap::with_capacity_and_hasher(info.no_vertices(), std::hash::BuildHasherDefault::<connectivity_info::PrimitiveIdHasher>::default());
         for vertex_id in info.vertex_iterator() {
             positions.insert(vertex_id, self.vertex_position(vertex_id).clone());
         }

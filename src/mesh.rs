@@ -42,8 +42,7 @@ pub mod validity;
 
 mod connectivity_info;
 
-use crate::mesh::connectivity_info::ConnectivityInfo;
-use std::collections::HashMap;
+use crate::mesh::connectivity_info::{ConnectivityInfo, PrimitiveMap};
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
 
@@ -91,7 +90,7 @@ pub enum Error {
 ///
 #[derive(Debug)]
 pub struct Mesh {
-    positions: HashMap<VertexID, Vec3>,
+    positions: PrimitiveMap<VertexID, Vec3>,
     connectivity_info: ConnectivityInfo
 }
 
@@ -101,7 +100,10 @@ impl Mesh
     {
         let no_vertices = positions.len()/3;
         let no_faces = indices.len()/3;
-        let mut mesh = Mesh { connectivity_info: ConnectivityInfo::new(no_vertices, no_faces), positions: HashMap::new()};
+        let mut mesh = Mesh {
+            connectivity_info: ConnectivityInfo::new(no_vertices, no_faces),
+            positions: PrimitiveMap::default() // HashMap::with_hasher(std::hash::BuildHasherDefault::<connectivity_info::PrimitiveIdHasher>::default())
+        };
 
         // Create vertices
         for i in 0..no_vertices {
@@ -144,7 +146,7 @@ impl Mesh
         mesh
     }
 
-    fn new_internal(positions: HashMap<VertexID, Vec3>, connectivity_info: ConnectivityInfo) -> Mesh
+    fn new_internal(positions: PrimitiveMap<VertexID, Vec3>, connectivity_info: ConnectivityInfo) -> Mesh
     {
         Mesh {positions, connectivity_info}
     }

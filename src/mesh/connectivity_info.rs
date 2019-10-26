@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use crate::mesh::ids::*;
 use std::hash::BuildHasherDefault;
 
-struct PrimitiveIdHasher {
+type PrimitiveMapRef<K, V> = RefCell<PrimitiveMap<K, V>>;
+pub type PrimitiveMap<K, V> = HashMap<K, V, BuildHasherDefault<PrimitiveIdHasher>>;
+
+pub struct PrimitiveIdHasher {
     value: u64
 }
 
@@ -33,9 +36,9 @@ impl std::hash::Hasher for PrimitiveIdHasher {
 
 #[derive(Clone, Debug)]
 pub(crate) struct ConnectivityInfo {
-    vertices: RefCell<HashMap<VertexID, Vertex, BuildHasherDefault<PrimitiveIdHasher>>>,
-    halfedges: RefCell<HashMap<HalfEdgeID, HalfEdge, BuildHasherDefault<PrimitiveIdHasher>>>,
-    faces: RefCell<HashMap<FaceID, Face, BuildHasherDefault<PrimitiveIdHasher>>>
+    vertices: PrimitiveMapRef<VertexID, Vertex>,
+    halfedges: PrimitiveMapRef<HalfEdgeID, HalfEdge>,
+    faces: PrimitiveMapRef<FaceID, Face>
 }
 
 impl ConnectivityInfo {
