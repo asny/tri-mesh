@@ -10,7 +10,10 @@ impl Mesh
     /// Moves the vertex to the specified position.
     pub fn move_vertex_to(&mut self, vertex_id: VertexID, value: Vec3)
     {
-        self.positions.insert(vertex_id, value);
+        let pos = self.positions.get_mut(&vertex_id).unwrap();
+        pos.x = value.x;
+        pos.y = value.y;
+        pos.z = value.z;
     }
 
     /// Moves the vertex by the specified vector, i.e. the new position is `mesh.vertex_position(vertex_id) + value`.
