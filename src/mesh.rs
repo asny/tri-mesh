@@ -114,9 +114,9 @@ impl Mesh
 
         // Create faces and twin connectivity
         for face in 0..no_faces {
-            let v0 = VertexID::new(indices[face * 3] as usize);
-            let v1 = VertexID::new(indices[face * 3 + 1] as usize);
-            let v2 = VertexID::new(indices[face * 3 + 2] as usize);
+            let v0 = VertexID::new(indices[face * 3]);
+            let v1 = VertexID::new(indices[face * 3 + 1]);
+            let v2 = VertexID::new(indices[face * 3 + 2]);
 
             mesh.connectivity_info.create_face(v0, v1, v2);
         }

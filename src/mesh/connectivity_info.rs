@@ -79,9 +79,9 @@ impl ConnectivityInfo {
     {
         let vertices = &mut *RefCell::borrow_mut(&self.vertices);
 
-        let len = vertices.len();
+        let len = vertices.len() as u32;
         let mut id = VertexID::new(len);
-        for i in len+1..std::usize::MAX {
+        for i in len+1..std::u32::MAX {
             if !vertices.contains_key(&id) { break }
             id = VertexID::new(i);
         }
@@ -94,9 +94,9 @@ impl ConnectivityInfo {
     {
         let halfedges = &mut *RefCell::borrow_mut(&self.halfedges);
 
-        let len = halfedges.len();
+        let len = halfedges.len() as u32;
         let mut id = HalfEdgeID::new(len);
-        for i in len+1..std::usize::MAX {
+        for i in len+1..std::u32::MAX {
             if !halfedges.contains_key(&id) { break }
             id = HalfEdgeID::new(i);
         }
@@ -109,9 +109,9 @@ impl ConnectivityInfo {
     {
         let faces = &mut *RefCell::borrow_mut(&self.faces);
 
-        let len = faces.len();
+        let len = faces.len() as u32;
         let mut id = FaceID::new(len);
-        for i in len+1..std::usize::MAX {
+        for i in len+1..std::u32::MAX {
             if !faces.contains_key(&id) { break }
             id = FaceID::new(i);
         }
