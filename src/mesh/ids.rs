@@ -8,11 +8,11 @@ use std::fmt;
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct VertexID
 {
-    val: usize
+    val: u32
 }
 
 impl VertexID {
-    pub(crate) fn new(val: usize) -> VertexID
+    pub(crate) fn new(val: u32) -> VertexID
     {
         VertexID {val}
     }
@@ -30,11 +30,11 @@ impl fmt::Display for VertexID {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct HalfEdgeID
 {
-    val: usize
+    val: u32
 }
 
 impl HalfEdgeID {
-    pub(crate) fn new(val: usize) -> HalfEdgeID
+    pub(crate) fn new(val: u32) -> HalfEdgeID
     {
         HalfEdgeID {val}
     }
@@ -52,11 +52,11 @@ impl fmt::Display for HalfEdgeID {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct FaceID
 {
-    val: usize
+    val: u32
 }
 
 impl FaceID {
-    pub(crate) fn new(val: usize) -> FaceID
+    pub(crate) fn new(val: u32) -> FaceID
     {
         FaceID {val}
     }

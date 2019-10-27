@@ -5,6 +5,7 @@ use crate::mesh::math::*;
 use crate::mesh::ids::*;
 use crate::mesh::intersection::*;
 use std::collections::{HashSet, HashMap};
+use crate::mesh::primitive_map::PrimitiveMap;
 
 /// # Split
 impl Mesh
@@ -12,7 +13,7 @@ impl Mesh
     /// Clones a subset of this mesh defined by the is_included function.
     pub fn clone_subset(&self, is_included: &Fn(&Mesh, FaceID) -> bool) -> Mesh
     {
-        let info = ConnectivityInfo::new(0, 0);
+        let info = connectivity_info::ConnectivityInfo::new(0, 0);
         for face_id in self.face_iter() {
             if is_included(self, face_id) {
                 let face = self.connectivity_info.face(face_id).unwrap();
@@ -48,7 +49,7 @@ impl Mesh
             }
         }
 
-        let mut positions = HashMap::with_capacity(info.no_vertices());
+        let mut positions = PrimitiveMap::with_capacity(info.no_vertices());
         for vertex_id in info.vertex_iterator() {
             positions.insert(vertex_id, self.vertex_position(vertex_id).clone());
         }

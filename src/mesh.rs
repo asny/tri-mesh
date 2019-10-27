@@ -40,10 +40,11 @@ pub mod export;
 pub mod connected_components;
 pub mod validity;
 
+mod primitive_map;
 mod connectivity_info;
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
-use std::collections::HashMap;
+use crate::mesh::primitive_map::PrimitiveMap;
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
 
@@ -91,7 +92,7 @@ pub enum Error {
 ///
 #[derive(Debug)]
 pub struct Mesh {
-    positions: HashMap<VertexID, Vec3>,
+    positions: PrimitiveMap<VertexID, Vec3>,
     connectivity_info: ConnectivityInfo
 }
 
@@ -101,7 +102,10 @@ impl Mesh
     {
         let no_vertices = positions.len()/3;
         let no_faces = indices.len()/3;
-        let mut mesh = Mesh { connectivity_info: ConnectivityInfo::new(no_vertices, no_faces), positions: HashMap::new()};
+        let mut mesh = Mesh {
+            connectivity_info: ConnectivityInfo::new(no_vertices, no_faces),
+            positions: PrimitiveMap::new()
+        };
 
         // Create vertices
         for i in 0..no_vertices {
@@ -110,9 +114,9 @@ impl Mesh
 
         // Create faces and twin connectivity
         for face in 0..no_faces {
-            let v0 = VertexID::new(indices[face * 3] as usize);
-            let v1 = VertexID::new(indices[face * 3 + 1] as usize);
-            let v2 = VertexID::new(indices[face * 3 + 2] as usize);
+            let v0 = VertexID::new(indices[face * 3]);
+            let v1 = VertexID::new(indices[face * 3 + 1]);
+            let v2 = VertexID::new(indices[face * 3 + 2]);
 
             mesh.connectivity_info.create_face(v0, v1, v2);
         }
@@ -144,7 +148,7 @@ impl Mesh
         mesh
     }
 
-    fn new_internal(positions: HashMap<VertexID, Vec3>, connectivity_info: ConnectivityInfo) -> Mesh
+    fn new_internal(positions: PrimitiveMap<VertexID, Vec3>, connectivity_info: ConnectivityInfo) -> Mesh
     {
         Mesh {positions, connectivity_info}
     }
