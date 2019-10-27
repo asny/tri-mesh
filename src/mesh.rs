@@ -39,10 +39,12 @@ pub mod split;
 pub mod export;
 pub mod connected_components;
 pub mod validity;
+pub mod primitive_map;
 
 mod connectivity_info;
 
-use crate::mesh::connectivity_info::{ConnectivityInfo, PrimitiveMap};
+use crate::mesh::connectivity_info::ConnectivityInfo;
+use crate::mesh::primitive_map::PrimitiveMap;
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
 
@@ -102,7 +104,7 @@ impl Mesh
         let no_faces = indices.len()/3;
         let mut mesh = Mesh {
             connectivity_info: ConnectivityInfo::new(no_vertices, no_faces),
-            positions: PrimitiveMap::default() // HashMap::with_hasher(std::hash::BuildHasherDefault::<connectivity_info::PrimitiveIdHasher>::default())
+            positions: PrimitiveMap::new()
         };
 
         // Create vertices

@@ -5,6 +5,7 @@ use crate::mesh::math::*;
 use crate::mesh::ids::*;
 use crate::mesh::intersection::*;
 use std::collections::{HashSet, HashMap};
+use crate::mesh::primitive_map::PrimitiveMap;
 
 /// # Split
 impl Mesh
@@ -48,7 +49,7 @@ impl Mesh
             }
         }
 
-        let mut positions = HashMap::with_capacity_and_hasher(info.no_vertices(), std::hash::BuildHasherDefault::<connectivity_info::PrimitiveIdHasher>::default());
+        let mut positions = PrimitiveMap::with_capacity(info.no_vertices());
         for vertex_id in info.vertex_iterator() {
             positions.insert(vertex_id, self.vertex_position(vertex_id).clone());
         }
