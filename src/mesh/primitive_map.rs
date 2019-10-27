@@ -1,6 +1,71 @@
 
+#[derive(Debug, Clone)]
+pub struct VertexMap<V>
+{
+    values: Vec<V>,
+    free: Vec<u32>
+}
+
+impl<V> VertexMap<V>
+    where V: Clone
+{
+    pub fn new() -> Self {
+        VertexMap { values: Vec::new(), free: Vec::new() }
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        VertexMap { values: Vec::with_capacity(capacity), free: Vec::new() }
+    }
+
+    pub fn insert_new(&mut self, value: V) -> Option<VertexID>  {
+        if let Some(i) = self.free.pop() {
+            let id = VertexID::new(i);
+            self.values[i as usize] = value;
+            Some(id)
+        }
+        else {
+            self.values.push(value);
+            Some(VertexID::new(self.values.len() as u32 - 1))
+        }
+    }
+
+    pub fn insert(&mut self, id: VertexID, value: V) {
+        let i = id.get() as usize;
+        if self.values.len() > i {
+            self.values[i] = value;
+        }
+        else {
+            self.values.resize_with(i+1, || value.clone());
+        }
+    }
+
+    pub fn remove(&mut self, id: &VertexID) {
+        self.free.push(id.get());
+    }
+
+    pub fn len(&self) -> usize {
+        self.values.len() - self.free.len()
+    }
+
+    pub fn get(&self, id: &VertexID) -> Option<&V> {
+        self.values.get(id.get() as usize)
+    }
+
+    pub fn get_mut(&mut self, id: &VertexID) -> Option<&mut V> {
+        self.values.get_mut(id.get() as usize)
+    }
+
+    pub fn iter(&self) -> Box<Iterator<Item = VertexID>> {
+        let t: Vec<VertexID> = (0..self.values.len())
+            .filter(|i| !self.free.contains(&(*i as u32)))
+            .map(|i| VertexID::new(i as u32)).collect();
+        Box::new(t.into_iter())
+    }
+}
+
 use std::hash::BuildHasherDefault;
 use std::collections::HashMap;
+use crate::mesh::ids::VertexID;
 
 #[derive(Debug, Clone)]
 pub struct PrimitiveMap<K, V>

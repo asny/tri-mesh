@@ -1,10 +1,10 @@
 use std::cell::{RefCell};
 use crate::mesh::ids::*;
-use crate::mesh::primitive_map::PrimitiveMap;
+use crate::mesh::primitive_map::*;
 
 #[derive(Clone, Debug)]
 pub(crate) struct ConnectivityInfo {
-    vertices: RefCell<PrimitiveMap<VertexID, Vertex>>,
+    vertices: RefCell<VertexMap<Vertex>>,
     halfedges: RefCell<PrimitiveMap<HalfEdgeID, HalfEdge>>,
     faces: RefCell<PrimitiveMap<FaceID, Face>>
 }
@@ -13,7 +13,7 @@ impl ConnectivityInfo {
     pub fn new(no_vertices: usize, no_faces: usize) -> ConnectivityInfo
     {
         ConnectivityInfo {
-            vertices: RefCell::new(PrimitiveMap::with_capacity(no_vertices)),
+            vertices: RefCell::new(VertexMap::with_capacity(no_vertices)),
             halfedges: RefCell::new(PrimitiveMap::with_capacity(4 * no_faces)),
             faces: RefCell::new(PrimitiveMap::with_capacity(no_faces))
         }
@@ -78,16 +78,7 @@ impl ConnectivityInfo {
     pub fn new_vertex(&self) -> VertexID
     {
         let vertices = &mut *RefCell::borrow_mut(&self.vertices);
-
-        let len = vertices.len() as u32;
-        let mut id = VertexID::new(len);
-        for i in len+1..std::u32::MAX {
-            if !vertices.contains_key(&id) { break }
-            id = VertexID::new(i);
-        }
-
-        vertices.insert(id, Vertex { halfedge: None });
-        id
+        vertices.insert_new(Vertex { halfedge: None }).unwrap()
     }
 
     pub fn new_halfedge(&self, vertex: Option<VertexID>, next: Option<HalfEdgeID>, face: Option<FaceID>) -> HalfEdgeID
@@ -141,7 +132,7 @@ impl ConnectivityInfo {
     pub fn remove_vertex(&self, vertex_id: VertexID)
     {
         let vertices = &mut *RefCell::borrow_mut(&self.vertices);
-        vertices.remove(&vertex_id).unwrap();
+        vertices.remove(&vertex_id);
     }
 
     pub fn remove_halfedge(&self, halfedge_id: HalfEdgeID)
@@ -195,8 +186,7 @@ impl ConnectivityInfo {
     pub fn vertex_iterator(&self) -> Box<Iterator<Item = VertexID>>
     {
         let vertices = RefCell::borrow(&self.vertices);
-        let t: Vec<VertexID> = vertices.iter().map(|pair| *pair.0).collect();
-        Box::new(t.into_iter())
+        vertices.iter()
     }
 
     pub fn halfedge_iterator(&self) -> Box<Iterator<Item = HalfEdgeID>>
@@ -244,8 +234,8 @@ impl std::fmt::Display for ConnectivityInfo {
         writeln!(f, "**** VERTICES: ****")?;
         let vertices = RefCell::borrow(&self.vertices);
         writeln!(f, "Count: {}", vertices.len())?;
-        for (id, info) in vertices.iter() {
-            writeln!(f, "{}: {:?}", id, info)?;
+        for id in vertices.iter() {
+            writeln!(f, "{}: {:?}", id, vertices.get(&id))?;
         }
         writeln!(f, "**** Halfedges: ****")?;
         let halfedges = RefCell::borrow(&self.halfedges);

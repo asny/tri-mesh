@@ -16,6 +16,10 @@ impl VertexID {
     {
         VertexID {val}
     }
+    pub(crate) fn get(&self) -> u32
+    {
+        self.val
+    }
 }
 
 impl fmt::Display for VertexID {
