@@ -96,56 +96,56 @@ impl ConnectivityInfo {
     pub fn remove_vertex(&self, vertex_id: VertexID)
     {
         let vertices = &mut *RefCell::borrow_mut(&self.vertices);
-        vertices.remove(&vertex_id);
+        vertices.remove(vertex_id);
     }
 
     pub fn remove_halfedge(&self, halfedge_id: HalfEdgeID)
     {
         let halfedges = &mut *RefCell::borrow_mut(&self.halfedges);
-        let halfedge = halfedges.get(&halfedge_id).unwrap();
+        let halfedge = halfedges.get(halfedge_id).unwrap();
         if halfedge.twin.is_some()
         {
-            halfedges.get_mut(&halfedge.twin.unwrap()).unwrap().twin = None;
+            halfedges.get_mut(halfedge.twin.unwrap()).unwrap().twin = None;
         }
-        halfedges.remove(&halfedge_id);
+        halfedges.remove(halfedge_id);
     }
 
     pub fn remove_face(&self, face_id: FaceID)
     {
         let faces = &mut *RefCell::borrow_mut(&self.faces);
-        faces.remove(&face_id);
+        faces.remove(face_id);
     }
 
     pub fn set_vertex_halfedge(&self, id: VertexID, val: Option<HalfEdgeID>)
     {
-        RefCell::borrow_mut(&self.vertices).get_mut(&id).unwrap().halfedge = val;
+        RefCell::borrow_mut(&self.vertices).get_mut(id).unwrap().halfedge = val;
     }
 
     pub fn set_halfedge_next(&self, id: HalfEdgeID, val: Option<HalfEdgeID>)
     {
-        RefCell::borrow_mut(&self.halfedges).get_mut(&id).unwrap().next = val;
+        RefCell::borrow_mut(&self.halfedges).get_mut(id).unwrap().next = val;
     }
 
     pub fn set_halfedge_twin(&self, id1: HalfEdgeID, id2: HalfEdgeID)
     {
         let halfedges = &mut *RefCell::borrow_mut(&self.halfedges);
-        halfedges.get_mut(&id1).unwrap().twin = Some(id2);
-        halfedges.get_mut(&id2).unwrap().twin = Some(id1);
+        halfedges.get_mut(id1).unwrap().twin = Some(id2);
+        halfedges.get_mut(id2).unwrap().twin = Some(id1);
     }
 
     pub fn set_halfedge_vertex(&self, id: HalfEdgeID, val: VertexID)
     {
-        RefCell::borrow_mut(&self.halfedges).get_mut(&id).unwrap().vertex = Some(val);
+        RefCell::borrow_mut(&self.halfedges).get_mut(id).unwrap().vertex = Some(val);
     }
 
     pub fn set_halfedge_face(&self, id: HalfEdgeID, val: Option<FaceID>)
     {
-        RefCell::borrow_mut(&self.halfedges).get_mut(&id).unwrap().face = val;
+        RefCell::borrow_mut(&self.halfedges).get_mut(id).unwrap().face = val;
     }
 
     pub fn set_face_halfedge(&self, id: FaceID, val: HalfEdgeID)
     {
-        RefCell::borrow_mut(&self.faces).get_mut(&id).unwrap().halfedge = Some(val);
+        RefCell::borrow_mut(&self.faces).get_mut(id).unwrap().halfedge = Some(val);
     }
 
     pub fn vertex_iterator(&self) -> Box<Iterator<Item = VertexID>>
@@ -168,17 +168,17 @@ impl ConnectivityInfo {
 
     pub fn vertex_halfedge(&self, vertex_id: VertexID) -> Option<HalfEdgeID>
     {
-        RefCell::borrow(&self.vertices).get(&vertex_id).unwrap().halfedge.clone()
+        RefCell::borrow(&self.vertices).get(vertex_id).unwrap().halfedge.clone()
     }
 
     pub fn halfedge(&self, halfedge_id: HalfEdgeID) -> Option<HalfEdge>
     {
-        RefCell::borrow(&self.halfedges).get(&halfedge_id).and_then(|halfedge| Some(halfedge.clone()))
+        RefCell::borrow(&self.halfedges).get(halfedge_id).and_then(|halfedge| Some(halfedge.clone()))
     }
 
     pub fn face_halfedge(&self, face_id: FaceID) -> Option<HalfEdgeID>
     {
-        RefCell::borrow(&self.faces).get(&face_id).unwrap().halfedge.clone()
+        RefCell::borrow(&self.faces).get(face_id).unwrap().halfedge.clone()
     }
 }
 
@@ -188,19 +188,19 @@ impl std::fmt::Display for ConnectivityInfo {
         let vertices = RefCell::borrow(&self.vertices);
         writeln!(f, "Count: {}", vertices.len())?;
         for id in vertices.iter() {
-            writeln!(f, "{}: {:?}", id, vertices.get(&id))?;
+            writeln!(f, "{}: {:?}", id, vertices.get(id))?;
         }
         writeln!(f, "**** Halfedges: ****")?;
         let halfedges = RefCell::borrow(&self.halfedges);
         writeln!(f, "Count: {}", halfedges.len())?;
         for id in halfedges.iter() {
-            writeln!(f, "{}: {:?}", id, halfedges.get(&id))?;
+            writeln!(f, "{}: {:?}", id, halfedges.get(id))?;
         }
         writeln!(f, "**** Faces: ****")?;
         let faces = RefCell::borrow(&self.faces);
         writeln!(f, "Count: {}", faces.len())?;
         for id in faces.iter() {
-            writeln!(f, "{}: {:?}", id, faces.get(&id))?;
+            writeln!(f, "{}: {:?}", id, faces.get(id))?;
         }
         Ok(())
     }

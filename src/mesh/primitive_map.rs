@@ -10,10 +10,6 @@ pub struct VertexMap<V>
 
 impl<V> VertexMap<V>
 {
-    pub fn new() -> Self {
-        VertexMap { values: Vec::new(), free: Vec::new() }
-    }
-
     pub fn with_capacity(capacity: usize) -> Self {
         VertexMap { values: Vec::with_capacity(capacity), free: Vec::new() }
     }
@@ -30,7 +26,7 @@ impl<V> VertexMap<V>
         }
     }
 
-    pub fn remove(&mut self, id: &VertexID) {
+    pub fn remove(&mut self, id: VertexID) {
         self.free.push(id.get());
     }
 
@@ -38,11 +34,11 @@ impl<V> VertexMap<V>
         self.values.len() - self.free.len()
     }
 
-    pub fn get(&self, id: &VertexID) -> Option<&V> {
+    pub fn get(&self, id: VertexID) -> Option<&V> {
         self.values.get(id.get() as usize)
     }
 
-    pub fn get_mut(&mut self, id: &VertexID) -> Option<&mut V> {
+    pub fn get_mut(&mut self, id: VertexID) -> Option<&mut V> {
         self.values.get_mut(id.get() as usize)
     }
 
@@ -64,10 +60,6 @@ pub struct HalfEdgeMap<V>
 
 impl<V> HalfEdgeMap<V>
 {
-    pub fn new() -> Self {
-        HalfEdgeMap { values: Vec::new(), free: Vec::new() }
-    }
-
     pub fn with_capacity(capacity: usize) -> Self {
         HalfEdgeMap { values: Vec::with_capacity(capacity), free: Vec::new() }
     }
@@ -84,7 +76,7 @@ impl<V> HalfEdgeMap<V>
         }
     }
 
-    pub fn remove(&mut self, id: &HalfEdgeID) {
+    pub fn remove(&mut self, id: HalfEdgeID) {
         self.free.push(id.get());
     }
 
@@ -92,11 +84,11 @@ impl<V> HalfEdgeMap<V>
         self.values.len() - self.free.len()
     }
 
-    pub fn get(&self, id: &HalfEdgeID) -> Option<&V> {
+    pub fn get(&self, id: HalfEdgeID) -> Option<&V> {
         self.values.get(id.get() as usize)
     }
 
-    pub fn get_mut(&mut self, id: &HalfEdgeID) -> Option<&mut V> {
+    pub fn get_mut(&mut self, id: HalfEdgeID) -> Option<&mut V> {
         self.values.get_mut(id.get() as usize)
     }
 
@@ -117,10 +109,6 @@ pub struct FaceMap<V>
 
 impl<V> FaceMap<V>
 {
-    pub fn new() -> Self {
-        FaceMap { values: Vec::new(), free: Vec::new() }
-    }
-
     pub fn with_capacity(capacity: usize) -> Self {
         FaceMap { values: Vec::with_capacity(capacity), free: Vec::new() }
     }
@@ -137,7 +125,7 @@ impl<V> FaceMap<V>
         }
     }
 
-    pub fn remove(&mut self, id: &FaceID) {
+    pub fn remove(&mut self, id: FaceID) {
         self.free.push(id.get());
     }
 
@@ -145,11 +133,11 @@ impl<V> FaceMap<V>
         self.values.len() - self.free.len()
     }
 
-    pub fn get(&self, id: &FaceID) -> Option<&V> {
+    pub fn get(&self, id: FaceID) -> Option<&V> {
         self.values.get(id.get() as usize)
     }
 
-    pub fn get_mut(&mut self, id: &FaceID) -> Option<&mut V> {
+    pub fn get_mut(&mut self, id: FaceID) -> Option<&mut V> {
         self.values.get_mut(id.get() as usize)
     }
 
