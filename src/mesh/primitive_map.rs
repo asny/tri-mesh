@@ -134,10 +134,6 @@ impl std::hash::Hasher for PrimitiveIdHasher {
         unimplemented!();
     }
 
-    fn write_usize(&mut self, i: usize) {
-        self.value = i as u64;
-    }
-
     fn write_u32(&mut self, i: u32) {
         self.value = i as u64;
     }

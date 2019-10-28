@@ -5,7 +5,6 @@ use crate::mesh::math::*;
 use crate::mesh::ids::*;
 use crate::mesh::intersection::*;
 use std::collections::{HashSet, HashMap};
-use crate::mesh::primitive_map::PrimitiveMap;
 
 /// # Split
 impl Mesh
@@ -13,48 +12,13 @@ impl Mesh
     /// Clones a subset of this mesh defined by the is_included function.
     pub fn clone_subset(&self, is_included: &Fn(&Mesh, FaceID) -> bool) -> Mesh
     {
-        let info = connectivity_info::ConnectivityInfo::new(0, 0);
+        let mut clone = self.clone();
         for face_id in self.face_iter() {
-            if is_included(self, face_id) {
-                let face = self.connectivity_info.face(face_id).unwrap();
-                for halfedge_id in self.face_halfedge_iter(face_id) {
-                    let mut walker = self.walker_from_halfedge(halfedge_id);
-                    let halfedge = self.connectivity_info.halfedge(halfedge_id).unwrap();
-                    info.add_halfedge(halfedge_id, halfedge);
-
-                    let vertex_id = walker.vertex_id().unwrap();
-                    let vertex = self.connectivity_info.vertex(vertex_id).unwrap();
-                    info.add_vertex(vertex_id, vertex);
-                    info.set_vertex_halfedge(vertex_id, walker.next_id());
-
-                    walker.as_twin();
-                    if walker.face_id().is_none()
-                    {
-                        let twin_id = walker.halfedge_id().unwrap();
-                        let twin = self.connectivity_info.halfedge(twin_id).unwrap();
-                        info.add_halfedge(twin_id, twin);
-
-                    }
-                    else if !is_included(self, walker.face_id().unwrap())
-                    {
-                        let twin_id = walker.halfedge_id().unwrap();
-                        let mut twin = self.connectivity_info.halfedge(twin_id).unwrap();
-                        twin.face = None;
-                        twin.next = None;
-                        info.add_halfedge(twin_id, twin);
-                    }
-                }
-
-                info.add_face(face_id, face);
+            if !is_included(self, face_id) {
+                clone.remove_face(face_id);
             }
         }
-
-        let mut positions = PrimitiveMap::with_capacity(info.no_vertices());
-        for vertex_id in info.vertex_iterator() {
-            positions.insert(vertex_id, self.vertex_position(vertex_id).clone());
-        }
-
-        Mesh::new_internal(positions, info)
+        clone
     }
 
     ///
