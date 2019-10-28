@@ -71,7 +71,7 @@ fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -
     let mut to_be_tested = vec![start_vertex_id];
     while let Some(vertex_id) = to_be_tested.pop()
     {
-        let sqr_distance = start_point.distance2(*mesh.vertex_position(vertex_id));
+        let sqr_distance = start_point.distance2(mesh.vertex_position(vertex_id));
         if sqr_distance < SQR_MAX_DISTANCE
         {
             // The weight is computed as the smoothstep function to the square euclidean distance

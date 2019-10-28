@@ -428,7 +428,7 @@ mod tests {
 
         let mut vertex_id1 = None;
         for vertex_id in mesh.vertex_iter() {
-            if *mesh.vertex_position(vertex_id) == vec3(0.0, 0.0, 0.0)
+            if mesh.vertex_position(vertex_id) == vec3(0.0, 0.0, 0.0)
             {
                 if vertex_id1.is_none() { vertex_id1 = Some(vertex_id); }
                 else {

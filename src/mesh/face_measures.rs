@@ -8,7 +8,7 @@ use crate::mesh::ids::*;
 impl Mesh
 {
     /// Returns the positions of the face vertices.
-    pub fn face_positions(&self, face_id: FaceID) -> (&Vec3, &Vec3, &Vec3)
+    pub fn face_positions(&self, face_id: FaceID) -> (Vec3, Vec3, Vec3)
     {
         let vertices = self.ordered_face_vertices(face_id);
         (self.vertex_position(vertices.0), self.vertex_position(vertices.1), self.vertex_position(vertices.2))
@@ -18,11 +18,11 @@ impl Mesh
     pub fn face_normal(&self, face_id: FaceID) -> Vec3
     {
         let mut walker = self.walker_from_face(face_id);
-        let p0 = *self.vertex_position(walker.vertex_id().unwrap());
+        let p0 = self.vertex_position(walker.vertex_id().unwrap());
         walker.as_next();
-        let v0 = *self.vertex_position(walker.vertex_id().unwrap()) - p0;
+        let v0 = self.vertex_position(walker.vertex_id().unwrap()) - p0;
         walker.as_next();
-        let v1 = *self.vertex_position(walker.vertex_id().unwrap()) - p0;
+        let v1 = self.vertex_position(walker.vertex_id().unwrap()) - p0;
 
         let dir = v0.cross(v1);
         dir.normalize()
@@ -32,11 +32,11 @@ impl Mesh
     pub fn face_area(&self, face_id: FaceID) -> f64
     {
         let mut walker = self.walker_from_face(face_id);
-        let p0 = *self.vertex_position(walker.vertex_id().unwrap());
+        let p0 = self.vertex_position(walker.vertex_id().unwrap());
         walker.as_next();
-        let v0 = *self.vertex_position(walker.vertex_id().unwrap()) - p0;
+        let v0 = self.vertex_position(walker.vertex_id().unwrap()) - p0;
         walker.as_next();
-        let v1 = *self.vertex_position(walker.vertex_id().unwrap()) - p0;
+        let v1 = self.vertex_position(walker.vertex_id().unwrap()) - p0;
 
         0.5 * v0.cross(v1).magnitude()
     }
@@ -45,11 +45,11 @@ impl Mesh
     pub fn face_center(&self, face_id: FaceID) -> Vec3
     {
         let mut walker = self.walker_from_face(face_id);
-        let p0 = *self.vertex_position(walker.vertex_id().unwrap());
+        let p0 = self.vertex_position(walker.vertex_id().unwrap());
         walker.as_next();
-        let p1 = *self.vertex_position(walker.vertex_id().unwrap());
+        let p1 = self.vertex_position(walker.vertex_id().unwrap());
         walker.as_next();
-        let p2 = *self.vertex_position(walker.vertex_id().unwrap());
+        let p2 = self.vertex_position(walker.vertex_id().unwrap());
 
         (p0 + p1 + p2)/3.0
     }

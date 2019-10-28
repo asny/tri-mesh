@@ -1,6 +1,7 @@
 use std::cell::{RefCell};
 use crate::mesh::ids::*;
 use crate::mesh::primitive_map::*;
+use crate::mesh::math::Vec3;
 
 #[derive(Clone, Debug)]
 pub(crate) struct ConnectivityInfo {
@@ -75,10 +76,10 @@ impl ConnectivityInfo {
         id
     }
 
-    pub fn new_vertex(&self) -> VertexID
+    pub fn new_vertex(&self, position: Vec3) -> VertexID
     {
         let vertices = &mut *RefCell::borrow_mut(&self.vertices);
-        vertices.insert_new(Vertex { halfedge: None }).unwrap()
+        vertices.insert_new(Vertex { halfedge: None, position }).unwrap()
     }
 
     pub fn new_halfedge(&self, vertex: Option<VertexID>, next: Option<HalfEdgeID>, face: Option<FaceID>) -> HalfEdgeID
@@ -180,6 +181,16 @@ impl ConnectivityInfo {
     {
         RefCell::borrow(&self.faces).get(face_id).unwrap().halfedge.clone()
     }
+
+    pub fn position(&self, vertex_id: VertexID) -> Vec3
+    {
+        RefCell::borrow(&self.vertices).get(vertex_id).unwrap().position
+    }
+
+    pub fn set_position(&self, vertex_id: VertexID, position: Vec3)
+    {
+        RefCell::borrow_mut(&self.vertices).get_mut(vertex_id).unwrap().position = position;
+    }
 }
 
 impl std::fmt::Display for ConnectivityInfo {
@@ -206,9 +217,10 @@ impl std::fmt::Display for ConnectivityInfo {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Vertex {
-    pub halfedge: Option<HalfEdgeID>
+    pub halfedge: Option<HalfEdgeID>,
+    pub position: Vec3
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]

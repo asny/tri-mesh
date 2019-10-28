@@ -97,9 +97,9 @@ fn face_and_face_overlaps(mesh1: &Mesh, face_id1: FaceID, mesh2: &Mesh, face_id2
     let (v0, v1, v2) = mesh1.face_vertices(face_id1);
     let (p0, p1, p2) = mesh2.face_positions(face_id2);
 
-    (mesh1.vertex_point_intersection(v0, p0).is_some() || mesh1.vertex_point_intersection(v1, p0).is_some() || mesh1.vertex_point_intersection(v2, p0).is_some())
-        && (mesh1.vertex_point_intersection(v0, p1).is_some() || mesh1.vertex_point_intersection(v1, p1).is_some() || mesh1.vertex_point_intersection(v2, p1).is_some())
-        && (mesh1.vertex_point_intersection(v0, p2).is_some() || mesh1.vertex_point_intersection(v1, p2).is_some() || mesh1.vertex_point_intersection(v2, p2).is_some())
+    (mesh1.vertex_point_intersection(v0, &p0).is_some() || mesh1.vertex_point_intersection(v1, &p0).is_some() || mesh1.vertex_point_intersection(v2, &p0).is_some())
+        && (mesh1.vertex_point_intersection(v0, &p1).is_some() || mesh1.vertex_point_intersection(v1, &p1).is_some() || mesh1.vertex_point_intersection(v2, &p1).is_some())
+        && (mesh1.vertex_point_intersection(v0, &p2).is_some() || mesh1.vertex_point_intersection(v1, &p2).is_some() || mesh1.vertex_point_intersection(v2, &p2).is_some())
 }
 
 fn split_at_intersections(mesh1: &mut Mesh, mesh2: &mut Mesh, intersections: &HashMap<(Primitive, Primitive), Vec3>, stitches: &mut Vec<(VertexID, VertexID)>) -> Option<(Vec<HalfEdgeID>, Vec<HalfEdgeID>)>
@@ -271,7 +271,7 @@ fn find_intersections_between_edge_face(mesh1: &Mesh, edges1: &Vec<HalfEdgeID>, 
         for face_id2 in mesh2.face_iter()
         {
             let (p0, p1) = mesh1.edge_positions(*edge1);
-            if let Some(intersection) = mesh2.face_line_piece_intersection(face_id2, p0, p1)
+            if let Some(intersection) = mesh2.face_line_piece_intersection(face_id2, &p0, &p1)
             {
                 match intersection {
                     Intersection::Point {primitive: primitive2, point} => {
@@ -303,7 +303,7 @@ fn find_intersections_between_edge_face(mesh1: &Mesh, edges1: &Vec<HalfEdgeID>, 
         for face_id1 in mesh1.face_iter()
         {
             let (p0, p1) = mesh2.edge_positions(*edge2);
-            if let Some(intersection) = mesh1.face_line_piece_intersection(face_id1, p0, p1)
+            if let Some(intersection) = mesh1.face_line_piece_intersection(face_id1, &p0, &p1)
             {
                 match intersection {
                     Intersection::Point {primitive: primitive1, point} => {

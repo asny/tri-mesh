@@ -107,7 +107,7 @@ impl Mesh
     {
         let mut positions = Vec::with_capacity(self.no_vertices() * 3);
         for position in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
-            push_vec3(&mut positions, *position);
+            push_vec3(&mut positions, position);
         }
         positions
     }
@@ -142,9 +142,9 @@ impl Mesh
         for face_id in self.face_iter()
         {
             let (p0, p1, p2) = self.face_positions(face_id);
-            push_vec3(&mut positions, *p0);
-            push_vec3(&mut positions, *p1);
-            push_vec3(&mut positions, *p2);
+            push_vec3(&mut positions, p0);
+            push_vec3(&mut positions, p1);
+            push_vec3(&mut positions, p2);
         }
         positions
     }

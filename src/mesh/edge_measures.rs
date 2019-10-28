@@ -10,7 +10,7 @@ impl Mesh
     ///
     /// Returns the two positions of the vertices of either end of the given halfedge.
     ///
-    pub fn edge_positions(&self, halfedge_id: HalfEdgeID) -> (&Vec3, &Vec3)
+    pub fn edge_positions(&self, halfedge_id: HalfEdgeID) -> (Vec3, Vec3)
     {
         let vertices = self.ordered_edge_vertices(halfedge_id);
         (self.vertex_position(vertices.0), self.vertex_position(vertices.1))
