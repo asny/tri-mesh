@@ -111,24 +111,6 @@ impl ConnectivityInfo {
         id
     }
 
-    pub fn add_vertex(&self, vertex_id: VertexID, vertex: Vertex)
-    {
-        let vertices = &mut *RefCell::borrow_mut(&self.vertices);
-        vertices.insert(vertex_id, vertex);
-    }
-
-    pub fn add_halfedge(&self, halfedge_id: HalfEdgeID, halfedge: HalfEdge)
-    {
-        let halfedges = &mut *RefCell::borrow_mut(&self.halfedges);
-        halfedges.insert(halfedge_id, halfedge);
-    }
-
-    pub fn add_face(&self, face_id: FaceID, face: Face)
-    {
-        let faces = &mut *RefCell::borrow_mut(&self.faces);
-        faces.insert(face_id, face);
-    }
-
     pub fn remove_vertex(&self, vertex_id: VertexID)
     {
         let vertices = &mut *RefCell::borrow_mut(&self.vertices);
@@ -203,11 +185,6 @@ impl ConnectivityInfo {
         Box::new(t.into_iter())
     }
 
-    pub fn vertex(&self, vertex_id: VertexID) -> Option<Vertex>
-    {
-        RefCell::borrow(&self.vertices).get(&vertex_id).and_then(|vertex| Some(vertex.clone()))
-    }
-
     pub fn vertex_halfedge(&self, vertex_id: VertexID) -> Option<HalfEdgeID>
     {
         RefCell::borrow(&self.vertices).get(&vertex_id).unwrap().halfedge.clone()
@@ -216,11 +193,6 @@ impl ConnectivityInfo {
     pub fn halfedge(&self, halfedge_id: HalfEdgeID) -> Option<HalfEdge>
     {
         RefCell::borrow(&self.halfedges).get(&halfedge_id).and_then(|halfedge| Some(halfedge.clone()))
-    }
-
-    pub fn face(&self, face_id: FaceID) -> Option<Face>
-    {
-        RefCell::borrow(&self.faces).get(&face_id).and_then(|face| Some(face.clone()))
     }
 
     pub fn face_halfedge(&self, face_id: FaceID) -> Option<HalfEdgeID>

@@ -9,10 +9,6 @@ pub struct VertexMap<V>
 impl<V> VertexMap<V>
     where V: Clone
 {
-    pub fn new() -> Self {
-        VertexMap { values: Vec::new(), free: Vec::new() }
-    }
-
     pub fn with_capacity(capacity: usize) -> Self {
         VertexMap { values: Vec::with_capacity(capacity), free: Vec::new() }
     }
@@ -26,16 +22,6 @@ impl<V> VertexMap<V>
         else {
             self.values.push(value);
             Some(VertexID::new(self.values.len() as u32 - 1))
-        }
-    }
-
-    pub fn insert(&mut self, id: VertexID, value: V) {
-        let i = id.get() as usize;
-        if self.values.len() > i {
-            self.values[i] = value;
-        }
-        else {
-            self.values.resize_with(i+1, || value.clone());
         }
     }
 
