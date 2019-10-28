@@ -42,6 +42,10 @@ impl HalfEdgeID {
     {
         HalfEdgeID {val}
     }
+    pub(crate) fn get(&self) -> u32
+    {
+        self.val
+    }
 }
 
 impl fmt::Display for HalfEdgeID {
@@ -63,6 +67,10 @@ impl FaceID {
     pub(crate) fn new(val: u32) -> FaceID
     {
         FaceID {val}
+    }
+    pub(crate) fn get(&self) -> u32
+    {
+        self.val
     }
 }
 

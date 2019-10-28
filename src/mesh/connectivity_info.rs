@@ -5,8 +5,8 @@ use crate::mesh::primitive_map::*;
 #[derive(Clone, Debug)]
 pub(crate) struct ConnectivityInfo {
     vertices: RefCell<VertexMap<Vertex>>,
-    halfedges: RefCell<PrimitiveMap<HalfEdgeID, HalfEdge>>,
-    faces: RefCell<PrimitiveMap<FaceID, Face>>
+    halfedges: RefCell<HalfEdgeMap<HalfEdge>>,
+    faces: RefCell<FaceMap<Face>>
 }
 
 impl ConnectivityInfo {
@@ -14,8 +14,8 @@ impl ConnectivityInfo {
     {
         ConnectivityInfo {
             vertices: RefCell::new(VertexMap::with_capacity(no_vertices)),
-            halfedges: RefCell::new(PrimitiveMap::with_capacity(4 * no_faces)),
-            faces: RefCell::new(PrimitiveMap::with_capacity(no_faces))
+            halfedges: RefCell::new(HalfEdgeMap::with_capacity(4 * no_faces)),
+            faces: RefCell::new(FaceMap::with_capacity(no_faces))
         }
     }
 
@@ -84,31 +84,13 @@ impl ConnectivityInfo {
     pub fn new_halfedge(&self, vertex: Option<VertexID>, next: Option<HalfEdgeID>, face: Option<FaceID>) -> HalfEdgeID
     {
         let halfedges = &mut *RefCell::borrow_mut(&self.halfedges);
-
-        let len = halfedges.len() as u32;
-        let mut id = HalfEdgeID::new(len);
-        for i in len+1..std::u32::MAX {
-            if !halfedges.contains_key(&id) { break }
-            id = HalfEdgeID::new(i);
-        }
-
-        halfedges.insert(id, HalfEdge { vertex, twin: None, next, face });
-        id
+        halfedges.insert_new(HalfEdge { vertex, twin: None, next, face }).unwrap()
     }
 
     fn new_face(&self) -> FaceID
     {
         let faces = &mut *RefCell::borrow_mut(&self.faces);
-
-        let len = faces.len() as u32;
-        let mut id = FaceID::new(len);
-        for i in len+1..std::u32::MAX {
-            if !faces.contains_key(&id) { break }
-            id = FaceID::new(i);
-        }
-
-        faces.insert(id, Face { halfedge: None });
-        id
+        faces.insert_new(Face { halfedge: None }).unwrap()
     }
 
     pub fn remove_vertex(&self, vertex_id: VertexID)
@@ -120,17 +102,18 @@ impl ConnectivityInfo {
     pub fn remove_halfedge(&self, halfedge_id: HalfEdgeID)
     {
         let halfedges = &mut *RefCell::borrow_mut(&self.halfedges);
-        let halfedge = halfedges.remove(&halfedge_id).unwrap();
+        let halfedge = halfedges.get(&halfedge_id).unwrap();
         if halfedge.twin.is_some()
         {
             halfedges.get_mut(&halfedge.twin.unwrap()).unwrap().twin = None;
         }
+        halfedges.remove(&halfedge_id);
     }
 
     pub fn remove_face(&self, face_id: FaceID)
     {
         let faces = &mut *RefCell::borrow_mut(&self.faces);
-        faces.remove(&face_id).unwrap();
+        faces.remove(&face_id);
     }
 
     pub fn set_vertex_halfedge(&self, id: VertexID, val: Option<HalfEdgeID>)
@@ -174,15 +157,13 @@ impl ConnectivityInfo {
     pub fn halfedge_iterator(&self) -> Box<Iterator<Item = HalfEdgeID>>
     {
         let halfedges = RefCell::borrow(&self.halfedges);
-        let t: Vec<HalfEdgeID> = halfedges.iter().map(|pair| *pair.0).collect();
-        Box::new(t.into_iter())
+        halfedges.iter()
     }
 
     pub fn face_iterator(&self) -> Box<Iterator<Item = FaceID>>
     {
         let faces = RefCell::borrow(&self.faces);
-        let t: Vec<FaceID> = faces.iter().map(|pair| *pair.0).collect();
-        Box::new(t.into_iter())
+        faces.iter()
     }
 
     pub fn vertex_halfedge(&self, vertex_id: VertexID) -> Option<HalfEdgeID>
@@ -212,14 +193,14 @@ impl std::fmt::Display for ConnectivityInfo {
         writeln!(f, "**** Halfedges: ****")?;
         let halfedges = RefCell::borrow(&self.halfedges);
         writeln!(f, "Count: {}", halfedges.len())?;
-        for (id, info) in halfedges.iter() {
-            writeln!(f, "{}: {:?}", id, info)?;
+        for id in halfedges.iter() {
+            writeln!(f, "{}: {:?}", id, halfedges.get(&id))?;
         }
         writeln!(f, "**** Faces: ****")?;
         let faces = RefCell::borrow(&self.faces);
         writeln!(f, "Count: {}", faces.len())?;
-        for (id, info) in faces.iter() {
-            writeln!(f, "{}: {:?}", id, info)?;
+        for id in faces.iter() {
+            writeln!(f, "{}: {:?}", id, faces.get(&id))?;
         }
         Ok(())
     }
