@@ -104,9 +104,9 @@ impl ConnectivityInfo {
     {
         let halfedges = &mut *RefCell::borrow_mut(&self.halfedges);
         let halfedge = halfedges.get(halfedge_id).unwrap();
-        if halfedge.twin.is_some()
+        if let Some(twin_id) = halfedge.twin
         {
-            halfedges.get_mut(halfedge.twin.unwrap()).unwrap().twin = None;
+            halfedges.get_mut(twin_id).unwrap().twin = None;
         }
         halfedges.remove(halfedge_id);
     }
