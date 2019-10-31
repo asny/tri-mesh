@@ -93,7 +93,7 @@ impl Mesh
     pub fn face_line_piece_intersection(&self, face_id: FaceID, point0: &Vec3, point1: &Vec3) -> Option<Intersection>
     {
         let p = self.vertex_position(self.walker_from_face(face_id).vertex_id().unwrap());
-        let n = self.face_normal(face_id);
+        let n = self.face_direction(face_id);
 
         plane_line_piece_intersection(&point0, &point1, &p, &n).and_then(|intersection| {
             match intersection {

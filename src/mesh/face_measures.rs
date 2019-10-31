@@ -14,8 +14,8 @@ impl Mesh
         (self.vertex_position(vertices.0), self.vertex_position(vertices.1), self.vertex_position(vertices.2))
     }
 
-    /// Returns the normal of the face.
-    pub fn face_normal(&self, face_id: FaceID) -> Vec3
+    /// Returns the unnormalized normal of the face.
+    pub fn face_direction(&self, face_id: FaceID) -> Vec3
     {
         let mut walker = self.walker_from_face(face_id);
         let p0 = self.vertex_position(walker.vertex_id().unwrap());
@@ -24,21 +24,19 @@ impl Mesh
         walker.as_next();
         let v1 = self.vertex_position(walker.vertex_id().unwrap()) - p0;
 
-        let dir = v0.cross(v1);
-        dir.normalize()
+        v0.cross(v1)
+    }
+
+    /// Returns the normal of the face.
+    pub fn face_normal(&self, face_id: FaceID) -> Vec3
+    {
+        self.face_direction(face_id).normalize()
     }
 
     /// Returns the area of the face.
     pub fn face_area(&self, face_id: FaceID) -> f64
     {
-        let mut walker = self.walker_from_face(face_id);
-        let p0 = self.vertex_position(walker.vertex_id().unwrap());
-        walker.as_next();
-        let v0 = self.vertex_position(walker.vertex_id().unwrap()) - p0;
-        walker.as_next();
-        let v1 = self.vertex_position(walker.vertex_id().unwrap()) - p0;
-
-        0.5 * v0.cross(v1).magnitude()
+        0.5 * self.face_direction(face_id).magnitude()
     }
 
     /// Returns the center of the face given as the average of its vertex positions.
