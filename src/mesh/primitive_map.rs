@@ -55,33 +55,36 @@ impl<V> VertexMap<V>
 pub struct HalfEdgeMap<V>
 {
     values: Vec<V>,
-    free: Vec<u32>
+    indices: Vec<HalfEdgeID>,
+    free: Vec<HalfEdgeID>
 }
 
 impl<V> HalfEdgeMap<V>
 {
     pub fn with_capacity(capacity: usize) -> Self {
-        HalfEdgeMap { values: Vec::with_capacity(capacity), free: Vec::new() }
+        HalfEdgeMap { values: Vec::with_capacity(capacity), indices: Vec::new(), free: Vec::new() }
     }
 
     pub fn insert_new(&mut self, value: V) -> Option<HalfEdgeID>  {
-        if let Some(i) = self.free.pop() {
-            let id = HalfEdgeID::new(i);
-            self.values[i as usize] = value;
-            Some(id)
+        let id = if let Some(i) = self.free.pop() {
+            self.values[i.get() as usize] = value;
+            i
         }
         else {
             self.values.push(value);
-            Some(HalfEdgeID::new(self.values.len() as u32 - 1))
-        }
+            HalfEdgeID::new(self.values.len() as u32 - 1)
+        };
+        self.indices.push(id);
+        Some(id)
     }
 
     pub fn remove(&mut self, id: HalfEdgeID) {
-        self.free.push(id.get());
+        self.free.push(id);
+        self.indices.retain(|i| *i != id);
     }
 
     pub fn len(&self) -> usize {
-        self.values.len() - self.free.len()
+        self.indices.len()
     }
 
     pub fn get(&self, id: HalfEdgeID) -> Option<&V> {
@@ -93,10 +96,7 @@ impl<V> HalfEdgeMap<V>
     }
 
     pub fn iter(&self) -> Box<Iterator<Item = HalfEdgeID>> {
-        let t: Vec<HalfEdgeID> = (0..self.values.len())
-            .filter(|i| !self.free.contains(&(*i as u32)))
-            .map(|i| HalfEdgeID::new(i as u32)).collect();
-        Box::new(t.into_iter())
+        Box::new(self.indices.clone().into_iter())
     }
 }
 

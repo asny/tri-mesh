@@ -157,8 +157,7 @@ impl ConnectivityInfo {
 
     pub fn halfedge_iterator(&self) -> Box<Iterator<Item = HalfEdgeID>>
     {
-        let halfedges = RefCell::borrow(&self.halfedges);
-        halfedges.iter()
+        RefCell::borrow(&self.halfedges).iter()
     }
 
     pub fn face_iterator(&self) -> Box<Iterator<Item = FaceID>>
