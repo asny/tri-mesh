@@ -40,7 +40,6 @@ pub mod export;
 pub mod connected_components;
 pub mod validity;
 
-mod primitive_map;
 mod connectivity_info;
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
