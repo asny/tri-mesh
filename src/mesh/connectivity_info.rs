@@ -5,18 +5,18 @@ use crate::mesh::math::Vec3;
 
 #[derive(Clone, Debug)]
 pub(crate) struct ConnectivityInfo {
-    vertices: RefCell<VertexMap<Vertex>>,
-    halfedges: RefCell<HalfEdgeMap<HalfEdge>>,
-    faces: RefCell<FaceMap<Face>>
+    vertices: RefCell<IDMap<VertexID, Vertex>>,
+    halfedges: RefCell<IDMap<HalfEdgeID, HalfEdge>>,
+    faces: RefCell<IDMap<FaceID, Face>>
 }
 
 impl ConnectivityInfo {
     pub fn new(no_vertices: usize, no_faces: usize) -> ConnectivityInfo
     {
         ConnectivityInfo {
-            vertices: RefCell::new(VertexMap::with_capacity(no_vertices)),
-            halfedges: RefCell::new(HalfEdgeMap::with_capacity(4 * no_faces)),
-            faces: RefCell::new(FaceMap::with_capacity(no_faces))
+            vertices: RefCell::new(IDMap::with_capacity(no_vertices)),
+            halfedges: RefCell::new(IDMap::with_capacity(4 * no_faces)),
+            faces: RefCell::new(IDMap::with_capacity(no_faces))
         }
     }
 
@@ -149,21 +149,19 @@ impl ConnectivityInfo {
         RefCell::borrow_mut(&self.faces).get_mut(id).unwrap().halfedge = Some(val);
     }
 
-    pub fn vertex_iterator(&self) -> Box<Iterator<Item = VertexID>>
+    pub fn vertex_iterator(&self) -> Box<dyn Iterator<Item = VertexID>>
     {
-        let vertices = RefCell::borrow(&self.vertices);
-        vertices.iter()
+        RefCell::borrow(&self.vertices).iter()
     }
 
-    pub fn halfedge_iterator(&self) -> Box<Iterator<Item = HalfEdgeID>>
+    pub fn halfedge_iterator(&self) -> Box<dyn Iterator<Item=HalfEdgeID>>
     {
         RefCell::borrow(&self.halfedges).iter()
     }
 
-    pub fn face_iterator(&self) -> Box<Iterator<Item = FaceID>>
+    pub fn face_iterator(&self) -> Box<dyn Iterator<Item = FaceID>>
     {
-        let faces = RefCell::borrow(&self.faces);
-        faces.iter()
+        RefCell::borrow(&self.faces).iter()
     }
 
     pub fn vertex_halfedge(&self, vertex_id: VertexID) -> Option<HalfEdgeID>
