@@ -244,7 +244,7 @@ impl<K: 'static, V> IDMap<K, V>
     where K: ID
 {
     pub fn with_capacity(capacity: usize) -> Self {
-        IDMap { values: Vec::with_capacity(capacity), indices: Vec::new(), free: Vec::new() }
+        IDMap { values: Vec::with_capacity(capacity), indices: Vec::with_capacity(capacity), free: Vec::new() }
     }
 
     pub fn insert_new(&mut self, value: V) -> Option<K>  {
