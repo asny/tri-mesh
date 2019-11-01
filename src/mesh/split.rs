@@ -5,7 +5,6 @@ use crate::mesh::math::*;
 use crate::mesh::ids::*;
 use crate::mesh::intersection::*;
 use std::collections::{HashSet, HashMap};
-use crate::mesh::primitive_map::PrimitiveMap;
 
 /// # Split
 impl Mesh
@@ -13,48 +12,35 @@ impl Mesh
     /// Clones a subset of this mesh defined by the is_included function.
     pub fn clone_subset(&self, is_included: &Fn(&Mesh, FaceID) -> bool) -> Mesh
     {
-        let info = connectivity_info::ConnectivityInfo::new(0, 0);
-        for face_id in self.face_iter() {
-            if is_included(self, face_id) {
-                let face = self.connectivity_info.face(face_id).unwrap();
-                for halfedge_id in self.face_halfedge_iter(face_id) {
-                    let mut walker = self.walker_from_halfedge(halfedge_id);
-                    let halfedge = self.connectivity_info.halfedge(halfedge_id).unwrap();
-                    info.add_halfedge(halfedge_id, halfedge);
-
-                    let vertex_id = walker.vertex_id().unwrap();
-                    let vertex = self.connectivity_info.vertex(vertex_id).unwrap();
-                    info.add_vertex(vertex_id, vertex);
-                    info.set_vertex_halfedge(vertex_id, walker.next_id());
-
+        let mut clone = self.clone();
+        for face_id in clone.face_iter() {
+            if !is_included(&clone, face_id) {
+                let edges: Vec<HalfEdgeID> = clone.face_halfedge_iter(face_id).collect();
+                clone.remove_face_unsafe(face_id);
+                for halfedge_id in edges {
+                    let mut walker = clone.walker_from_halfedge(halfedge_id);
                     walker.as_twin();
                     if walker.face_id().is_none()
                     {
-                        let twin_id = walker.halfedge_id().unwrap();
-                        let twin = self.connectivity_info.halfedge(twin_id).unwrap();
-                        info.add_halfedge(twin_id, twin);
-
-                    }
-                    else if !is_included(self, walker.face_id().unwrap())
-                    {
-                        let twin_id = walker.halfedge_id().unwrap();
-                        let mut twin = self.connectivity_info.halfedge(twin_id).unwrap();
-                        twin.face = None;
-                        twin.next = None;
-                        info.add_halfedge(twin_id, twin);
+                        clone.connectivity_info.remove_halfedge(walker.halfedge_id().unwrap());
+                        clone.connectivity_info.remove_halfedge(halfedge_id);
                     }
                 }
-
-                info.add_face(face_id, face);
             }
         }
 
-        let mut positions = PrimitiveMap::with_capacity(info.no_vertices());
-        for vertex_id in info.vertex_iterator() {
-            positions.insert(vertex_id, self.vertex_position(vertex_id).clone());
+        for vertex_id in clone.vertex_iter() {
+            clone.connectivity_info.set_vertex_halfedge(vertex_id, None);
         }
 
-        Mesh::new_internal(positions, info)
+        for halfedge_id in clone.halfedge_iter() {
+            let walker = clone.walker_from_halfedge(halfedge_id);
+            clone.connectivity_info.set_vertex_halfedge(walker.vertex_id().unwrap(), walker.twin_id());
+        }
+        for vertex_id in clone.vertex_iter() {
+            clone.remove_vertex_if_lonely(vertex_id);
+        }
+        clone
     }
 
     ///
@@ -133,9 +119,9 @@ fn face_and_face_overlaps(mesh1: &Mesh, face_id1: FaceID, mesh2: &Mesh, face_id2
     let (v0, v1, v2) = mesh1.face_vertices(face_id1);
     let (p0, p1, p2) = mesh2.face_positions(face_id2);
 
-    (mesh1.vertex_point_intersection(v0, p0).is_some() || mesh1.vertex_point_intersection(v1, p0).is_some() || mesh1.vertex_point_intersection(v2, p0).is_some())
-        && (mesh1.vertex_point_intersection(v0, p1).is_some() || mesh1.vertex_point_intersection(v1, p1).is_some() || mesh1.vertex_point_intersection(v2, p1).is_some())
-        && (mesh1.vertex_point_intersection(v0, p2).is_some() || mesh1.vertex_point_intersection(v1, p2).is_some() || mesh1.vertex_point_intersection(v2, p2).is_some())
+    (mesh1.vertex_point_intersection(v0, &p0).is_some() || mesh1.vertex_point_intersection(v1, &p0).is_some() || mesh1.vertex_point_intersection(v2, &p0).is_some())
+        && (mesh1.vertex_point_intersection(v0, &p1).is_some() || mesh1.vertex_point_intersection(v1, &p1).is_some() || mesh1.vertex_point_intersection(v2, &p1).is_some())
+        && (mesh1.vertex_point_intersection(v0, &p2).is_some() || mesh1.vertex_point_intersection(v1, &p2).is_some() || mesh1.vertex_point_intersection(v2, &p2).is_some())
 }
 
 fn split_at_intersections(mesh1: &mut Mesh, mesh2: &mut Mesh, intersections: &HashMap<(Primitive, Primitive), Vec3>, stitches: &mut Vec<(VertexID, VertexID)>) -> Option<(Vec<HalfEdgeID>, Vec<HalfEdgeID>)>
@@ -307,7 +293,7 @@ fn find_intersections_between_edge_face(mesh1: &Mesh, edges1: &Vec<HalfEdgeID>, 
         for face_id2 in mesh2.face_iter()
         {
             let (p0, p1) = mesh1.edge_positions(*edge1);
-            if let Some(intersection) = mesh2.face_line_piece_intersection(face_id2, p0, p1)
+            if let Some(intersection) = mesh2.face_line_piece_intersection(face_id2, &p0, &p1)
             {
                 match intersection {
                     Intersection::Point {primitive: primitive2, point} => {
@@ -339,7 +325,7 @@ fn find_intersections_between_edge_face(mesh1: &Mesh, edges1: &Vec<HalfEdgeID>, 
         for face_id1 in mesh1.face_iter()
         {
             let (p0, p1) = mesh2.edge_positions(*edge2);
-            if let Some(intersection) = mesh1.face_line_piece_intersection(face_id1, p0, p1)
+            if let Some(intersection) = mesh1.face_line_piece_intersection(face_id1, &p0, &p1)
             {
                 match intersection {
                     Intersection::Point {primitive: primitive1, point} => {

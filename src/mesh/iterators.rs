@@ -129,7 +129,7 @@ impl Mesh
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
     /// let mut sum_vertex_positions = Vec3::zero();
     /// for vertex_id in mesh.vertex_iter() {
-    ///     sum_vertex_positions += *mesh.vertex_position(vertex_id);
+    ///     sum_vertex_positions += mesh.vertex_position(vertex_id);
     /// }
     /// ```
     ///
@@ -224,7 +224,7 @@ impl Mesh
     /// let mut i = 0;
     /// for halfedge_id in mesh.vertex_halfedge_iter(vertex_id) {
     ///     let walker = mesh.walker_from_halfedge(halfedge_id);
-    ///     one_ring_average_position += *mesh.vertex_position(walker.vertex_id().unwrap());
+    ///     one_ring_average_position += mesh.vertex_position(walker.vertex_id().unwrap());
     ///     i = i+1;
     /// }
     /// one_ring_average_position /= i as f64;

@@ -40,11 +40,9 @@ pub mod export;
 pub mod connected_components;
 pub mod validity;
 
-mod primitive_map;
 mod connectivity_info;
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
-use crate::mesh::primitive_map::PrimitiveMap;
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
 
@@ -92,7 +90,6 @@ pub enum Error {
 ///
 #[derive(Debug)]
 pub struct Mesh {
-    positions: PrimitiveMap<VertexID, Vec3>,
     connectivity_info: ConnectivityInfo
 }
 
@@ -103,8 +100,7 @@ impl Mesh
         let no_vertices = positions.len()/3;
         let no_faces = indices.len()/3;
         let mut mesh = Mesh {
-            connectivity_info: ConnectivityInfo::new(no_vertices, no_faces),
-            positions: PrimitiveMap::new()
+            connectivity_info: ConnectivityInfo::new(no_vertices, no_faces)
         };
 
         // Create vertices
@@ -148,9 +144,9 @@ impl Mesh
         mesh
     }
 
-    fn new_internal(positions: PrimitiveMap<VertexID, Vec3>, connectivity_info: ConnectivityInfo) -> Mesh
+    fn new_internal(connectivity_info: ConnectivityInfo) -> Mesh
     {
-        Mesh {positions, connectivity_info}
+        Mesh {connectivity_info}
     }
 
     /// Returns the number of vertices in the mesh.
@@ -190,9 +186,7 @@ impl Mesh
 
     fn create_vertex(&mut self, position: Vec3) -> VertexID
     {
-        let id = self.connectivity_info.new_vertex();
-        self.positions.insert(id, position);
-        id
+        self.connectivity_info.new_vertex(position)
     }
 
     fn create_boundary_edges(&mut self)
@@ -212,7 +206,7 @@ impl Mesh
 
 impl Clone for Mesh {
     fn clone(&self) -> Mesh {
-        Mesh::new_internal(self.positions.clone(), self.connectivity_info.clone())
+        Mesh::new_internal(self.connectivity_info.clone())
     }
 }
 
@@ -220,8 +214,6 @@ impl std::fmt::Display for Mesh {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         writeln!(f, "**** Connectivity: ****")?;
         writeln!(f, "{}", self.connectivity_info)?;
-        writeln!(f, "**** Positions: ****")?;
-        writeln!(f, "{:?}", self.positions)?;
         Ok(())
     }
 }

@@ -309,7 +309,7 @@ impl Mesh
 
     pub(super) fn remove_vertex_if_lonely(&mut self, vertex_id: VertexID)
     {
-        if self.walker_from_vertex(vertex_id).halfedge_id().is_none()
+        if self.connectivity_info.vertex_halfedge(vertex_id).is_none()
         {
             self.connectivity_info.remove_vertex(vertex_id);
         }

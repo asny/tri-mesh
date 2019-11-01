@@ -1,6 +1,13 @@
 //! Defines unique id's for a vertex, half-edge and face.
 
 use std::fmt;
+use std::hash::Hash;
+use std::fmt::Debug;
+
+pub(crate) trait ID: Clone + Eq + Copy + Ord + Hash + Debug {
+    fn get(&self) -> u32;
+    fn new(val: u32) -> Self;
+}
 
 ///
 /// An unique ID for a vertex
@@ -11,10 +18,14 @@ pub struct VertexID
     val: u32
 }
 
-impl VertexID {
-    pub(crate) fn new(val: u32) -> VertexID
+impl ID for VertexID {
+    fn new(val: u32) -> VertexID
     {
         VertexID {val}
+    }
+    fn get(&self) -> u32
+    {
+        self.val
     }
 }
 
@@ -33,10 +44,14 @@ pub struct HalfEdgeID
     val: u32
 }
 
-impl HalfEdgeID {
-    pub(crate) fn new(val: u32) -> HalfEdgeID
+impl ID for HalfEdgeID {
+    fn new(val: u32) -> HalfEdgeID
     {
         HalfEdgeID {val}
+    }
+    fn get(&self) -> u32
+    {
+        self.val
     }
 }
 
@@ -55,10 +70,14 @@ pub struct FaceID
     val: u32
 }
 
-impl FaceID {
-    pub(crate) fn new(val: u32) -> FaceID
+impl ID for FaceID {
+    fn new(val: u32) -> FaceID
     {
         FaceID {val}
+    }
+    fn get(&self) -> u32
+    {
+        self.val
     }
 }
 

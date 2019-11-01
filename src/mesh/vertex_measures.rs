@@ -8,9 +8,9 @@ use crate::mesh::ids::*;
 impl Mesh
 {
     /// Returns the vertex position.
-    pub fn vertex_position(&self, vertex_id: VertexID) -> &Vec3
+    pub fn vertex_position(&self, vertex_id: VertexID) -> Vec3
     {
-        self.positions.get(&vertex_id).unwrap()
+        self.connectivity_info.position(vertex_id)
     }
 
     /// Returns the normal of the vertex given as the average of the normals of the neighbouring faces.
