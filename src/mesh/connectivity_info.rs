@@ -240,6 +240,8 @@ pub(crate) struct IDMap<K, V>
     free: Vec<K>
 }
 
+use std::collections::HashSet;
+
 impl<K: 'static, V> IDMap<K, V>
     where K: ID
 {
@@ -278,6 +280,10 @@ impl<K: 'static, V> IDMap<K, V>
     }
 
     pub fn iter(&self) -> Box<dyn Iterator<Item = K>> {
-        Box::new(self.indices.clone().into_iter())
+//         Box::new(self.indices.clone().into_iter())
+		let free: HashSet<_> = self.free.iter().cloned().collect();
+		Box::new(   (0 .. self.values.len() as u32)
+					.map(|i| K::new(i))
+					.filter(move |i| !free.contains(&i))   )
     }
 }
