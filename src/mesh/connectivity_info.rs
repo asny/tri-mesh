@@ -236,7 +236,6 @@ pub struct Face {
 pub(crate) struct IDMap<K, V>
 {
     values: Vec<V>,
-    indices: Vec<K>,
     free: Vec<K>
 }
 
@@ -246,7 +245,7 @@ impl<K: 'static, V> IDMap<K, V>
     where K: ID
 {
     pub fn with_capacity(capacity: usize) -> Self {
-        IDMap { values: Vec::with_capacity(capacity), indices: Vec::with_capacity(capacity), free: Vec::new() }
+        IDMap { values: Vec::with_capacity(capacity), free: Vec::new() }
     }
 
     pub fn insert_new(&mut self, value: V) -> Option<K>  {
@@ -258,17 +257,15 @@ impl<K: 'static, V> IDMap<K, V>
             self.values.push(value);
             K::new(self.values.len() as u32 - 1)
         };
-        self.indices.push(id);
         Some(id)
     }
 
     pub fn remove(&mut self, id: K) {
         self.free.push(id);
-        self.indices.retain(|i| *i != id);
     }
 
     pub fn len(&self) -> usize {
-        self.indices.len()
+        self.values.len() - self.free.len()
     }
 
     pub fn get(&self, id: K) -> Option<&V> {
@@ -280,7 +277,6 @@ impl<K: 'static, V> IDMap<K, V>
     }
 
     pub fn iter(&self) -> Box<dyn Iterator<Item = K>> {
-//         Box::new(self.indices.clone().into_iter())
 		let free: HashSet<_> = self.free.iter().cloned().collect();
 		Box::new(   (0 .. self.values.len() as u32)
 					.map(|i| K::new(i))
