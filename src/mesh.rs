@@ -131,13 +131,18 @@ impl Mesh
             
             // mark twin halfedges
             let edges = [sorted(v0, v1), sorted(v1, v2), sorted(v2, v0)];
-            let mut halfedge = conn.face_halfedge(face).unwrap();
+			let mut walker = mesh.walker_from_face(face);
             for e in edges.iter() {
+				let halfedge = walker.halfedge_id().unwrap();
 				match twins.get(e) {
-					Some(&twin)	=> { conn.set_halfedge_twin(halfedge, twin); },
+					Some(&twin)	=> {
+						assert!(conn.halfedge(twin).unwrap().twin.is_none());
+						assert!(conn.halfedge(twin).unwrap().vertex != conn.halfedge(halfedge).unwrap().vertex);
+						conn.set_halfedge_twin(halfedge, twin);
+					},
 					None		=> { twins.insert(*e, halfedge); },
 				}
-				halfedge = conn.halfedge(halfedge).unwrap().next.unwrap();
+				walker.as_next();
             }
         }
         for halfedge in conn.halfedge_iterator() {
@@ -146,6 +151,8 @@ impl Mesh
 				conn.set_halfedge_twin(halfedge, conn.new_halfedge(Some(vertex), None, None));
 			}
         }
+        
+        mesh.is_valid().unwrap();
         
         mesh
     }
