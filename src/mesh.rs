@@ -39,12 +39,15 @@ pub mod split;
 pub mod export;
 pub mod connected_components;
 pub mod validity;
+pub mod generation;
 
 mod connectivity_info;
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
+
+use std::collections::HashMap;
 
 /// Mesh errors.
 #[derive(Debug)]
@@ -107,40 +110,44 @@ impl Mesh
         for i in 0..no_vertices {
             mesh.create_vertex(vec3(positions[i*3], positions[i*3+1], positions[i*3+2]));
         }
+        
+        let mut twins = HashMap::<(u32,u32), HalfEdgeID>::new();
+        fn sorted(a: u32, b: u32) -> (u32,u32) {	// the key creation function
+			if a < b	{(a,b)}
+			else		{(b,a)}
+        }
+        
+        let conn = &mesh.connectivity_info;
 
         // Create faces and twin connectivity
         for face in 0..no_faces {
-            let v0 = VertexID::new(indices[face * 3]);
-            let v1 = VertexID::new(indices[face * 3 + 1]);
-            let v2 = VertexID::new(indices[face * 3 + 2]);
+            let v0 = indices[face * 3];
+            let v1 = indices[face * 3 + 1];
+            let v2 = indices[face * 3 + 2];
 
-            mesh.connectivity_info.create_face(v0, v1, v2);
-        }
-
-        let mut walker = mesh.walker();
-        let mut halfedges: Vec<HalfEdgeID> = mesh.halfedge_iter().collect();
-        while let Some(halfedge_id) = halfedges.pop()
-        {
-            walker.as_halfedge_walker(halfedge_id);
-            if walker.twin_id().is_none() {
-                let (sink_vertex_id, source_vertex_id) = (walker.vertex_id().unwrap(), walker.as_previous().vertex_id().unwrap());
-                let mut found_twin_id = None;
-                for twin_id_to_test in halfedges.iter()
-                {
-                    walker.as_halfedge_walker(*twin_id_to_test);
-                    if walker.twin_id().is_none() && (walker.vertex_id().unwrap() == source_vertex_id && walker.as_previous().vertex_id().unwrap() == sink_vertex_id ||
-                        walker.vertex_id().unwrap() == sink_vertex_id && walker.as_previous().vertex_id().unwrap() == source_vertex_id)
-                    {
-                        found_twin_id = Some(*twin_id_to_test);
-                        break;
-                    }
-                }
-                
-                let twin_id = found_twin_id.unwrap_or_else(|| mesh.connectivity_info.new_halfedge(Some(source_vertex_id), None, None));
-                mesh.connectivity_info.set_halfedge_twin(halfedge_id, twin_id);
+            let face = conn.create_face(
+										VertexID::new(v0), 
+										VertexID::new(v1), 
+										VertexID::new(v2)  );
+            
+            // mark twin halfedges
+            let edges = [sorted(v0, v1), sorted(v1, v2), sorted(v2, v0)];
+            let mut halfedge = conn.face_halfedge(face).unwrap();
+            for e in edges.iter() {
+				match twins.get(e) {
+					Some(&twin)	=> { conn.set_halfedge_twin(halfedge, twin); },
+					None		=> { twins.insert(*e, halfedge); },
+				}
+				halfedge = conn.halfedge(halfedge).unwrap().next.unwrap();
             }
         }
-
+        for halfedge in conn.halfedge_iterator() {
+			if conn.halfedge(halfedge).unwrap().twin.is_none() {
+				let vertex = mesh.walker_from_halfedge(halfedge).as_previous().vertex_id().unwrap();
+				conn.set_halfedge_twin(halfedge, conn.new_halfedge(Some(vertex), None, None));
+			}
+        }
+        
         mesh
     }
 
