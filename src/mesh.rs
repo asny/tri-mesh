@@ -39,7 +39,6 @@ pub mod split;
 pub mod export;
 pub mod connected_components;
 pub mod validity;
-pub mod generation;
 
 mod connectivity_info;
 
