@@ -137,7 +137,6 @@ impl Mesh
 				match twins.get(e) {
 					Some(&twin)	=> {
 						assert!(conn.halfedge(twin).unwrap().twin.is_none());
-						assert!(conn.halfedge(twin).unwrap().vertex != conn.halfedge(halfedge).unwrap().vertex);
 						conn.set_halfedge_twin(halfedge, twin);
 					},
 					None		=> { twins.insert(*e, halfedge); },
@@ -151,8 +150,6 @@ impl Mesh
 				conn.set_halfedge_twin(halfedge, conn.new_halfedge(Some(vertex), None, None));
 			}
         }
-        
-        mesh.is_valid().unwrap();
         
         mesh
     }
