@@ -169,9 +169,9 @@ impl Shape {
  	
  	pub fn is_valid(&self) -> bool {
 		// TODO use an error as return value
-		let maxindex = self.points.len() as usize;
+		let maxindex = self.points.len() as u32;
 		for face in self.faces.iter() {
-			for i in face.iter() {
+			for &i in face.iter() {
 				if i > maxindex { return false; }
 			}
 		}
@@ -223,7 +223,7 @@ mod tests {
 			], Vec3::new(0., 0.5, 1.));
 		
 		assert_eq!(shape.points.len(), 8);
-		assert_eq!(shape.faces.len(), 8);
+		assert_eq!(shape.faces.len(), 6);	// there is no face for the non-existing edge (0, 3)
 		assert!(shape.is_valid());
 	}
 	
