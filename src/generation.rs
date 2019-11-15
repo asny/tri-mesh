@@ -2,6 +2,7 @@
 
 use std::convert::Into;
 use std::iter::FromIterator;
+use std::collections::HashMap;
 use crate::mesh::Mesh;
 use crate::mesh::math::*;
 
@@ -24,7 +25,7 @@ pub struct Shape {
 impl Into<Mesh> for Shape {
 	fn into(self) -> Mesh {
 		// TODO ideally we would do this:
-		// Mesh::new(self.faces, self.points)
+		// Mesh::new(&self.faces, &self.points)
 		// but the current Mesh new function is asking an owned storage, with splited vector and face components
 		let mut faces = Vec::with_capacity(self.faces.len()*3);
 		for face in self.faces {
@@ -42,6 +43,88 @@ impl Shape {
 	/// create with empty buffers
 	pub fn new() -> Self {
 		Shape::default()
+	}
+	
+	pub fn boundingbox(&self) -> Option<[Vec3; 2]> {
+		if self.points.is_empty()
+			{ None }
+		else {
+			let mut extremes = [self.points[0], self.points[0]];
+			for p in self.points.iter() {
+				if      p.x < extremes[0].x		{ extremes[0].x = p.x; }
+				else if p.y > extremes[1].x		{ extremes[1].x = p.x; }
+				if      p.y < extremes[0].y		{ extremes[0].y = p.y; }
+				else if p.y > extremes[1].y		{ extremes[1].y = p.y; }
+				if      p.z < extremes[0].z		{ extremes[0].z = p.z; }
+				else if p.z > extremes[1].z		{ extremes[1].z = p.z; }
+			}
+			Some(extremes)
+		}
+	}
+	
+	pub fn merge(&mut self, other: &Self) -> &mut Self {
+		let offset = self.points.len() as u32;
+		self.points.extend_from_slice(&other.points);
+		self.faces.extend(other.faces.iter().map(|f| [f[0]+offset, f[1]+offset, f[2]+offset]));
+		self
+	}
+	
+	pub fn merge_doubles(&mut self, distance: Option<f64>) -> &mut Self {
+		if self.points.is_empty() { return self; }
+		
+		// get the distance step
+		let step = match distance {
+			Some(distance)	=> distance,
+			None => {
+				let b = self.boundingbox().unwrap();
+				(b[1]-b[0]).magnitude() * 1e-6
+			}
+		};
+		
+		// hashtable of redirections for merge
+		let mut merges = HashMap::new();
+		
+		// generate a has table to find the points quickly
+		let mut placements = HashMap::with_capacity(self.points.len());
+		let place = |pt: &Vec3|	{ [(pt.x/step) as i64, (pt.y/step) as i64, (pt.z/step) as i64] };
+		for (i,point) in self.points.iter().enumerate() {
+			placements.insert(place(point), i as u32);
+		}
+		
+		let derives = vec![[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [0, 1, 1], [1, 0, 1], [1, 1, 1]];
+		
+		for (i,point) in self.points.iter().enumerate() {
+			// find a point to merge with
+			let placement = place(point);
+			let mut pair: Option<u32> = None;
+			for derive in derives.iter() {
+				let key = [placement[0]+derive[0], placement[1]+derive[1], placement[2]+derive[2]];
+				match placements.get(&key)	{
+					None => continue,
+					Some(&j) => { pair = Some(j); break; },
+				}
+			}
+			// break cyclic redirections
+			if let Some(mut pair) = pair {
+				loop {
+					match merges.get(&pair) {
+						None => break,
+						Some(&p) => {
+							if p != i as u32 {pair = p;}
+							else {break;}
+						},
+					}
+				}
+				merges.insert(i as u32, pair);
+			}
+		}
+		
+		self.merge_points(&merges);
+		self
+	}
+	
+	pub fn merge_points(&mut self, merges: &HashMap<u32, u32>) -> &mut Self {
+		self
 	}
 	
 	/// insert a surface defined by its outline
@@ -162,8 +245,8 @@ impl Shape {
  	
  	/// create a revolution surface from the line, around the axis
  	///
- 	pub fn revolution(&mut self, line: &[Vec3], segments: usize, axis: Vec3, angle: f64) -> &mut Self {
-		self.extrans(line, segments, &|amount, pt| Quaternion::from_axis_angle(axis, Rad(angle*amount)).rotate_vector(pt));
+ 	pub fn revolution(&mut self, line: &[Vec3], segments: usize, origin: Vec3, axis: Vec3, angle: f64) -> &mut Self {
+		self.extrans(line, segments, &|amount, pt| Quaternion::from_axis_angle(axis, Rad(angle*amount)).rotate_vector(pt-origin) + origin);
 		self
  	}
  	
@@ -196,6 +279,7 @@ fn base_from_points(points: &mut dyn Iterator<Item=Vec3>) -> (Vec3, Vec3, Vec3) 
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use std::f64::consts::PI;
 	
 	#[test]
 	fn test_triangulation() 
@@ -227,4 +311,17 @@ mod tests {
 		assert!(shape.is_valid());
 	}
 	
+	#[test]
+	fn test_revolution() {
+		let mut shape = Shape::new();
+		shape.revolution(&vec![
+			Vec3::new(1., 0., 0.),
+			Vec3::new(2., 0., 1.),
+			Vec3::new(1., 0., 2.),
+			], 32, Vec3::new(0., 0., 0.), Vec3::new(0., 0., 1.), PI);
+		
+		assert_eq!(shape.points.len(), 3*33);
+		assert_eq!(shape.faces.len(), 4*32);
+		assert!(shape.is_valid());
+	}
 }
