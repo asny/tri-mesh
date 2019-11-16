@@ -40,11 +40,13 @@ impl Into<Mesh> for Shape {
 }
 
 impl Shape {
-	/// create with empty buffers
+	/// create with empty buffers.
 	pub fn new() -> Self {
 		Shape::default()
 	}
 	
+	/// return the extreme coordinates of the shape content.
+	///
 	pub fn boundingbox(&self) -> Option<[Vec3; 2]> {
 		if self.points.is_empty()
 			{ None }
@@ -62,6 +64,8 @@ impl Shape {
 		}
 	}
 	
+	/// insert an other shape, simply including its points and faces.
+	///
 	pub fn merge(&mut self, other: &Self) -> &mut Self {
 		let offset = self.points.len() as u32;
 		self.points.extend_from_slice(&other.points);
@@ -69,6 +73,11 @@ impl Shape {
 		self
 	}
 	
+	/// Merge points that are too close.
+	///
+	/// if specified, `distance` is the approximate radius in which the points will me considered to be merged.
+	/// # WANING: `distance` is approximative, points can be merged if they are up to `2*distance`
+	///
 	pub fn merge_doubles(&mut self, distance: Option<f64>) -> &mut Self {
 		if self.points.is_empty() { return self; }
 		
@@ -117,6 +126,10 @@ impl Shape {
 		self
 	}
 	
+	/// merge some points.
+	///
+	/// the argument must be like `{point_to_merge:  point_to_merge_to}`.
+	///
 	pub fn merge_points(&mut self, merges: &HashMap<u32, u32>) -> &mut Self {
 		let mut reindex = Vec::with_capacity(self.points.len());
 		let mut j = 0;
@@ -135,8 +148,9 @@ impl Shape {
 		self
 	}
 	
-	/// insert a surface defined by its outline
-	/// The ouline is considered closed (ie. the last point is connected to the first)
+	/// insert a surface defined by its outline.
+	///
+	/// The ouline is considered closed (ie. the last point is connected to the first).
 	pub fn triangulation(&mut self, outline: &[Vec3]) -> &mut Self {
 		self.points.extend_from_slice(outline);
 		self.triangulate((0 .. outline.len() as u32).collect());
@@ -144,6 +158,7 @@ impl Shape {
 	}
 	
 	/// create the triangles for a surface defined by its `outline`. 
+	///
 	/// The ouline is considered closed (ie. the last point is connected to the first)
 	pub fn triangulate(&mut self, closed_outline: Vec<u32>) -> &mut Self {
 		let mut outline = closed_outline;	// move it to mutable
@@ -227,6 +242,7 @@ impl Shape {
 	}
 	
 	/// extrude a line into a lateral surface, proceeding by steps.
+	///
 	/// each point the result of `transform(step/segments, line_point)`
 	///
  	pub fn extrans(&mut self, line: &[Vec3], segments: usize, transform: &dyn Fn(f64,Vec3) -> Vec3) -> &mut Self {
@@ -251,7 +267,7 @@ impl Shape {
 		self
  	}
  	
- 	/// create a revolution surface from the line, around the axis
+ 	/// create a revolution surface from the line, around the axis.
  	///
  	pub fn revolution(&mut self, line: &[Vec3], segments: usize, origin: Vec3, axis: Vec3, angle: f64) -> &mut Self {
 		self.extrans(line, segments, &|amount, pt| Quaternion::from_axis_angle(axis, Rad(angle*amount)).rotate_vector(pt-origin) + origin);
