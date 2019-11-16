@@ -113,8 +113,6 @@ impl Shape {
 			}
 		}
 		
-		println!("pairs: {:#?}", merges);
-		
 		self.merge_points(&merges);
 		self
 	}
@@ -346,9 +344,6 @@ mod tests {
 			Vec3::new(1., 0., 2.),
 			], div, Vec3::new(0., 0., 0.), Vec3::new(0., 0., 1.), 2.*PI);
 		shape.merge_doubles(None);
-		for (i,p) in shape.points.iter().enumerate() {
-			println!("{}\t{:?}", i,p);
-		}
 		
 		assert_eq!(shape.points.len(), 3*div);
 		assert_eq!(shape.faces.len(), 4*div);
