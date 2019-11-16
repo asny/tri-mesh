@@ -82,48 +82,58 @@ impl Shape {
 		};
 		
 		// hashtable of redirections for merge
-		let mut merges = HashMap::new();
+		let mut merges = HashMap::<u32, u32>::new();
 		
-		// generate a has table to find the points quickly
+		// generate a hash table to find the points quickly (this is truncated coordinates)
 		let mut placements = HashMap::with_capacity(self.points.len());
+		// handle truncation errors on the result of place
+		let derives = vec![[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [0,1,1], [1,0,1], [1,1,1]];
+		
 		let place = |pt: &Vec3|	{ [(pt.x/step) as i64, (pt.y/step) as i64, (pt.z/step) as i64] };
 		for (i,point) in self.points.iter().enumerate() {
-			placements.insert(place(point), i as u32);
-		}
-		
-		let derives = vec![[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [0, 1, 1], [1, 0, 1], [1, 1, 1]];
-		
-		for (i,point) in self.points.iter().enumerate() {
-			// find a point to merge with
 			let placement = place(point);
-			let mut pair: Option<u32> = None;
+			let mut pair_found = false;
+			
 			for derive in derives.iter() {
 				let key = [placement[0]+derive[0], placement[1]+derive[1], placement[2]+derive[2]];
-				match placements.get(&key)	{
-					None => continue,
-					Some(&j) => { pair = Some(j); break; },
+				if placements.contains_key(&key) {
+					merges.insert(i as u32, placements[&key]);
+					pair_found = true;
+					break;
 				}
 			}
-			// break cyclic redirections
-			if let Some(mut pair) = pair {
-				loop {
-					match merges.get(&pair) {
-						None => break,
-						Some(&p) => {
-							if p != i as u32 {pair = p;}
-							else {break;}
-						},
-					}
-				}
-				merges.insert(i as u32, pair);
+			if ! pair_found		{ placements.insert(placement, i as u32); }
+		}
+		
+		// simplify multiple redirections
+		for (start,mut target) in merges.iter() {
+			while merges.contains_key(target) {
+				target = &merges[target];
+				assert_ne!(target, start);
 			}
 		}
+		
+		println!("pairs: {:#?}", merges);
 		
 		self.merge_points(&merges);
 		self
 	}
 	
 	pub fn merge_points(&mut self, merges: &HashMap<u32, u32>) -> &mut Self {
+		let mut reindex = Vec::with_capacity(self.points.len());
+		let mut j = 0;
+		for i in 0 .. self.points.len() {
+			if ! merges.contains_key(&(i as u32)) 	{
+				self.points[j] = self.points[i];
+				j += 1;
+			}
+			reindex.push(j as u32);
+		}
+		self.points.truncate(self.points.len() - merges.len());
+		for i in 0 .. self.faces.len() {
+			let old = self.faces[i];
+			self.faces[i] = [reindex[old[0] as usize], reindex[old[1] as usize], reindex[old[2] as usize]];
+		}
 		self
 	}
 	
@@ -229,7 +239,7 @@ impl Shape {
 		let mut istart = self.points.len() as u32;
 		self.points.extend_from_slice(line);
 		
-		for segt in 0 .. segments {
+		for segt in 1 ..= segments {
 			let amount = segt as f64 / segments as f64;
 			for pt in line.iter() {
 				self.points.push(transform(amount, *pt));
@@ -313,15 +323,35 @@ mod tests {
 	
 	#[test]
 	fn test_revolution() {
+		let div = 32;
 		let mut shape = Shape::new();
 		shape.revolution(&vec![
 			Vec3::new(1., 0., 0.),
 			Vec3::new(2., 0., 1.),
 			Vec3::new(1., 0., 2.),
-			], 32, Vec3::new(0., 0., 0.), Vec3::new(0., 0., 1.), PI);
+			], div, Vec3::new(0., 0., 0.), Vec3::new(0., 0., 1.), PI);
 		
-		assert_eq!(shape.points.len(), 3*33);
-		assert_eq!(shape.faces.len(), 4*32);
+		assert_eq!(shape.points.len(), 3*(div+1));
+		assert_eq!(shape.faces.len(), 4*div);
+		assert!(shape.is_valid());
+	}
+	
+	#[test]
+	fn test_merge_doubles() {
+		let div = 32;
+		let mut shape = Shape::new();
+		shape.revolution(&vec![
+			Vec3::new(1., 0., 0.),
+			Vec3::new(2., 0., 1.),
+			Vec3::new(1., 0., 2.),
+			], div, Vec3::new(0., 0., 0.), Vec3::new(0., 0., 1.), 2.*PI);
+		shape.merge_doubles(None);
+		for (i,p) in shape.points.iter().enumerate() {
+			println!("{}\t{:?}", i,p);
+		}
+		
+		assert_eq!(shape.points.len(), 3*div);
+		assert_eq!(shape.faces.len(), 4*div);
 		assert!(shape.is_valid());
 	}
 }
