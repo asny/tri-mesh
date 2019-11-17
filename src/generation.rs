@@ -96,7 +96,7 @@ impl Shape {
 		// generate a hash table to find the points quickly (this is truncated coordinates)
 		let mut placements = HashMap::with_capacity(self.points.len());
 		// handle truncation errors on the result of place
-		let derives = vec![[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [0,1,1], [1,0,1], [1,1,1]];
+		let derives = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [0,1,1], [1,0,1], [1,1,1]];
 		
 		let place = |pt: &Vec3|	{ [(pt.x/step) as i64, (pt.y/step) as i64, (pt.z/step) as i64] };
 		for (i,point) in self.points.iter().enumerate() {
