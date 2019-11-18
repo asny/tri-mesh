@@ -162,7 +162,7 @@ mod tests {
     {
         let indices: Vec<u32> = vec![0, 2, 3,  0, 3, 1,  0, 1, 2];
         let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  0.0, 0.0, 0.1,  0.1, 0.0, -0.1,  -1.0, 0.0, -0.5];
-        let mut mesh = Mesh::new(indices, positions);
+        let mut mesh = Mesh::new(&indices, &positions);
 
         mesh.collapse_small_faces(0.2);
         mesh.is_valid().unwrap();

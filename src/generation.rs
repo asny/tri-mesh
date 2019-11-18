@@ -35,7 +35,7 @@ impl Into<Mesh> for Shape {
 		for point in self.points {
 			points.extend_from_slice((point.as_ref() as &[f64; 3]).as_ref());
 		}
-		Mesh::new(faces, points)
+		Mesh::new(&faces, &points)
 	}
 }
 

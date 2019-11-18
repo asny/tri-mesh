@@ -95,7 +95,7 @@ pub struct Mesh {
 
 impl Mesh
 {
-    pub(crate) fn new(indices: Vec<u32>, positions: Vec<f64>) -> Mesh
+    pub(crate) fn new(indices: &[u32], positions: &[f64]) -> Mesh
     {
         let no_vertices = positions.len()/3;
         let no_faces = indices.len()/3;
@@ -225,7 +225,7 @@ mod tests {
 
     #[test]
     fn test_one_face_connectivity() {
-        let mesh = Mesh::new(vec![0, 1, 2], vec![0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]);
+        let mesh = Mesh::new(&vec![0, 1, 2], &vec![0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]);
 
         let f1 = mesh.face_iter().next().unwrap();
         let v1 = mesh.walker_from_face(f1).vertex_id().unwrap();
@@ -283,7 +283,8 @@ mod tests {
                                        0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
                                        0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5];
 
-        let mesh = Mesh::new((0..9).collect(), positions);
+        let indices: Vec<u32> = (0..9).collect();
+        let mesh = Mesh::new(&indices, &positions);
 
         assert_eq!(9, mesh.no_vertices());
         assert_eq!(3, mesh.no_faces());
