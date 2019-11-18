@@ -110,13 +110,11 @@ impl Mesh
             mesh.create_vertex(vec3(positions[i*3], positions[i*3+1], positions[i*3+2]));
         }
         
-        let mut twins = HashMap::<(u32,u32), HalfEdgeID>::new();
-        fn sorted(a: u32, b: u32) -> (u32,u32) {	// the key creation function
+        let mut twins = HashMap::<(VertexID,VertexID), HalfEdgeID>::new();
+        fn sort(a: VertexID, b: VertexID) -> (VertexID,VertexID) {
 			if a < b	{(a,b)}
 			else		{(b,a)}
         }
-        
-        let conn = &mesh.connectivity_info;
 
         // Create faces and twin connectivity
         for face in 0..no_faces {
@@ -124,30 +122,26 @@ impl Mesh
             let v1 = indices[face * 3 + 1];
             let v2 = indices[face * 3 + 2];
 
-            let face = conn.create_face(
-										VertexID::new(v0), 
-										VertexID::new(v1), 
-										VertexID::new(v2)  );
+            let face = mesh.connectivity_info.create_face(VertexID::new(v0), VertexID::new(v1), VertexID::new(v2));
             
             // mark twin halfedges
-            let edges = [sorted(v0, v1), sorted(v1, v2), sorted(v2, v0)];
 			let mut walker = mesh.walker_from_face(face);
-            for e in edges.iter() {
-				let halfedge = walker.halfedge_id().unwrap();
-				match twins.get(e) {
-					Some(&twin)	=> {
-						assert!(conn.halfedge(twin).unwrap().twin.is_none());
-						conn.set_halfedge_twin(halfedge, twin);
-					},
-					None		=> { twins.insert(*e, halfedge); },
-				}
-				walker.as_next();
+            for _ in 0..3 {
+                let vertex_id = walker.vertex_id().unwrap();
+                walker.as_next();
+                let key = sort(vertex_id, walker.vertex_id().unwrap());
+                if let Some(twin) = twins.get(&key) {
+                    mesh.connectivity_info.set_halfedge_twin(walker.halfedge_id().unwrap(), *twin);
+                }
+                else {
+                    twins.insert(key, walker.halfedge_id().unwrap());
+                }
             }
         }
-        for halfedge in conn.halfedge_iterator() {
-			if conn.halfedge(halfedge).unwrap().twin.is_none() {
+        for halfedge in mesh.connectivity_info.halfedge_iterator() {
+			if mesh.connectivity_info.halfedge(halfedge).unwrap().twin.is_none() {
 				let vertex = mesh.walker_from_halfedge(halfedge).as_previous().vertex_id().unwrap();
-				conn.set_halfedge_twin(halfedge, conn.new_halfedge(Some(vertex), None, None));
+				mesh.connectivity_info.set_halfedge_twin(halfedge, mesh.connectivity_info.new_halfedge(Some(vertex), None, None));
 			}
         }
         
