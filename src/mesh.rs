@@ -46,6 +46,8 @@ use crate::mesh::connectivity_info::ConnectivityInfo;
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
 
+use std::collections::HashMap;
+
 /// Mesh errors.
 #[derive(Debug)]
 pub enum Error {
@@ -107,40 +109,42 @@ impl Mesh
         for i in 0..no_vertices {
             mesh.create_vertex(vec3(positions[i*3], positions[i*3+1], positions[i*3+2]));
         }
+        
+        let mut twins = HashMap::<(VertexID,VertexID), HalfEdgeID>::new();
+        fn sort(a: VertexID, b: VertexID) -> (VertexID,VertexID) {
+			if a < b	{(a,b)}
+			else		{(b,a)}
+        }
 
         // Create faces and twin connectivity
         for face in 0..no_faces {
-            let v0 = VertexID::new(indices[face * 3]);
-            let v1 = VertexID::new(indices[face * 3 + 1]);
-            let v2 = VertexID::new(indices[face * 3 + 2]);
+            let v0 = indices[face * 3];
+            let v1 = indices[face * 3 + 1];
+            let v2 = indices[face * 3 + 2];
 
-            mesh.connectivity_info.create_face(v0, v1, v2);
-        }
-
-        let mut walker = mesh.walker();
-        let mut halfedges: Vec<HalfEdgeID> = mesh.halfedge_iter().collect();
-        while let Some(halfedge_id) = halfedges.pop()
-        {
-            walker.as_halfedge_walker(halfedge_id);
-            if walker.twin_id().is_none() {
-                let (sink_vertex_id, source_vertex_id) = (walker.vertex_id().unwrap(), walker.as_previous().vertex_id().unwrap());
-                let mut found_twin_id = None;
-                for twin_id_to_test in halfedges.iter()
-                {
-                    walker.as_halfedge_walker(*twin_id_to_test);
-                    if walker.twin_id().is_none() && (walker.vertex_id().unwrap() == source_vertex_id && walker.as_previous().vertex_id().unwrap() == sink_vertex_id ||
-                        walker.vertex_id().unwrap() == sink_vertex_id && walker.as_previous().vertex_id().unwrap() == source_vertex_id)
-                    {
-                        found_twin_id = Some(*twin_id_to_test);
-                        break;
-                    }
+            let face = mesh.connectivity_info.create_face(VertexID::new(v0), VertexID::new(v1), VertexID::new(v2));
+            
+            // mark twin halfedges
+			let mut walker = mesh.walker_from_face(face);
+            for _ in 0..3 {
+                let vertex_id = walker.vertex_id().unwrap();
+                walker.as_next();
+                let key = sort(vertex_id, walker.vertex_id().unwrap());
+                if let Some(twin) = twins.get(&key) {
+                    mesh.connectivity_info.set_halfedge_twin(walker.halfedge_id().unwrap(), *twin);
                 }
-                
-                let twin_id = found_twin_id.unwrap_or_else(|| mesh.connectivity_info.new_halfedge(Some(source_vertex_id), None, None));
-                mesh.connectivity_info.set_halfedge_twin(halfedge_id, twin_id);
+                else {
+                    twins.insert(key, walker.halfedge_id().unwrap());
+                }
             }
         }
-
+        for halfedge in mesh.connectivity_info.halfedge_iterator() {
+			if mesh.connectivity_info.halfedge(halfedge).unwrap().twin.is_none() {
+				let vertex = mesh.walker_from_halfedge(halfedge).as_previous().vertex_id().unwrap();
+				mesh.connectivity_info.set_halfedge_twin(halfedge, mesh.connectivity_info.new_halfedge(Some(vertex), None, None));
+			}
+        }
+        
         mesh
     }
 
