@@ -154,7 +154,7 @@ impl Shape {
 	pub fn triangulation(&mut self, outline: &[Vec3]) -> &mut Self {
 		let startindex = self.points.len();
 		self.points.extend_from_slice(outline);
-		self.triangulate((startindex .. startindex+outline.len() as u32).collect());
+		self.triangulate((startindex as u32 .. (startindex+outline.len()) as u32).collect());
 		self
 	}
 	
