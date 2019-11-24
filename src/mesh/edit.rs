@@ -78,6 +78,26 @@ impl Mesh
 	///        +                           +
 	/// ```
 	pub fn split_vertex(&mut self, start: HalfEdgeID, end: HalfEdgeID) -> VertexID {
+        let (vstart, rstart) = {
+            let walker = self.walker_from_halfedge(start).into_twin();
+            (walker.vertex_id().unwrap(), walker.halfedge_id().unwrap())
+            };
+        let (vend, rend) = {
+            let walker = self.walker_from_halfedge(end).into_twin();
+            (walker.vertex_id().unwrap(), walker.halfedge_id().unwrap())
+            };
+        
+        let old = self.walker_from_halfedge(start).vertex_id().unwrap();
+        let created = self.split_vertex_unfinished(start, end);
+        
+        let conn = &mut self.connectivity_info;
+        conn.set_halfedge_twin(start,   conn.new_halfedge(Some(vstart),     None, None));
+        conn.set_halfedge_twin(rstart,  conn.new_halfedge(Some(old),        None, None));
+        conn.set_halfedge_twin(end,     conn.new_halfedge(Some(vend),       None, None));
+        conn.set_halfedge_twin(rend,    conn.new_halfedge(Some(created),    None, None));
+        created
+	}
+	fn split_vertex_unfinished(&mut self, start: HalfEdgeID, end: HalfEdgeID) -> VertexID {
 		assert_eq!(
 			self.walker_from_halfedge(start).vertex_id().unwrap(), 
 			self.walker_from_halfedge(end).vertex_id().unwrap(),
@@ -85,6 +105,7 @@ impl Mesh
 		
 		// duplicate the vertex
 		let newvert = self.connectivity_info.new_vertex(self.vertex_position(self.walker_from_halfedge(start).vertex_id().unwrap()));
+		self.connectivity_info.set_vertex_halfedge(newvert, self.walker_from_halfedge(end).as_twin().halfedge_id());
 		// cut at start and at end
 		self.connectivity_info.remove_halfedge_twin(start);
 		self.connectivity_info.remove_halfedge_twin(end);
@@ -401,7 +422,7 @@ impl Mesh
             
             // separate the vertex in two vertices
             let vert1 = edge[i];
-            let vert2 = self.split_vertex(last, next);
+            let vert2 = self.split_vertex_unfinished(last, next);
             facing.push([vert1, vert2]);
             // displace points						
             self.connectivity_info.set_position(vert2, self.vertex_position(vert2) + d2);
@@ -425,20 +446,18 @@ impl Mesh
 
 
 /// return the halfedge starting from `he`'s vertex, that has the closest direction to `he`
-fn next_forward(mesh: &Mesh, he: HalfEdgeID) -> Option<HalfEdgeID> {
+fn next_forward(mesh: &Mesh, start: HalfEdgeID) -> Option<HalfEdgeID> {
     // nominal direction, the direction of he
-    let nominal = mesh.edge_direction(he);
+    let nominal = mesh.edge_direction(start);
     let mut score = -1.;
     let mut next = None;
-    let mut walker = mesh.walker_from_halfedge(he).into_next();
-    // find the maximum projection of halfedges directions over the nominal ones, for the halfedges starting from he's vertex
-    while walker.halfedge_id().is_some() && walker.halfedge_id().unwrap() != he {
-        let s = mesh.edge_direction(walker.halfedge_id().unwrap()) .dot(nominal);
+    
+    for he in mesh.vertex_halfedge_iter(mesh.walker_from_halfedge(start).vertex_id().unwrap()) {
+        let s = mesh.edge_direction(he) .dot(nominal);
         if s > score {
-            next = walker.halfedge_id();
+            next = Some(he);
             score = s;
         }
-        walker.as_twin().as_next();
     }
     next
 }
@@ -754,4 +773,24 @@ mod tests {
         assert_eq!(2, mesh.no_faces());
         mesh.is_valid().unwrap();
     }
+    
+    #[test]
+    fn test_split_vertex() {
+        let mut mesh = MeshBuilder::new().icosahedron().build().unwrap();
+        let no_faces = mesh.no_faces();
+        let no_halfedges = mesh.no_halfedges();
+        
+        let vert = mesh.vertex_iter().next().unwrap();
+        let mut walker = mesh.walker_from_vertex(vert);
+        let start = walker.halfedge_id().unwrap();
+        let end = walker.as_next().as_twin().as_next().as_twin().halfedge_id().unwrap();
+        
+        mesh.split_vertex(start, end);
+        
+        assert_eq!(13, mesh.no_vertices());
+        assert_eq!(no_faces, mesh.no_faces());
+        assert_eq!(no_halfedges+4, mesh.no_halfedges());
+        mesh.is_valid().unwrap();
+    }
+    
 }
