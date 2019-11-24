@@ -78,6 +78,7 @@ impl Mesh
 	///        +                           +
 	/// ```
 	pub fn split_vertex(&mut self, start: HalfEdgeID, end: HalfEdgeID) -> VertexID {
+        // get start vertex of `start` and `end` and their twin
         let (vstart, rstart) = {
             let walker = self.walker_from_halfedge(start).into_twin();
             (walker.vertex_id().unwrap(), walker.halfedge_id().unwrap())
@@ -86,10 +87,11 @@ impl Mesh
             let walker = self.walker_from_halfedge(end).into_twin();
             (walker.vertex_id().unwrap(), walker.halfedge_id().unwrap())
             };
-        
+        // splited vertex
         let old = self.walker_from_halfedge(start).vertex_id().unwrap();
         let created = self.split_vertex_unfinished(start, end);
         
+        // create twins for the separated halfedges
         let conn = &mut self.connectivity_info;
         conn.set_halfedge_twin(start,   conn.new_halfedge(Some(vstart),     None, None));
         conn.set_halfedge_twin(rstart,  conn.new_halfedge(Some(old),        None, None));
@@ -405,19 +407,24 @@ impl Mesh
         let startvert = self.walker_from_halfedge(last).vertex_id().unwrap();
         last = self.walker_from_halfedge(last).as_twin().halfedge_id().unwrap();
         
-        let mut facing = Vec::new();
+        let mut facing = Vec::with_capacity(edge.len());
         
         for i in 0 .. edge.len() {
+            // get the next edge to bevel else the ending one
             if i < edge.len()-1		{ next = self.connecting_edge(edge[i+1], edge[i]) .expect(err_continuous); }
             // get the end halfedge (after the last vertex of the edge)
             else 					{ next = self.walker_from_halfedge(next_forward(self, last).unwrap()).as_twin().halfedge_id() .expect(err_border); }
             
-            let d1 = (	self.face_normal(self.walker_from_halfedge(last).face_id().unwrap()) .cross(self.edge_direction(last))
-                        -	self.face_normal(self.walker_from_halfedge(next).as_twin().face_id().unwrap()) .cross(self.edge_direction(next))
+            let d1 = (	self.face_normal(self.walker_from_halfedge(last).face_id().unwrap()) 
+                            .cross(self.edge_direction(last))
+                        -	self.face_normal(self.walker_from_halfedge(next).as_twin().face_id().unwrap()) 
+                            .cross(self.edge_direction(next))
                         ).normalize() * amount;
             
-            let d2 = (	self.face_normal(self.walker_from_halfedge(last).as_twin().face_id().unwrap()) .cross(self.edge_direction(last))
-                        +	self.face_normal(self.walker_from_halfedge(next).face_id().unwrap()) .cross(self.edge_direction(next))
+            let d2 = (	self.face_normal(self.walker_from_halfedge(last).as_twin().face_id().unwrap()) 
+                            .cross(self.edge_direction(last))
+                        +	self.face_normal(self.walker_from_halfedge(next).face_id().unwrap()) 
+                            .cross(self.edge_direction(next))
                         ) .normalize() * amount;
             
             // separate the vertex in two vertices
@@ -793,4 +800,16 @@ mod tests {
         mesh.is_valid().unwrap();
     }
     
+    use std::iter::FromIterator;
+    
+    #[test]
+    fn test_bevel_curve() {
+        let mut mesh = MeshBuilder::new().icosahedron().build().unwrap();
+        mesh.bevel_curve(&Vec::from_iter([0,1,4].iter().cloned().map(VertexID::new)), 0.1);
+        mesh.is_valid();
+        
+        mesh = MeshBuilder::new().icosahedron().build().unwrap();
+        mesh.bevel_curve(&Vec::from_iter([0,4,5,3,7,6].iter().cloned().map(VertexID::new)), 0.2);
+        mesh.is_valid();
+    }
 }
