@@ -109,12 +109,6 @@ impl Mesh
         for i in 0..no_vertices {
             mesh.create_vertex(vec3(positions[i*3], positions[i*3+1], positions[i*3+2]));
         }
-        
-        let mut twins = HashMap::<(VertexID,VertexID), HalfEdgeID>::new();
-        fn sort(a: VertexID, b: VertexID) -> (VertexID,VertexID) {
-			if a < b	{(a,b)}
-			else		{(b,a)}
-        }
 
         // Create faces and twin connectivity
         for face in 0..no_faces {
@@ -122,30 +116,47 @@ impl Mesh
             let v1 = indices[face * 3 + 1];
             let v2 = indices[face * 3 + 2];
 
-            let face = mesh.connectivity_info.create_face(VertexID::new(v0), VertexID::new(v1), VertexID::new(v2));
-            
-            // mark twin halfedges
-			let mut walker = mesh.walker_from_face(face);
+            mesh.connectivity_info.create_face(VertexID::new(v0), VertexID::new(v1), VertexID::new(v2));
+        }
+        mesh.twin_alones();
+        
+        mesh
+    }
+    
+    
+    /// twin edges that share the same vertices
+    pub fn twin_alones(&mut self) {
+        // dictionnary for twining
+        let mut twins = HashMap::<(VertexID, VertexID), HalfEdgeID>::new();
+        fn sort(a: VertexID, b: VertexID) -> (VertexID,VertexID) {
+            if a < b	{(a,b)}
+            else		{(b,a)}
+        }
+        
+        // get halfedges ids and begin twining
+        for face in self.face_iter() {
+            let mut walker = self.walker_from_face(face);
             for _ in 0..3 {
                 let vertex_id = walker.vertex_id().unwrap();
                 walker.as_next();
-                let key = sort(vertex_id, walker.vertex_id().unwrap());
-                if let Some(twin) = twins.get(&key) {
-                    mesh.connectivity_info.set_halfedge_twin(walker.halfedge_id().unwrap(), *twin);
-                }
-                else {
-                    twins.insert(key, walker.halfedge_id().unwrap());
+                if walker.twin_id().is_none() {
+                    let key = sort(vertex_id, walker.vertex_id().unwrap());
+                    if let Some(twin) = twins.get(&key) {
+                        self.connectivity_info.set_halfedge_twin(walker.halfedge_id().unwrap(), *twin);
+                    }
+                    else {
+                        twins.insert(key, walker.halfedge_id().unwrap());
+                    }
                 }
             }
         }
-        for halfedge in mesh.connectivity_info.halfedge_iterator() {
-			if mesh.connectivity_info.halfedge(halfedge).unwrap().twin.is_none() {
-				let vertex = mesh.walker_from_halfedge(halfedge).as_previous().vertex_id().unwrap();
-				mesh.connectivity_info.set_halfedge_twin(halfedge, mesh.connectivity_info.new_halfedge(Some(vertex), None, None));
-			}
+        // finish twining, and put empty twins to edges that are connected to only 1 face
+        for halfedge in self.halfedge_iter() {
+            if self.connectivity_info.halfedge(halfedge).unwrap().twin.is_none() {
+                let vertex = self.walker_from_halfedge(halfedge).as_previous().vertex_id().unwrap();
+                self.connectivity_info.set_halfedge_twin(halfedge, self.connectivity_info.new_halfedge(Some(vertex), None, None));
+            }
         }
-        
-        mesh
     }
 
     fn new_internal(connectivity_info: ConnectivityInfo) -> Mesh

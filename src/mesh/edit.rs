@@ -65,6 +65,38 @@ impl Mesh
 
         Ok(())
     }
+    
+	/// split a vertex in two vertices, along the edges `start` and `end`, returning the created point.
+	/// - `start` and `end` must point to the same vertex.
+	/// - the two points remains in the same initial location.
+	/// - the point created becomes the vertex pointed by `start`
+	/// ```
+	///        +                           +
+	///        |                          / \
+	///  ------+-------     -->      ----+   +----
+	///        |                          \ /
+	///        +                           +
+	/// ```
+	pub fn split_vertex(&mut self, start: HalfEdgeID, end: HalfEdgeID) -> VertexID {
+		assert_eq!(
+			self.walker_from_halfedge(start).vertex_id().unwrap(), 
+			self.walker_from_halfedge(end).vertex_id().unwrap(),
+			);
+		
+		// duplicate the vertex
+		let newvert = self.connectivity_info.new_vertex(self.vertex_position(self.walker_from_halfedge(start).vertex_id().unwrap()));
+		// cut at start and at end
+		self.connectivity_info.remove_halfedge_twin(start);
+		self.connectivity_info.remove_halfedge_twin(end);
+		// change refs to old vertex between these two halfedges
+		let mut walker = self.walker_from_halfedge(start);
+		while let Some(he) = walker.halfedge_id() {
+			self.connectivity_info.set_halfedge_vertex(he, newvert);
+			walker.as_next().as_twin();
+		}
+		
+		newvert
+	}
 
     /// Split the given edge into two.
     /// Returns the id of the new vertex positioned at the given position.
@@ -334,7 +366,88 @@ impl Mesh
 
         self.connectivity_info.remove_face(face_id);
     }
+    
+    
+    /// Create a bevel on the given edges, these must be contiguous and ordered (ie. `edge[i]` starts from `edge[i-1]`)
+    /// This function is not a realistic chamfer, it can displace the edges that are cutted by the bevel.
+    ///
+    pub fn bevel_curve(&mut self, edge: &[VertexID], amount: f64)
+    {
+        assert!(edge.len() >= 2, "`edge` must be at least two points");
+        
+        let err_continuous = "edge must be a list of contiguous vertices";
+        let err_border = "edge must not be on a border of the mesh";
+        
+        let mut next = self.connecting_edge(edge[0], edge[1]) .expect(err_continuous);
+        // get the start halfedge (before the first vertex of the edge)
+        let mut last = next_forward(self, self.walker_from_halfedge(next).as_twin().halfedge_id().unwrap()) .expect(err_border);
+        let startvert = self.walker_from_halfedge(last).vertex_id().unwrap();
+        last = self.walker_from_halfedge(last).as_twin().halfedge_id().unwrap();
+        
+        let mut facing = Vec::new();
+        
+        for i in 0 .. edge.len() {
+            if i < edge.len()-1		{ next = self.connecting_edge(edge[i+1], edge[i]) .expect(err_continuous); }
+            // get the end halfedge (after the last vertex of the edge)
+            else 					{ next = self.walker_from_halfedge(next_forward(self, last).unwrap()).as_twin().halfedge_id() .expect(err_border); }
+            
+            let d1 = (	self.face_normal(self.walker_from_halfedge(last).face_id().unwrap()) .cross(self.halfedge_direction(last))
+                        -	self.face_normal(self.walker_from_halfedge(next).as_twin().face_id().unwrap()) .cross(self.halfedge_direction(next))
+                        ).normalize() * amount;
+            
+            let d2 = (	self.face_normal(self.walker_from_halfedge(last).as_twin().face_id().unwrap()) .cross(self.halfedge_direction(last))
+                        +	self.face_normal(self.walker_from_halfedge(next).face_id().unwrap()) .cross(self.halfedge_direction(next))
+                        ) .normalize() * amount;
+            
+            // separate the vertex in two vertices
+            let vert1 = edge[i];
+            let vert2 = self.split_vertex(last, next);
+            facing.push([vert1, vert2]);
+            // displace points						
+            self.connectivity_info.set_position(vert2, self.vertex_position(vert2) + d2);
+            self.connectivity_info.set_position(vert1, self.vertex_position(vert1) + d1);
+                        
+            last = next;
+        }
+        let lastvert = self.walker_from_halfedge(next).vertex_id().unwrap();
+        
+        // create start and end face
+        self.connectivity_info.create_face(startvert, facing[0].0, facing[0].1);
+        self.connectivity_info.create_face(lastvert, facing.last().1, facing.last().0);
+        // create all faces
+        for confront in facing.windows(2) {
+            self.connectivity_info.create_face(confront[0][0], confront[0][1], confront[1][1]);
+            self.connectivity_info.create_face(confront[1][1], confront[1][0], confront[0][0]);
+        }
+        self.twin_alones();
+    }
 }
+
+/// normalized vector representing the direction in which the halfedge points
+fn halfedge_direction(mesh: &Mesh, edge: HalfEdgeID) -> Vec3 {
+    let (src,dst) = mesh.edge_position(edge);
+    (dst-src).normalize()
+}
+
+/// return the halfedge starting from `he`'s vertex, that has the closest direction to `he`
+fn next_forward(mesh: &Mesh, he: HalfEdgeID) -> Option<HalfEdgeID> {
+    // nominal direction, the direction of he
+    let nominal = mesh.halfedge_direction(he);
+    let mut score = -1.;
+    let mut next = None;
+    let mut walker = mesh.halfedge_walker(he).into_next();
+    // find the maximum projection of halfedges directions over the nominal ones, for the halfedges starting from he's vertex
+    while walker.halfedge_id().is_some() && walker.halfedge_id().unwrap() != he {
+        let s = mesh.direction(walker.halfedge_id().unwrap());
+        if s > score {
+            next = walker.halfedge_id();
+            score = s;
+        }
+        walker.as_twin().as_next();
+    }
+    next
+}
+
 
 
 #[cfg(test)]
