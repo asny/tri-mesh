@@ -33,4 +33,13 @@ impl Mesh
         let (p0, p1) = self.edge_positions(halfedge_id);
         (p0 - p1).magnitude2()
     }
+    
+    ///
+    /// Normalized vector representing the direction in which the halfedge points
+    ///
+    pub fn edge_direction(&self, edge: HalfEdgeID) -> Vec3 
+    {
+        let (src,dst) = self.edge_positions(edge);
+        (dst-src).normalize()
+    }
 }

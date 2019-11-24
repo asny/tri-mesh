@@ -391,12 +391,12 @@ impl Mesh
             // get the end halfedge (after the last vertex of the edge)
             else 					{ next = self.walker_from_halfedge(next_forward(self, last).unwrap()).as_twin().halfedge_id() .expect(err_border); }
             
-            let d1 = (	self.face_normal(self.walker_from_halfedge(last).face_id().unwrap()) .cross(self.halfedge_direction(last))
-                        -	self.face_normal(self.walker_from_halfedge(next).as_twin().face_id().unwrap()) .cross(self.halfedge_direction(next))
+            let d1 = (	self.face_normal(self.walker_from_halfedge(last).face_id().unwrap()) .cross(self.edge_direction(last))
+                        -	self.face_normal(self.walker_from_halfedge(next).as_twin().face_id().unwrap()) .cross(self.edge_direction(next))
                         ).normalize() * amount;
             
-            let d2 = (	self.face_normal(self.walker_from_halfedge(last).as_twin().face_id().unwrap()) .cross(self.halfedge_direction(last))
-                        +	self.face_normal(self.walker_from_halfedge(next).face_id().unwrap()) .cross(self.halfedge_direction(next))
+            let d2 = (	self.face_normal(self.walker_from_halfedge(last).as_twin().face_id().unwrap()) .cross(self.edge_direction(last))
+                        +	self.face_normal(self.walker_from_halfedge(next).face_id().unwrap()) .cross(self.edge_direction(next))
                         ) .normalize() * amount;
             
             // separate the vertex in two vertices
@@ -412,8 +412,8 @@ impl Mesh
         let lastvert = self.walker_from_halfedge(next).vertex_id().unwrap();
         
         // create start and end face
-        self.connectivity_info.create_face(startvert, facing[0].0, facing[0].1);
-        self.connectivity_info.create_face(lastvert, facing.last().1, facing.last().0);
+        self.connectivity_info.create_face(startvert, facing[0][0], facing[0][1]);
+        self.connectivity_info.create_face(lastvert, facing.last().unwrap()[1], facing.last().unwrap()[0]);
         // create all faces
         for confront in facing.windows(2) {
             self.connectivity_info.create_face(confront[0][0], confront[0][1], confront[1][1]);
@@ -423,22 +423,17 @@ impl Mesh
     }
 }
 
-/// normalized vector representing the direction in which the halfedge points
-fn halfedge_direction(mesh: &Mesh, edge: HalfEdgeID) -> Vec3 {
-    let (src,dst) = mesh.edge_position(edge);
-    (dst-src).normalize()
-}
 
 /// return the halfedge starting from `he`'s vertex, that has the closest direction to `he`
 fn next_forward(mesh: &Mesh, he: HalfEdgeID) -> Option<HalfEdgeID> {
     // nominal direction, the direction of he
-    let nominal = mesh.halfedge_direction(he);
+    let nominal = mesh.edge_direction(he);
     let mut score = -1.;
     let mut next = None;
-    let mut walker = mesh.halfedge_walker(he).into_next();
+    let mut walker = mesh.walker_from_halfedge(he).into_next();
     // find the maximum projection of halfedges directions over the nominal ones, for the halfedges starting from he's vertex
     while walker.halfedge_id().is_some() && walker.halfedge_id().unwrap() != he {
-        let s = mesh.direction(walker.halfedge_id().unwrap());
+        let s = mesh.edge_direction(walker.halfedge_id().unwrap()) .dot(nominal);
         if s > score {
             next = walker.halfedge_id();
             score = s;
