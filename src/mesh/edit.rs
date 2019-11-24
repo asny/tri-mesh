@@ -103,7 +103,7 @@ impl Mesh
 		assert_eq!(
 			self.walker_from_halfedge(start).vertex_id().unwrap(), 
 			self.walker_from_halfedge(end).vertex_id().unwrap(),
-			);
+			"spliting halfedges doesn't point to the same vertex");
 		
 		// duplicate the vertex
 		let newvert = self.connectivity_info.new_vertex(self.vertex_position(self.walker_from_halfedge(start).vertex_id().unwrap()));
@@ -401,47 +401,64 @@ impl Mesh
         let err_continuous = "edge must be a list of contiguous vertices";
         let err_border = "edge must not be on a border of the mesh";
         
-        let mut next = self.connecting_edge(edge[0], edge[1]) .expect(err_continuous);
         // get the start halfedge (before the first vertex of the edge)
-        let mut last = next_forward(self, self.walker_from_halfedge(next).as_twin().halfedge_id().unwrap()) .expect(err_border);
-        let startvert = self.walker_from_halfedge(last).vertex_id().unwrap();
-        last = self.walker_from_halfedge(last).as_twin().halfedge_id().unwrap();
+        let rfirst = next_forward(self, self.connecting_edge(edge[1], edge[0]) .expect(err_continuous)) .expect(err_border);
+        let startvert = self.walker_from_halfedge(rfirst).vertex_id().unwrap();
+        let first = self.walker_from_halfedge(rfirst).as_twin().halfedge_id().unwrap();
+        // get the end halfedge (after the last vertex of the edge)
+        let last = next_forward(self, self.connecting_edge(edge[edge.len()-2], edge[edge.len()-1]) .expect(err_continuous)) .expect(err_border);
+        let endvert = self.walker_from_halfedge(last).vertex_id().unwrap();
         
-        let mut facing = Vec::with_capacity(edge.len());
+        // get all the informations for the operation, since while modifying the mesh, the halfedge functions doesn't work
+        let mut infos = Vec::with_capacity(edge.len());
         
+        let mut previous = first;
+        let mut next = first;
         for i in 0 .. edge.len() {
             // get the next edge to bevel else the ending one
             if i < edge.len()-1		{ next = self.connecting_edge(edge[i+1], edge[i]) .expect(err_continuous); }
-            // get the end halfedge (after the last vertex of the edge)
-            else 					{ next = self.walker_from_halfedge(next_forward(self, last).unwrap()).as_twin().halfedge_id() .expect(err_border); }
+            else 					{ next = last; }
             
-            let d1 = (	self.face_normal(self.walker_from_halfedge(last).face_id().unwrap()) 
-                            .cross(self.edge_direction(last))
+            let d1 = (	self.face_normal(self.walker_from_halfedge(previous).face_id().unwrap()) 
+                            .cross(self.edge_direction(previous))
                         -	self.face_normal(self.walker_from_halfedge(next).as_twin().face_id().unwrap()) 
                             .cross(self.edge_direction(next))
                         ).normalize() * amount;
             
-            let d2 = (	self.face_normal(self.walker_from_halfedge(last).as_twin().face_id().unwrap()) 
-                            .cross(self.edge_direction(last))
+            let d2 = (	self.face_normal(self.walker_from_halfedge(previous).as_twin().face_id().unwrap()) 
+                            .cross(self.edge_direction(previous))
                         +	self.face_normal(self.walker_from_halfedge(next).face_id().unwrap()) 
                             .cross(self.edge_direction(next))
                         ) .normalize() * amount;
             
+            infos.push(([d1, d2], [last,next]));
+            
+            previous = next;
+        }
+        
+        let mut facing = Vec::with_capacity(edge.len());
+        
+        previous = first;
+        next = first;
+        for i in 0 .. edge.len() {
+            // get the next edge to bevel else the ending one
+            if i < edge.len()-1		{ next = self.connecting_edge(edge[i+1], edge[i]) .expect(err_continuous); }
+            else 					{ next = last; }
+            
             // separate the vertex in two vertices
             let vert1 = edge[i];
-            let vert2 = self.split_vertex_unfinished(last, next);
+            let vert2 = self.split_vertex_unfinished(last, self.walker_from_halfedge(next).as_twin().halfedge_id().unwrap());
             facing.push([vert1, vert2]);
             // displace points						
-            self.connectivity_info.set_position(vert2, self.vertex_position(vert2) + d2);
-            self.connectivity_info.set_position(vert1, self.vertex_position(vert1) + d1);
+            self.connectivity_info.set_position(vert1, self.vertex_position(vert1) + infos[i].0[0]);
+            self.connectivity_info.set_position(vert2, self.vertex_position(vert2) + infos[i].0[1]);
                         
-            last = next;
+            previous = next;
         }
-        let lastvert = self.walker_from_halfedge(next).vertex_id().unwrap();
         
         // create start and end face
         self.connectivity_info.create_face(startvert, facing[0][0], facing[0][1]);
-        self.connectivity_info.create_face(lastvert, facing.last().unwrap()[1], facing.last().unwrap()[0]);
+        self.connectivity_info.create_face(endvert, facing.last().unwrap()[1], facing.last().unwrap()[0]);
         // create all faces
         for confront in facing.windows(2) {
             self.connectivity_info.create_face(confront[0][0], confront[0][1], confront[1][1]);
