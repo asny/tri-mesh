@@ -408,52 +408,37 @@ impl Mesh
         // get the end halfedge (after the last vertex of the edge)
         let last = next_forward(self, self.connecting_edge(edge[edge.len()-2], edge[edge.len()-1]) .expect(err_continuous)) .expect(err_border);
         let endvert = self.walker_from_halfedge(last).vertex_id().unwrap();
-        
-        // get all the informations for the operation, since while modifying the mesh, the halfedge functions doesn't work
-        let mut infos = Vec::with_capacity(edge.len());
+                
+        let mut facing = Vec::with_capacity(edge.len());
         
         let mut previous = first;
         let mut next = first;
+        let dir_prev = self.edge_direction(previous);
+        let mut results_prev = (    self.face_normal(self.walker_from_halfedge(previous).face_id().unwrap())            .cross(dir_prev),
+                                    self.face_normal(self.walker_from_halfedge(previous).as_twin().face_id().unwrap())  .cross(dir_prev),
+                                );
         for i in 0 .. edge.len() {
             // get the next edge to bevel else the ending one
             if i < edge.len()-1		{ next = self.connecting_edge(edge[i+1], edge[i]) .expect(err_continuous); }
             else 					{ next = last; }
             
-            let d1 = (	self.face_normal(self.walker_from_halfedge(previous).face_id().unwrap()) 
-                            .cross(self.edge_direction(previous))
-                        -	self.face_normal(self.walker_from_halfedge(next).as_twin().face_id().unwrap()) 
-                            .cross(self.edge_direction(next))
-                        ).normalize() * amount;
-            
-            let d2 = (	self.face_normal(self.walker_from_halfedge(previous).as_twin().face_id().unwrap()) 
-                            .cross(self.edge_direction(previous))
-                        +	self.face_normal(self.walker_from_halfedge(next).face_id().unwrap()) 
-                            .cross(self.edge_direction(next))
-                        ) .normalize() * amount;
-            
-            infos.push(([d1, d2], [last,next]));
-            
-            previous = next;
-        }
-        
-        let mut facing = Vec::with_capacity(edge.len());
-        
-        previous = first;
-        next = first;
-        for i in 0 .. edge.len() {
-            // get the next edge to bevel else the ending one
-            if i < edge.len()-1		{ next = self.connecting_edge(edge[i+1], edge[i]) .expect(err_continuous); }
-            else 					{ next = last; }
+            let dir_next = self.edge_direction(next);
+            let results_next = (    self.face_normal(self.walker_from_halfedge(next).face_id().unwrap())            .cross(dir_next),
+                                    self.face_normal(self.walker_from_halfedge(next).as_twin().face_id().unwrap())  .cross(dir_next),
+                                );
+            let d1 = (results_next.0 + results_prev.0).normalize() * amount;
+            let d2 = (results_next.1 + results_prev.1).normalize() * amount;
             
             // separate the vertex in two vertices
             let vert1 = edge[i];
-            let vert2 = self.split_vertex_unfinished(last, self.walker_from_halfedge(next).as_twin().halfedge_id().unwrap());
+            let vert2 = self.split_vertex(last, self.walker_from_halfedge(next).as_twin().halfedge_id().unwrap());
             facing.push([vert1, vert2]);
             // displace points						
-            self.connectivity_info.set_position(vert1, self.vertex_position(vert1) + infos[i].0[0]);
-            self.connectivity_info.set_position(vert2, self.vertex_position(vert2) + infos[i].0[1]);
+            self.connectivity_info.set_position(vert1, self.vertex_position(vert1) + d1);
+            self.connectivity_info.set_position(vert2, self.vertex_position(vert2) + d2);
                         
             previous = next;
+            results_prev = results_next;
         }
         
         // create start and end face
