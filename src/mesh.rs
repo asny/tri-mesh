@@ -139,10 +139,20 @@ impl Mesh
             for _ in 0..3 {
                 let vertex_id = walker.vertex_id().unwrap();
                 walker.as_next();
-                if walker.twin_id().is_none() {
+                if walker.twin_id().is_none() || walker.clone().as_twin().face_id().is_none() {
                     let key = sort(vertex_id, walker.vertex_id().unwrap());
-                    if let Some(twin) = twins.get(&key) {
-                        self.connectivity_info.set_halfedge_twin(walker.halfedge_id().unwrap(), *twin);
+                    if let Some(&twin) = twins.get(&key) {
+                        // if there was an empty halfedge already twined to the edge, remove it
+                        let oldtwin = self.walker_from_halfedge(twin).into_twin();
+                        if oldtwin.halfedge_id().is_some() && oldtwin.face_id().is_none() {
+                            self.connectivity_info.remove_halfedge(oldtwin.halfedge_id().unwrap());
+                        }
+                        let myoldtwin = walker.clone().into_twin();
+                        if myoldtwin.halfedge_id().is_some() && myoldtwin.face_id().is_none() {
+                            self.connectivity_info.remove_halfedge(myoldtwin.halfedge_id().unwrap());
+                        }
+                        // twin halfedges
+                        self.connectivity_info.set_halfedge_twin(walker.halfedge_id().unwrap(), twin);
                     }
                     else {
                         twins.insert(key, walker.halfedge_id().unwrap());
