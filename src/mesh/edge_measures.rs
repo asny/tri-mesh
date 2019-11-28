@@ -39,7 +39,7 @@ impl Mesh
     ///
     pub fn edge_direction(&self, edge: HalfEdgeID) -> Vec3 
     {
-        let (src,dst) = self.edge_positions(edge);
-        (dst-src).normalize()
+        let (dst,src) = self.edge_vertices(edge);
+        (self.vertex_position(dst)-self.vertex_position(src)).normalize()
     }
 }
