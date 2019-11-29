@@ -70,7 +70,8 @@ impl Mesh
 	/// - `start` and `end` must point to the same vertex.
 	/// - the two points remains in the same initial location.
 	/// - the point created becomes the vertex pointed by `start`
-	/// ```
+	///
+	/// ```text
 	///        +                           +
 	///        |                          / \
 	///  ------+-------     -->      ----+   +----
@@ -99,31 +100,26 @@ impl Mesh
         conn.set_halfedge_twin(rend,    conn.new_halfedge(Some(created),    None, None));
         created
 	}
-	/// variant of split_vertex, that doesn't create empty twin halfedges for the hole
+	/// variant of split_vertex, that doesn't create empty twin halfedges for the hole (makes it easier to fill it with faces)
 	fn split_vertex_unfinished(&mut self, start: HalfEdgeID, end: HalfEdgeID) -> VertexID {
 		assert_eq!(
 			self.walker_from_halfedge(start).vertex_id().unwrap(), 
 			self.walker_from_halfedge(end).vertex_id().unwrap(),
 			"spliting halfedges doesn't point to the same vertex");
+		
 		// duplicate the vertex
 		let oldvert = self.walker_from_halfedge(start).vertex_id().unwrap();
 		let newvert = self.connectivity_info.new_vertex(self.vertex_position(oldvert));
-		println!("splitting across {}  {:?}  {:?}    {}", oldvert, start, end, newvert);
 		// cut at start and at end
 		self.connectivity_info.remove_halfedge_twin(start);
 		self.connectivity_info.remove_halfedge_twin(end);
 		self.connectivity_info.set_vertex_halfedge(newvert, self.walker_from_halfedge(start).as_next().halfedge_id());
 		self.connectivity_info.set_vertex_halfedge(oldvert, self.walker_from_halfedge(end  ).as_next().halfedge_id());
-// 		println!("set {:?} to {:?}", newvert, self.walker_from_halfedge(start).as_next().halfedge_id());
-// 		println!("set {:?} to {:?}", oldvert, self.walker_from_halfedge(end  ).as_next().halfedge_id());
 		// change refs to old vertex between these two halfedges
 		let mut walker = self.walker_from_halfedge(start);
 		while let Some(he) = walker.halfedge_id() {
-//             println!("set {:?}  vertex from {} to {}", he, self.connectivity_info.halfedge(he).unwrap().vertex.unwrap(), newvert);
 			self.connectivity_info.set_halfedge_vertex(he, newvert);
 			walker.as_next().as_twin();
-// 			if walker.halfedge_id() == Some(start)	{println!("reached start");}
-// 			if walker.halfedge_id() == Some(end)	{println!("reached end");}
 		}
 		
 		newvert
@@ -406,8 +402,6 @@ impl Mesh
     {
         assert!(edge.len() >= 2, "`edge` must be at least two points");
         
-        println!("operate on a mesh of {} vertices\t{} halfedges", self.no_vertices(), self.no_halfedges());
-        
         let err_continuous = "edge must be a list of contiguous vertices";
         let err_border = "edge must not be on a border of the mesh";
         
@@ -437,7 +431,6 @@ impl Mesh
                 // get the next edge to bevel else the ending one
                 if i < edge.len()-1		{ next = self.connecting_edge(edge[i], edge[i+1]) .expect(err_continuous); }
                 else 					{ next = last; }
-                assert_ne!(prev, self.walker_from_halfedge(next).as_twin().halfedge_id().unwrap());
                 
                 let dir_next = self.edge_direction(next);
                 let results_next = (    self.face_normal(self.walker_from_halfedge(next).face_id().unwrap())            .cross(dir_next),
@@ -467,25 +460,14 @@ impl Mesh
         
         if endvert.is_none()    {endvert = Some(facing[0][1]);}
         
-        println!("facing: {:#?}", facing);
-        
         // create start and end face
-        for face in self.face_iter() {
-            println!("has face {:?}", self.face_vertices(face));
-        }
         self.connectivity_info.create_face(startvert, facing[0][0], facing[0][1]);
         self.connectivity_info.create_face(endvert.unwrap(), facing[facing.len()-1][1], facing[facing.len()-1][0]);
         // create all faces
         for confront in facing.windows(2) {
             self.connectivity_info.create_face(confront[0][1], confront[0][0], confront[1][1]);
             self.connectivity_info.create_face(confront[1][0], confront[1][1], confront[0][0]);
-            println!("create face {} {} {}", confront[0][1], confront[0][0], confront[1][1]);
-            println!("create face {} {} {}", confront[1][0], confront[1][1], confront[0][0]);
         }
-//         println!("halfedges:");
-//         for (i,he) in self.halfedge_iter().enumerate() {
-//             println!("he {}\t{}\t{:?}", i, he, self.connectivity_info.halfedge(he).unwrap());
-//         }
         self.twin_alones();
     }
 }
@@ -505,8 +487,6 @@ fn next_forward(mesh: &Mesh, start: HalfEdgeID) -> Option<HalfEdgeID> {
             score = s;
         }
     }
-    println!("next_forward is {:?} with score {}", next, score);
-    if let Some(vert) = next    { assert_ne!(vert, start); }
     next
 }
 
@@ -850,14 +830,6 @@ mod tests {
         let nominal_no_halfedges = mesh.no_halfedges();
         let nominal_no_faces = mesh.no_faces();
         
-        println!("faces:");
-        for face in mesh.face_iter() {
-            println!("{:?}", mesh.face_vertices(face));
-        }
-//         println!("halfedges:");
-//         for (i,he) in mesh.halfedge_iter().enumerate() {
-//             println!("he {}\t{}\t{:?}", i, he, mesh.connectivity_info.halfedge(he).unwrap());
-//         }
 		// non-looped
         mesh.bevel_curve(&Vec::from_iter([0,4,5].iter().cloned().map(VertexID::new)), 0.1);
         assert_eq!(nominal_no_vertices+3, mesh.no_vertices());
