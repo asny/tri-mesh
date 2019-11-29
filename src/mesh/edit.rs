@@ -394,6 +394,54 @@ impl Mesh
         self.connectivity_info.remove_face(face_id);
     }
     
+    pub fn remove_vertex(&mut self, vertex: VertexID)
+    {
+		let conn = &self.connectivity_info;
+		let mut walker = self.walker_from_vertex(vertex).into_twin();
+		
+		while let Some(h1) = walker.halfedge_id() {
+			walker.as_next();
+			if let Some(h2) = walker.halfedge_id() {
+				if let Some(face) = walker.face_id() {
+			
+					walker.as_twin();
+					
+					let mut wlk = self.walker_from_halfedge(h2).into_next();
+					let h3 = wlk.halfedge_id().unwrap();
+					wlk.as_twin();
+					if wlk.face_id().is_some() {
+						conn.set_halfedge_face(h3, None);
+						conn.set_halfedge_next(h3, None);
+					}
+					else {
+						conn.remove_halfedge(h3);
+						if let Some(twin) = wlk.halfedge_id()	{ conn.remove_halfedge(twin); }
+					}
+					
+					conn.remove_face(face);
+				}
+				else { walker.stop(); }
+				conn.remove_halfedge(h2);
+			}
+			conn.remove_halfedge(h1);
+			
+		}
+		conn.remove_vertex(vertex);
+    }
+    
+    /*
+    /// cut a corner by a plane defined by its normal
+    pub fn bevel_vertex(&mut self, vertex: &VertexID, distance: f64, normal: Vec3)
+    {
+		let pos = self.vertex_position(vertex);
+		for he in self.vertex_halfedge_iter() {
+			let edgedir = self.edge_direction(he);
+			let cut = edgedir * (distance / edgedir.dot(normal));
+			self.split_edge(pos + cut);
+		}
+		self.remove_vertex(vertex);
+    }
+    */
     
     /// Create a bevel on the given edges, these must be contiguous and ordered (ie. `edge[i]` starts from `edge[i-1]`)
     /// This function is not a realistic chamfer, it can displace the edges that are cutted by the bevel.
@@ -849,5 +897,13 @@ mod tests {
         mesh = MeshBuilder::new().icosahedron().build().unwrap();
         mesh.bevel_curve(&Vec::from_iter([0,4,5,3,7,6].iter().cloned().map(VertexID::new)), 0.2);
         mesh.is_valid().unwrap();
+    }
+    
+    #[test]
+    fn test_remove_vertex() {
+		let mut mesh = MeshBuilder::new().cube().build().unwrap();
+		mesh.remove_vertex(mesh.vertex_iter().next().unwrap());
+		assert_eq!(7, mesh.no_vertices());
+		mesh.is_valid().unwrap();
     }
 }
