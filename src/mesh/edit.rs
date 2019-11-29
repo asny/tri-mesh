@@ -108,7 +108,7 @@ impl Mesh
 		// duplicate the vertex
 		let oldvert = self.walker_from_halfedge(start).vertex_id().unwrap();
 		let newvert = self.connectivity_info.new_vertex(self.vertex_position(oldvert));
-		println!("splitting across {}  {:?}  {:?}", oldvert, start, end);
+		println!("splitting across {}  {:?}  {:?}    {}", oldvert, start, end, newvert);
 		// cut at start and at end
 		self.connectivity_info.remove_halfedge_twin(start);
 		self.connectivity_info.remove_halfedge_twin(end);
@@ -119,11 +119,11 @@ impl Mesh
 		// change refs to old vertex between these two halfedges
 		let mut walker = self.walker_from_halfedge(start);
 		while let Some(he) = walker.halfedge_id() {
-            println!("set {:?}  vertex from {} to {}", he, self.connectivity_info.halfedge(he).unwrap().vertex.unwrap(), newvert);
+//             println!("set {:?}  vertex from {} to {}", he, self.connectivity_info.halfedge(he).unwrap().vertex.unwrap(), newvert);
 			self.connectivity_info.set_halfedge_vertex(he, newvert);
 			walker.as_next().as_twin();
-			if walker.halfedge_id() == Some(start)	{println!("reached start");}
-			if walker.halfedge_id() == Some(end)	{println!("reached end");}
+// 			if walker.halfedge_id() == Some(start)	{println!("reached start");}
+// 			if walker.halfedge_id() == Some(end)	{println!("reached end");}
 		}
 		
 		newvert
@@ -482,10 +482,10 @@ impl Mesh
             println!("create face {} {} {}", confront[0][1], confront[0][0], confront[1][1]);
             println!("create face {} {} {}", confront[1][0], confront[1][1], confront[0][0]);
         }
-        println!("halfedges:");
-        for (i,he) in self.halfedge_iter().enumerate() {
-            println!("he {}\t{}\t{:?}", i, he, self.connectivity_info.halfedge(he).unwrap());
-        }
+//         println!("halfedges:");
+//         for (i,he) in self.halfedge_iter().enumerate() {
+//             println!("he {}\t{}\t{:?}", i, he, self.connectivity_info.halfedge(he).unwrap());
+//         }
         self.twin_alones();
     }
 }
@@ -854,22 +854,26 @@ mod tests {
         for face in mesh.face_iter() {
             println!("{:?}", mesh.face_vertices(face));
         }
-        mesh.bevel_curve(&Vec::from_iter([0,4,5].iter().cloned().map(VertexID::new)), 0.1);
 //         println!("halfedges:");
 //         for (i,he) in mesh.halfedge_iter().enumerate() {
 //             println!("he {}\t{}\t{:?}", i, he, mesh.connectivity_info.halfedge(he).unwrap());
 //         }
+		// non-looped
+        mesh.bevel_curve(&Vec::from_iter([0,4,5].iter().cloned().map(VertexID::new)), 0.1);
         assert_eq!(nominal_no_vertices+3, mesh.no_vertices());
         assert_eq!(nominal_no_halfedges+18, mesh.no_halfedges());
         assert_eq!(nominal_no_faces+6, mesh.no_faces());
         mesh.is_valid().unwrap();
         
+        // looped over a face
+        mesh = MeshBuilder::new().icosahedron().build().unwrap();
         mesh.bevel_curve(&Vec::from_iter([0,1,4].iter().cloned().map(VertexID::new)), 0.1);
         assert_eq!(nominal_no_vertices+3, mesh.no_vertices());
         assert_eq!(nominal_no_halfedges+18, mesh.no_halfedges());
         assert_eq!(nominal_no_faces+6, mesh.no_faces());
         mesh.is_valid().unwrap();
         
+        // loop over the whole mesh
         mesh = MeshBuilder::new().icosahedron().build().unwrap();
         mesh.bevel_curve(&Vec::from_iter([0,4,5,3,7,6].iter().cloned().map(VertexID::new)), 0.2);
         mesh.is_valid().unwrap();
