@@ -3,6 +3,7 @@
 use crate::mesh::*;
 use crate::mesh::math::*;
 use crate::mesh::ids::*;
+use std::iter::FromIterator;
 
 /// # Edit
 impl Mesh
@@ -429,19 +430,24 @@ impl Mesh
 		conn.remove_vertex(vertex);
     }
     
-    /*
+    
     /// cut a corner by a plane defined by its normal
-    pub fn bevel_vertex(&mut self, vertex: &VertexID, distance: f64, normal: Vec3)
+    pub fn bevel_vertex(&mut self, vertex: VertexID, distance: f64, normal: Vec3)
     {
+		let mut tocut = Vec::from_iter(self.vertex_halfedge_iter(vertex));
+		let mut cuts = Vec::with_capacity(tocut.len());
 		let pos = self.vertex_position(vertex);
-		for he in self.vertex_halfedge_iter() {
+		for he in tocut {
 			let edgedir = self.edge_direction(he);
 			let cut = edgedir * (distance / edgedir.dot(normal));
-			self.split_edge(pos + cut);
+			cuts.push(self.split_edge(he, pos + cut));
 		}
 		self.remove_vertex(vertex);
+		
+		// triangulate the cuts
+		unimplemented!();
     }
-    */
+    
     
     /// Create a bevel on the given edges, these must be contiguous and ordered (ie. `edge[i]` starts from `edge[i-1]`)
     /// This function is not a realistic chamfer, it can displace the edges that are cutted by the bevel.
