@@ -135,11 +135,14 @@ impl Shape {
 		{
 			let mut j = 0;
 			for i in 0 .. self.points.len() {
-				if ! merges.contains_key(&(i as u32)) 	{
+				if let Some(&dst) = merges.get(&(i as u32)) {
+					reindex.push(dst);
+				}
+				else {
+					reindex.push(j as u32);
 					self.points[j] = self.points[i];
 					j += 1;
 				}
-				reindex.push(j as u32);
 			}
 			self.points.truncate(j);
 		}
@@ -418,11 +421,6 @@ mod tests {
 			Vec3::new(1., 0., 2.),
 			], div, Vec3::new(0., 0., 0.), Vec3::new(0., 0., 1.), 2.*PI);
 		shape.merge_doubles(None);
-		      
-		println!("faces:");
-		for face in shape.faces.iter() {
-			println!("  {:?}", face);
-		}
 		
 		assert!(shape.is_valid());
 		assert!(shape.is_envelope());
