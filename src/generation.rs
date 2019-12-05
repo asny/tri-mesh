@@ -149,7 +149,7 @@ impl Shape {
 				let old = self.faces[i];
 				self.faces[j] = [reindex[old[0] as usize], reindex[old[1] as usize], reindex[old[2] as usize]];
 				let face = self.faces[j];
-				if face[0] != face[1] || face[1] != face[2] || face[0] != face[2] {
+				if face[0] != face[1] && face[1] != face[2] && face[0] != face[2] {
 					j += 1;
 				}	
 			}
