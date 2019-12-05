@@ -235,9 +235,10 @@ impl Shape {
 			self.points.push(point+displt);
 		}
 		// add the triangles
-		for i in istart+1 .. istart+num {
-			self.faces.push([i-1, i,   i+1]);
-			self.faces.push([i-1, i+1, i+2]);
+		for j in 0 .. num-1 {
+			let i = 2*j + istart;
+			self.faces.push([i,   i+1, i+2]);
+			self.faces.push([i+3, i+2, i+1 ]);
 		}
 		self
 	}
@@ -259,11 +260,11 @@ impl Shape {
 			for pt in line.iter() {
 				self.points.push(transform(amount, *pt));
 			}
-			for i in istart+1 .. istart+num {
-				self.faces.push([i-1, i, i+num]);
-				self.faces.push([i-1, i+num, i+num-1]);
+			for i in istart .. istart+num-1 {
+				self.faces.push([i+num, i,       i+num+1]);
+				self.faces.push([i+1,   i+num+1, i      ]);
 			}
-			istart += line.len() as u32;
+			istart += num;
 		}
 		self
  	}
@@ -285,6 +286,29 @@ impl Shape {
 		}
 		true
  	}
+ 	
+	/// return true if the mesh is an enveloppe  ie each edge is used twice at most, and the normals are consistents
+	pub fn is_envelope(&self) -> bool {
+		let mut edges = HashMap::<(u32,u32),bool>::new();
+		for face in self.faces.iter() {
+			for edge in [(face[0], face[1]), 
+						(face[1], face[2]), 
+						(face[2], face[0])].iter() {
+				// edge already used, or bad normal direction
+				if edges.contains_key(&edge) { return false; }
+				if let Some(mut used) = edges.get_mut(&(edge.1, edge.0)) {
+					// edge already shared
+					if *used        { return false; }
+					*used = true;
+				}
+				else {
+					edges.insert(*edge, false);
+				}
+			}
+		}
+		true
+	}
+       
 }
 
 
@@ -319,6 +343,7 @@ mod tests {
 			]);
 		assert_eq!(shape.faces.len(), 3);
 		assert!(shape.is_valid());
+		assert!(shape.is_envelope());
 	}
 	
 	#[test]
@@ -334,6 +359,7 @@ mod tests {
 		assert_eq!(shape.points.len(), 8);
 		assert_eq!(shape.faces.len(), 6);	// there is no face for the non-existing edge (0, 3)
 		assert!(shape.is_valid());
+		assert!(shape.is_envelope());
 	}
 	
 	#[test]
@@ -349,11 +375,12 @@ mod tests {
 		assert_eq!(shape.points.len(), 3*(div+1));
 		assert_eq!(shape.faces.len(), 4*div);
 		assert!(shape.is_valid());
+		assert!(shape.is_envelope());
 	}
 	
 	#[test]
 	fn test_merge_doubles() {
-		let div = 32;
+		let div = 4;
 		let mut shape = Shape::new();
 		shape.revolution(&vec![
 			Vec3::new(1., 0., 0.),
@@ -361,9 +388,15 @@ mod tests {
 			Vec3::new(1., 0., 2.),
 			], div, Vec3::new(0., 0., 0.), Vec3::new(0., 0., 1.), 2.*PI);
 		shape.merge_doubles(None);
+		      
+		println!("faces:");
+		for face in shape.faces.iter() {
+			println!("  {:?}", face);
+		}
 		
+		assert!(shape.is_valid());
+		assert!(shape.is_envelope());
 		assert_eq!(shape.points.len(), 3*div);
 		assert_eq!(shape.faces.len(), 4*div);
-		assert!(shape.is_valid());
 	}
 }
