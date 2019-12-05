@@ -126,25 +126,55 @@ impl Shape {
 		self
 	}
 	
-	/// merge some points.
+	/// Merge some points.
 	///
 	/// the argument must be like `{point_to_merge:  point_to_merge_to}`.
 	///
 	pub fn merge_points(&mut self, merges: &HashMap<u32, u32>) -> &mut Self {
 		let mut reindex = Vec::with_capacity(self.points.len());
+		{
+			let mut j = 0;
+			for i in 0 .. self.points.len() {
+				if ! merges.contains_key(&(i as u32)) 	{
+					self.points[j] = self.points[i];
+					j += 1;
+				}
+				reindex.push(j as u32);
+			}
+			self.points.truncate(j);
+		}
+		{
+			let mut j = 0;
+			for i in 0 .. self.faces.len() {
+				let old = self.faces[i];
+				self.faces[j] = [reindex[old[0] as usize], reindex[old[1] as usize], reindex[old[2] as usize]];
+				let face = self.faces[j];
+				if face[0] != face[1] || face[1] != face[2] || face[0] != face[2] {
+					j += 1;
+				}	
+			}
+			self.faces.truncate(j);
+		}
+		self
+	}
+	
+	/// Remove points that are not hold by any face
+	///
+	pub fn remove_unused(&mut self) -> &mut Self {
+		let mut usage = vec![false; self.points.len()];
+		for face in self.faces.iter() {
+			for pt in face.iter() 		{ usage[*pt as usize] = true; }
+		}
+		
 		let mut j = 0;
 		for i in 0 .. self.points.len() {
-			if ! merges.contains_key(&(i as u32)) 	{
+			if usage[i]	{
 				self.points[j] = self.points[i];
 				j += 1;
 			}
-			reindex.push(j as u32);
 		}
-		self.points.truncate(self.points.len() - merges.len());
-		for i in 0 .. self.faces.len() {
-			let old = self.faces[i];
-			self.faces[i] = [reindex[old[0] as usize], reindex[old[1] as usize], reindex[old[2] as usize]];
-		}
+		self.points.truncate(j);
+		
 		self
 	}
 	
