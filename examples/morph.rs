@@ -222,7 +222,7 @@ fn main()
         }
 
         // Draw
-        let render_scene = |camera: &Camera| {
+        let render_scene = |camera: &dyn Camera| {
             let model_matrix = dust::Mat4::identity();
             model.render(&model_matrix, camera);
             wireframe_model.render(camera);

@@ -217,7 +217,7 @@ fn main()
         }
 
         // Draw
-        let render_scene = |camera: &Camera| {
+        let render_scene = |camera: &dyn Camera| {
             let model_matrix = dust::Mat4::identity();
             if let Some(ref result) = results
             {

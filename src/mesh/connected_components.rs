@@ -25,7 +25,7 @@ impl Mesh
     ///
     /// Finds the connected set of faces starting from the given face and limited by the given limit function.
     ///
-    pub fn connected_component_with_limit(&self, start_face_id: FaceID, limit: &Fn(HalfEdgeID) -> bool) -> HashSet<FaceID>
+    pub fn connected_component_with_limit(&self, start_face_id: FaceID, limit: &dyn Fn(HalfEdgeID) -> bool) -> HashSet<FaceID>
     {
         let mut component = HashSet::new();
         component.insert(start_face_id);
@@ -50,7 +50,7 @@ impl Mesh
     ///
     /// Finds all the sets of connected faces which are limited by the given limit function.
     ///
-    pub fn connected_components_with_limit(&self, limit: &Fn(HalfEdgeID) -> bool) -> Vec<HashSet<FaceID>>
+    pub fn connected_components_with_limit(&self, limit: &dyn Fn(HalfEdgeID) -> bool) -> Vec<HashSet<FaceID>>
     {
         let mut components: Vec<HashSet<FaceID>> = Vec::new();
         for face_id in self.face_iter() {

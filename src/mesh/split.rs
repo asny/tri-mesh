@@ -10,7 +10,7 @@ use std::collections::{HashSet, HashMap};
 impl Mesh
 {
     /// Clones a subset of this mesh defined by the is_included function.
-    pub fn clone_subset(&self, is_included: &Fn(&Mesh, FaceID) -> bool) -> Mesh
+    pub fn clone_subset(&self, is_included: &dyn Fn(&Mesh, FaceID) -> bool) -> Mesh
     {
         let mut clone = self.clone();
         for face_id in clone.face_iter() {
@@ -46,7 +46,7 @@ impl Mesh
     ///
     /// Splits the mesh into subsets bounded by the edges where the is_at_split function returns true.
     ///
-    pub fn split(&self, is_at_split: &Fn(&Mesh, HalfEdgeID) -> bool) -> Vec<Mesh>
+    pub fn split(&self, is_at_split: &dyn Fn(&Mesh, HalfEdgeID) -> bool) -> Vec<Mesh>
     {
         let components = self.connected_components_with_limit(&|halfedge_id| is_at_split(self, halfedge_id));
         components.iter().map(|cc| self.clone_subset(&|_, face_id| cc.contains(&face_id))).collect()

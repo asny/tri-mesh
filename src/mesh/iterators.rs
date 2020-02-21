@@ -6,13 +6,13 @@ use crate::mesh::traversal::Walker;
 use crate::mesh::connectivity_info::ConnectivityInfo;
 
 /// An iterator over the vertices. See [here](../struct.Mesh.html#method.vertex_iter) for more information.
-pub type VertexIter = Box<Iterator<Item = VertexID>>;
+pub type VertexIter = Box<dyn Iterator<Item=VertexID>>;
 
 /// An iterator over the half-edges. See [here](../struct.Mesh.html#method.halfedge_iter) for more information.
-pub type HalfEdgeIter = Box<Iterator<Item = HalfEdgeID>>;
+pub type HalfEdgeIter = Box<dyn Iterator<Item = HalfEdgeID>>;
 
 /// An iterator over the faces. See [here](../struct.Mesh.html#method.face_iter) for more information.
-pub type FaceIter = Box<Iterator<Item = FaceID>>;
+pub type FaceIter = Box<dyn Iterator<Item = FaceID>>;
 
 /// An iterator over the half-edges starting in a given vertex. See [here](../struct.Mesh.html#method.vertex_halfedge_iter) for more information.
 pub struct VertexHalfedgeIter<'a>
