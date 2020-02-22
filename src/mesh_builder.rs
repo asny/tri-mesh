@@ -101,6 +101,7 @@ impl MeshBuilder {
     /// #    Ok(())
     /// # }
     /// ```
+    #[cfg(feature = "obj-io")]
     pub fn with_obj(mut self, source: String) -> Self
     {
         let mut positions = Vec::new();
