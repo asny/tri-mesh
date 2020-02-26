@@ -222,6 +222,18 @@ impl std::fmt::Display for Mesh {
     }
 }
 
+#[cfg(feature = "3d-io")]
+use serde::{Serialize, Deserialize};
+#[cfg(feature = "3d-io")]
+#[derive(Serialize, Deserialize, Debug)]
+pub(crate) struct IOMesh {
+    pub magic_number: u8,
+    pub version: u8,
+    pub indices: Vec<u32>,
+    pub positions: Vec<f32>,
+    pub normals: Vec<f32>
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

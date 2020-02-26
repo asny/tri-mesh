@@ -11,6 +11,18 @@ pub enum Error {
     NoPositionsSpecified {
         /// Error reason.
         message: String
+    },
+    InvalidFile {
+        message: String
+    },
+    #[cfg(feature = "3d-io")]
+    Bincode(bincode::Error)
+}
+
+#[cfg(feature = "3d-io")]
+impl From<bincode::Error> for Error {
+    fn from(err: bincode::Error) -> Error {
+        Error::Bincode(err).into()
     }
 }
 
@@ -120,6 +132,7 @@ impl MeshBuilder {
     /// #    Ok(())
     /// # }
     /// ```
+    #[cfg(feature = "obj-io")]
     pub fn with_named_obj(mut self, source: String, object_name: &str) -> Self
     {
         let objs = wavefront_obj::obj::parse(source).unwrap();
@@ -153,6 +166,20 @@ impl MeshBuilder {
         self.positions = Some(positions);
         self.indices = Some(indices);
         self
+    }
+
+    #[cfg(feature = "3d-io")]
+    pub fn with_3d(mut self, bytes: &[u8]) -> Result<Self, Error>
+    {
+        let decoded: crate::mesh::IOMesh = bincode::deserialize(bytes)?;
+        if decoded.magic_number != 61 {
+            Err(Error::InvalidFile {message: "Invalid 3d file!".to_string()})
+        }
+        else {
+            self.positions = Some(decoded.positions.iter().map(|x| *x as f64).collect());
+            self.indices = Some(decoded.indices);
+            Ok(self)
+        }
     }
 
     ///

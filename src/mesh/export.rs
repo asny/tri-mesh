@@ -251,6 +251,14 @@ impl Mesh
         }
         output
     }
+
+    #[cfg(feature = "3d-io")]
+    pub fn parse_as_3d(&self) -> Vec<u8>
+    {
+        let export_mesh = crate::mesh::IOMesh {magic_number: 61, version: 1, indices: self.indices_buffer(),
+            positions: self.positions_buffer_f32(), normals: self.normals_buffer_f32()};
+        bincode::serialize(&export_mesh).unwrap()
+    }
 }
 
 fn push_vec3(vec: &mut Vec<f64>, vec3: crate::mesh::math::Vec3)
@@ -264,6 +272,16 @@ fn push_vec3(vec: &mut Vec<f64>, vec3: crate::mesh::math::Vec3)
 mod tests {
     use crate::MeshBuilder;
     use crate::mesh::math::*;
+
+    #[test]
+    fn test_parse_as_3d() {
+        let mesh = MeshBuilder::new().cylinder(3, 16).build().unwrap();
+        let encoded: Vec<u8> = mesh.parse_as_3d();
+        let decoded = MeshBuilder::new().with_3d(&encoded).unwrap().build().unwrap();
+
+        assert_eq!(mesh.no_vertices(), decoded.no_vertices());
+        assert_eq!(mesh.no_faces(), decoded.no_faces());
+    }
 
     #[test]
     fn test_indexed_export() {
