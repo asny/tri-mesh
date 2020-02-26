@@ -102,32 +102,54 @@ impl MeshBuilder {
     /// # }
     /// ```
     #[cfg(feature = "obj-io")]
-    pub fn with_obj(mut self, source: String) -> Self
+    pub fn with_obj(self, source: String) -> Self
     {
+        self.with_named_obj(source, "")
+    }
+
+    ///
+    /// Parses the .obj file and extracts the connectivity information (indices) and positions which is used to construct a mesh when the `build` method is called.
+    /// Only the object with the given name is extracted from the file.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
+    ///     let obj_source = std::fs::read_to_string("foo.obj").expect("Something went wrong reading the file");
+    ///     let mesh = tri_mesh::mesh_builder::MeshBuilder::new().with_named_obj(obj_source, "my_object").build()?;
+    /// #    Ok(())
+    /// # }
+    /// ```
+    pub fn with_named_obj(mut self, source: String, object_name: &str) -> Self
+    {
+        let objs = wavefront_obj::obj::parse(source).unwrap();
         let mut positions = Vec::new();
         let mut indices = Vec::new();
 
-        let objs = wavefront_obj::obj::parse(source).unwrap().objects;
-        for obj in objs.iter()
-        {
-            let start_index = positions.len()/3;
-            for vertex in obj.vertices.iter() {
-                positions.push(vertex.x);
-                positions.push(vertex.y);
-                positions.push(vertex.z);
-            }
+        for obj in objs.objects.iter() { // Objects consisting of several meshes with different materials
+            if &obj.name == object_name || object_name == "" {
+                let start_index = positions.len()/3;
+                obj.vertices.iter().for_each(|v| {
+                    positions.push(v.x);
+                    positions.push(v.y);
+                    positions.push(v.z);
+                });
 
-            for shape in obj.geometry.first().unwrap().shapes.iter() {
-                match shape.primitive {
-                    wavefront_obj::obj::Primitive::Triangle((i0, ..), (i1, ..), (i2, ..)) => {
-                        indices.push((start_index + i0) as u32);
-                        indices.push((start_index + i1) as u32);
-                        indices.push((start_index + i2) as u32);
-                    },
-                    _ => {}
+                for mesh in obj.geometry.iter() { // All meshes with different materials
+                    for primitive in mesh.shapes.iter() { // All triangles with same material
+                        match primitive.primitive {
+                            wavefront_obj::obj::Primitive::Triangle(i0, i1, i2) => {
+                                indices.push((start_index + i0.0) as u32);
+                                indices.push((start_index + i1.0) as u32);
+                                indices.push((start_index + i2.0) as u32);
+                            },
+                            _ => {}
+                        }
+                    }
                 }
             }
         }
+
         self.positions = Some(positions);
         self.indices = Some(indices);
         self
