@@ -252,6 +252,22 @@ impl Mesh
         output
     }
 
+    ///
+    /// Parses the mesh into a byte array that follows the .3d file format and which can then be saved into a file.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # fn main() -> std::io::Result<()> {
+    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+    /// // Write the mesh data to a byte array
+    /// let bytes = mesh.parse_as_3d();
+    ///
+    /// // Write the byte array to an .3d file
+    /// std::fs::write("foo.3d", bytes)?;
+    /// # Ok(())
+    /// # }
+    /// ```
     #[cfg(feature = "3d-io")]
     pub fn parse_as_3d(&self) -> Vec<u8>
     {

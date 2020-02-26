@@ -12,9 +12,12 @@ pub enum Error {
         /// Error reason.
         message: String
     },
+    /// Invalid file format
     InvalidFile {
+        /// Error reason.
         message: String
     },
+    /// Invalid 3d file format
     #[cfg(feature = "3d-io")]
     Bincode(bincode::Error)
 }
@@ -168,6 +171,18 @@ impl MeshBuilder {
         self
     }
 
+    ///
+    /// Parses the .3d file and extracts the connectivity information (indices) and positions which is used to construct a mesh when the `build` method is called.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
+    ///     let bytes = std::fs::read("foo.3d").expect("Something went wrong reading the file");
+    ///     let mesh = tri_mesh::mesh_builder::MeshBuilder::new().with_3d(&bytes)?.build()?;
+    /// #    Ok(())
+    /// # }
+    /// ```
     #[cfg(feature = "3d-io")]
     pub fn with_3d(mut self, bytes: &[u8]) -> Result<Self, Error>
     {
