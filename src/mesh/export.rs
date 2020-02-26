@@ -112,6 +112,22 @@ impl Mesh
         positions
     }
 
+    ///
+    /// Returns the positions of the vertices in an array which is meant to be used for visualisation.
+    /// See [this](#index-based-arrays) example.
+    ///
+    /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
+    ///
+    pub fn positions_buffer_f32(&self) -> Vec<f32>
+    {
+        let mut positions = Vec::with_capacity(self.no_vertices() * 3);
+        for position in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
+            for i in 0..3 {
+                positions.push(position[i] as f32);
+            }
+        }
+        positions
+    }
 
     ///
     /// Returns the normals of the vertices in an array which is meant to be used for visualisation.
@@ -128,6 +144,28 @@ impl Mesh
         let mut normals = Vec::with_capacity(self.no_vertices() * 3);
         for vertex_id in self.vertex_iter() {
             push_vec3(&mut normals, self.vertex_normal(vertex_id));
+        }
+        normals
+    }
+
+    ///
+    /// Returns the normals of the vertices in an array which is meant to be used for visualisation.
+    /// See [this](#index-based-arrays) example.
+    ///
+    /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
+    ///
+    /// **Note:** The normal of a vertex is computed as the average of the normals of the adjacent faces.
+    ///
+    /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
+    ///
+    pub fn normals_buffer_f32(&self) -> Vec<f32>
+    {
+        let mut normals = Vec::with_capacity(self.no_vertices() * 3);
+        for vertex_id in self.vertex_iter() {
+            let n = self.vertex_normal(vertex_id);
+            for i in 0..3 {
+                normals.push(n[i] as f32);
+            }
         }
         normals
     }
