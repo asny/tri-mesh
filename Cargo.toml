@@ -12,8 +12,8 @@ keywords = ["mesh", "geometry", "3d", "half-edge", "graphics"]
 
 [features]
 default = ["obj-io", "3d-io"]
-obj-io = ["wavefront_obj"]
-3d-io = ["serde", "bincode"]
+obj-io = ["wavefront_obj"] # Support for loading/saving .obj files
+3d-io = ["serde", "bincode"] # Support for loading/saving .3d files (custom format)
 
 [dependencies]
 cgmath = "0.16"
