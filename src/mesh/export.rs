@@ -224,6 +224,7 @@ impl Mesh
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(feature = "obj-io")]
     pub fn parse_as_obj(&self) -> String
     {
         let mut output = String::from("o object\n");
@@ -258,10 +259,10 @@ impl Mesh
     /// # Examples
     ///
     /// ```no_run
-    /// # fn main() -> std::io::Result<()> {
+    /// # fn main() -> Result<(), tri_mesh::mesh::Error> {
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
     /// // Write the mesh data to a byte array
-    /// let bytes = mesh.parse_as_3d();
+    /// let bytes = mesh.parse_as_3d()?;
     ///
     /// // Write the byte array to an .3d file
     /// std::fs::write("foo.3d", bytes)?;
@@ -269,11 +270,11 @@ impl Mesh
     /// # }
     /// ```
     #[cfg(feature = "3d-io")]
-    pub fn parse_as_3d(&self) -> Vec<u8>
+    pub fn parse_as_3d(&self) -> Result<Vec<u8>, bincode::Error>
     {
         let export_mesh = crate::mesh::IOMesh {magic_number: 61, version: 1, indices: self.indices_buffer(),
             positions: self.positions_buffer_f32(), normals: self.normals_buffer_f32()};
-        bincode::serialize(&export_mesh).unwrap()
+        bincode::serialize(&export_mesh)
     }
 }
 
@@ -292,7 +293,7 @@ mod tests {
     #[test]
     fn test_parse_as_3d() {
         let mesh = MeshBuilder::new().cylinder(3, 16).build().unwrap();
-        let encoded: Vec<u8> = mesh.parse_as_3d();
+        let encoded: Vec<u8> = mesh.parse_as_3d().unwrap();
         let decoded = MeshBuilder::new().with_3d(&encoded).unwrap().build().unwrap();
 
         assert_eq!(mesh.no_vertices(), decoded.no_vertices());

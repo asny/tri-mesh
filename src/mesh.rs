@@ -65,6 +65,26 @@ pub enum Error {
     MeshIsInvalid {
         /// Error reason.
         message: String
+    },
+    /// Invalid 3d file format
+    #[cfg(feature = "3d-io")]
+    Bincode(bincode::Error),
+    /// IO error
+    #[cfg(feature = "3d-io")]
+    IO(std::io::Error)
+}
+
+#[cfg(feature = "3d-io")]
+impl From<bincode::Error> for Error {
+    fn from(err: bincode::Error) -> Error {
+        Error::Bincode(err).into()
+    }
+}
+
+#[cfg(feature = "3d-io")]
+impl From<std::io::Error> for Error {
+    fn from(err: std::io::Error) -> Error {
+        Error::IO(err).into()
     }
 }
 
