@@ -245,7 +245,7 @@ impl std::fmt::Display for Mesh {
 #[cfg(feature = "3d-io")]
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub(crate) struct IOMesh {
-    pub magic_number: u8,
+    pub magic_number: u8, // Always 61
     pub version: u8,
     pub indices: Vec<u32>,
     pub positions: Vec<f32>,

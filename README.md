@@ -4,11 +4,7 @@
 [![Docs.rs](https://docs.rs/tri-mesh/badge.svg)](https://docs.rs/tri-mesh)
 [![Build Status](https://travis-ci.org/asny/tri-mesh.svg?branch=master)](https://travis-ci.org/asny/tri-mesh)
 
-A triangle mesh data structure including basic operations.
-
-Why another triangle mesh data structure crate you might ask.
-Well, if you want a more feature complete crate than [half_edge_mesh](https://crates.io/crates/half_edge_mesh) and a less generic crate than [plexus](https://crates.io/crates/plexus),
-then `tri-mesh` is probably something for you!
+A triangle mesh data structure including basic operations. Use it to create, edit and compute on 3D models.
 
 ## Examples
 
@@ -35,7 +31,7 @@ Please, see the [documentation](https://docs.rs/tri-mesh) for more details.
 Add the following to your `Cargo.toml`:
 ```toml
 [dependencies]
-tri-mesh = "0.4.0"
+tri-mesh = "0.5.0"
 ```
 
 ### I have a mesh without normals, how can I use `tri-mesh` to compute them?
