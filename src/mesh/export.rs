@@ -255,7 +255,7 @@ impl Mesh
 
     ///
     /// Parses the mesh into a byte array that follows a custom file format (.3d) and which can then be saved into a file.
-    /// The .3d file format is optimized for loading and saving using Rust (using [serde]() and [bindcode]()).
+    /// The .3d file format is optimized for loading and saving using Rust (using [serde](https://docs.rs/serde/) and [bindcode](https://docs.rs/bincode/)).
     /// The layout is:
     /// magic_number: u8, // Always 61
     //  version: u8,
