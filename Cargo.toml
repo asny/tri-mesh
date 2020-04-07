@@ -22,4 +22,4 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 bincode = { version = "1.2", optional = true }
 
 [dev-dependencies]
-dust = {path = "examples/dust/", version = "0.1.0"}
+three-d = "0.1.0"

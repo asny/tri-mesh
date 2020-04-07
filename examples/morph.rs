@@ -1,14 +1,11 @@
 
-use tri_mesh::prelude::*;
-use tri_mesh::prelude::Vec3 as Vec3;
-use tri_mesh::prelude::vec3 as vec3;
-use tri_mesh::prelude::vec4 as vec4;
 use std::collections::HashMap;
 
 /// Loads the mesh and scale/translate it.
-fn on_startup(scene_center: &Vec3, scene_radius: f64) -> Mesh
+fn on_startup(scene_center: &tri_mesh::prelude::Vec3, scene_radius: f64) -> tri_mesh::mesh::Mesh
 {
-    let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/bunny.obj").to_string()).build().unwrap();
+    use tri_mesh::prelude::*;
+    let mut mesh = MeshBuilder::new().with_3d(include_bytes!("assets/suzanne.3d")).unwrap().build().unwrap();
     let (min, max) = mesh.extreme_coordinates();
     mesh.translate(-0.5 * (max + min)); // Translate such that the mesh center is in origo.
     let size = max - min;
@@ -18,7 +15,7 @@ fn on_startup(scene_center: &Vec3, scene_radius: f64) -> Mesh
 }
 
 /// When the user clicks, we see if the model is hit. If it is, we compute the morph weights from the picking point.
-fn on_click(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<HashMap<VertexID, Vec3>>
+fn on_click(mesh: &tri_mesh::mesh::Mesh, ray_start_point: &tri_mesh::prelude::Vec3, ray_direction: &tri_mesh::prelude::Vec3) -> Option<HashMap<tri_mesh::prelude::VertexID, tri_mesh::prelude::Vec3>>
 {
     if let Some((vertex_id, point)) = pick(&mesh,&ray_start_point, &ray_direction) {
         Some(compute_weights(mesh, vertex_id, &point))
@@ -27,7 +24,7 @@ fn on_click(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option
 }
 
 /// Morphs the vertices based on the computed weights.
-fn on_morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f64)
+fn on_morph(mesh: &mut tri_mesh::mesh::Mesh, weights: &HashMap<tri_mesh::prelude::VertexID, tri_mesh::prelude::Vec3>, factor: f64)
 {
     for (vertex_id, weight) in weights.iter() {
         mesh.move_vertex_by(*vertex_id,weight * factor);
@@ -35,8 +32,9 @@ fn on_morph(mesh: &mut Mesh, weights: &HashMap<VertexID, Vec3>, factor: f64)
 }
 
 /// Picking used for determining whether a mouse click starts a morph operation. Returns a close vertex and the position of the click on the mesh surface.
-fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(VertexID, Vec3)>
+fn pick(mesh: &tri_mesh::mesh::Mesh, ray_start_point: &tri_mesh::prelude::Vec3, ray_direction: &tri_mesh::prelude::Vec3) -> Option<(tri_mesh::prelude::VertexID, tri_mesh::prelude::Vec3)>
 {
+    use tri_mesh::prelude::*;
     if let Some(Intersection::Point {primitive, point}) = mesh.ray_intersection(ray_start_point, ray_direction) {
         let start_vertex_id = match primitive {
             Primitive::Face(face_id) => {
@@ -56,8 +54,9 @@ fn pick(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<(Ve
 }
 
 /// Compute a directional weight for each vertex to be used for the morph operation.
-fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -> HashMap<VertexID, Vec3>
+fn compute_weights(mesh: &tri_mesh::mesh::Mesh, start_vertex_id: tri_mesh::prelude::VertexID, start_point: &tri_mesh::prelude::Vec3) -> HashMap<tri_mesh::prelude::VertexID, tri_mesh::prelude::Vec3>
 {
+    use tri_mesh::prelude::*;
     static SQR_MAX_DISTANCE: f64 = 1.0;
 
     // Use the smoothstep function to get a smooth morphing
@@ -95,96 +94,72 @@ fn compute_weights(mesh: &Mesh, start_vertex_id: VertexID, start_point: &Vec3) -
 /// Above: Everything related to tri-mesh
 /// Below: Visualisation of the mesh, event handling and so on
 ///
-use dust::*;
-use dust::objects::*;
-use dust::window::{event::*, Window};
 
 fn main()
 {
+    use three_d::*;
+
     let scene_radius = 10.0;
-    let scene_center = dust::vec3(0.0, 5.0, 0.0);
-    let mut mesh = on_startup(&vec3(scene_center.x as f64, scene_center.y as f64, scene_center.z as f64), scene_radius as f64);
+    let scene_center = vec3(0.0, 5.0, 0.0);
+    let mut mesh = on_startup(&tri_mesh::prelude::vec3(scene_center.x as f64, scene_center.y as f64, scene_center.z as f64), scene_radius as f64);
     let positions: Vec<f32> = mesh.positions_buffer().iter().map(|v| *v as f32).collect();
     let normals: Vec<f32> = mesh.normals_buffer().iter().map(|v| *v as f32).collect();
 
     let mut window = Window::new_default("Morph tool").unwrap();
-    let (framebuffer_width, framebuffer_height) = window.framebuffer_size();
+    let (width, height) = window.framebuffer_size();
     let window_size = window.size();
     let gl = window.gl();
 
     // Renderer
-    let renderer = DeferredPipeline::new(&gl, framebuffer_width, framebuffer_height, true, vec4(0.8, 0.8, 0.8, 1.0)).unwrap();
-
-    // Camera
-    let mut camera = camera::PerspectiveCamera::new(scene_center + scene_radius * vec3(1.0, 1.0, 1.0).normalize(), scene_center,
-                                                    vec3(0.0, 1.0, 0.0),degrees(45.0), framebuffer_width as f32 / framebuffer_height as f32, 0.1, 1000.0);
+    let mut renderer = DeferredPipeline::new(&gl).unwrap();
+    let mut camera = Camera::new_perspective(&gl, scene_center + scene_radius * vec3(1.0, 1.0, 1.0).normalize(), scene_center, vec3(0.0, 1.0, 0.0),
+                                                degrees(45.0), width as f32 / height as f32, 0.1, 1000.0);
 
     // Objects
-    let mut wireframe_model = Wireframe::new(&gl, &mesh.indices_buffer(), &positions, 0.02);
-    wireframe_model.set_parameters(0.8, 0.2, 5.0);
-    wireframe_model.set_color(&vec3(0.9, 0.2, 0.2));
+    let mut wireframe_model = Edges::new(&gl, &mesh.indices_buffer(), &positions, 0.01);
+    wireframe_model.diffuse_intensity = 0.8;
+    wireframe_model.specular_intensity = 0.2;
+    wireframe_model.specular_power = 5.0;
+    wireframe_model.color = vec3(0.9, 0.2, 0.2);
 
-    let mut model = ShadedMesh::new(&gl, &mesh.indices_buffer(), &att!["position" => (positions, 3), "normal" => (normals, 3)]).unwrap();
+    let mut model = Mesh::new(&gl, &mesh.indices_buffer(), &positions, &normals).unwrap();
     model.color = vec3(0.8, 0.8, 0.8);
+    model.diffuse_intensity = 0.2;
+    model.specular_intensity = 0.4;
+    model.specular_power = 20.0;
 
-    let plane_positions: Vec<f32> = vec![
-        -1.0, 0.0, -1.0,
-        1.0, 0.0, -1.0,
-        1.0, 0.0, 1.0,
-        -1.0, 0.0, 1.0
-    ];
-    let plane_normals: Vec<f32> = vec![
-        0.0, 1.0, 0.0,
-        0.0, 1.0, 0.0,
-        0.0, 1.0, 0.0,
-        0.0, 1.0, 0.0
-    ];
-    let plane_indices: Vec<u32> = vec![
-        0, 2, 1,
-        0, 3, 2,
-    ];
-    let mut plane = ShadedMesh::new(&gl, &plane_indices, &att!["position" => (plane_positions, 3), "normal" => (plane_normals, 3)]).unwrap();
+    let mut plane_mesh = tri_mesh::MeshBuilder::new().plane().build().unwrap();
+    plane_mesh.scale(100.0);
+    let mut plane = Mesh::new(&gl, &plane_mesh.indices_buffer(), &plane_mesh.positions_buffer_f32(), &plane_mesh.normals_buffer_f32()).unwrap();
+    plane.color = vec3(0.8, 0.8, 0.8);
     plane.diffuse_intensity = 0.2;
     plane.specular_intensity = 0.4;
     plane.specular_power = 20.0;
 
-    let mut ambient_light = light::AmbientLight::new();
-    ambient_light.base.intensity = 0.4;
+    let ambient_light = AmbientLight::new(&gl, 0.4, &vec3(1.0, 1.0, 1.0)).unwrap();
 
     let mut dir = vec3(-1.0, -1.0, -1.0).normalize();
-    let mut light1 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
-    light1.enable_shadows(&gl, scene_radius * 4.0).unwrap();
-    light1.base.intensity = 0.75;
-
-    dir = vec3(-1.0, -1.0, 1.0).normalize();
-    let mut light2 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
-    light2.enable_shadows(&gl, scene_radius * 4.0).unwrap();
-    light2.base.intensity = 0.75;
-
-    dir = vec3(1.0, -1.0, 1.0).normalize();
-    let mut light3 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
-    light3.enable_shadows(&gl, scene_radius * 4.0).unwrap();
-    light3.base.intensity = 0.75;
-
+    let mut spot_light0 = SpotLight::new(&gl, 0.6, &vec3(1.0, 1.0, 1.0), &(scene_center - 2.0f32 * scene_radius * dir),
+                                   &dir, 25.0, 0.1, 0.001, 0.0001).unwrap();
     dir = vec3(1.0, -1.0, -1.0).normalize();
-    let mut light4 = light::SpotLight::new(scene_center - 2.0 * scene_radius * dir, dir);
-    light4.enable_shadows(&gl, scene_radius * 4.0).unwrap();
-    light4.base.intensity = 0.75;
+    let mut spot_light1 = SpotLight::new(&gl, 0.6, &vec3(1.0, 1.0, 1.0), &(scene_center - 2.0f32 * scene_radius * dir),
+                                   &dir, 25.0, 0.1, 0.001, 0.0001).unwrap();
+    dir = vec3(1.0, -1.0, 1.0).normalize();
+    let mut spot_light2 = SpotLight::new(&gl, 0.6, &vec3(1.0, 1.0, 1.0), &(scene_center - 2.0f32 * scene_radius * dir),
+                                   &dir, 25.0, 0.1, 0.001, 0.0001).unwrap();
+    dir = vec3(-1.0, -1.0, 1.0).normalize();
+    let mut spot_light3 = SpotLight::new(&gl, 0.6, &vec3(1.0, 1.0, 1.0), &(scene_center - 2.0f32 * scene_radius * dir),
+                                   &dir, 25.0, 0.1, 0.001, 0.0001).unwrap();
 
-    let mut camera_handler = camerahandler::CameraHandler::new(camerahandler::CameraState::SPHERICAL);
-
-    let mut weights: Option<HashMap<VertexID, Vec3>> = None;
+    let mut weights: Option<HashMap<tri_mesh::prelude::VertexID, tri_mesh::prelude::Vec3>> = None;
     // main loop
-    window.render_loop(move |events, _elapsed_time|
+    let mut rotating = false;
+    window.render_loop(move |frame_input|
     {
-        for event in events {
+        camera.set_size(frame_input.screen_width as f32, frame_input.screen_height as f32);
+
+        for event in frame_input.events.iter() {
             match event {
-                Event::Key {state, kind} => {
-                    if kind == "Tab" && *state == State::Pressed
-                    {
-                        camera_handler.next_state();
-                    }
-                },
                 Event::MouseClick {state, button, position} => {
                     if *button == MouseButton::Left
                     {
@@ -193,67 +168,57 @@ fn main()
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
                             let dir = camera.view_direction_at((x, y));
-                            weights = on_click(&mesh,&vec3(p.x as f64, p.y as f64, p.z as f64), &vec3(dir.x as f64, dir.y as f64, dir.z as f64));
+                            weights = on_click(&mesh,&tri_mesh::prelude::vec3(p.x as f64, p.y as f64, p.z as f64), &tri_mesh::prelude::vec3(dir.x as f64, dir.y as f64, dir.z as f64));
                             if weights.is_none() {
-                                camera_handler.start_rotation();
+                                rotating = true;
                             }
                         }
                         else {
                             weights = None;
-                            camera_handler.end_rotation()
+                            rotating = false;
                         }
                     }
                 },
                 Event::MouseWheel {delta} => {
-                    camera_handler.zoom(&mut camera, *delta as f32);
+                    camera.zoom(*delta as f32);
                 },
                 Event::MouseMotion {delta} => {
-                    camera_handler.rotate(&mut camera, delta.0 as f32, delta.1 as f32);
+                    if rotating {
+                        camera.rotate(delta.0 as f32, delta.1 as f32);
+                    }
                     if let Some(ref w) = weights
                     {
                         on_morph(&mut mesh, w, 0.001 * delta.1);
                         let positions: Vec<f32> = mesh.positions_buffer().iter().map(|v| *v as f32).collect();
                         let normals: Vec<f32> = mesh.normals_buffer().iter().map(|v| *v as f32).collect();
                         wireframe_model.update_positions(&positions);
-                        model.update_attributes(&att!["position" => (positions, 3), "normal" => (normals, 3)]).unwrap();
+                        model.update_positions(&positions).unwrap();
+                        model.update_normals(&normals).unwrap();
                     }
-                }
+                },
+                _ => {}
             }
         }
-
-        // Draw
-        let render_scene = |camera: &dyn Camera| {
-            let model_matrix = dust::Mat4::identity();
-            model.render(&model_matrix, camera);
-            wireframe_model.render(camera);
+        let render_scene = |camera: &Camera| {
+            state::cull(&gl, state::CullType::Back);
+            model.render(&Mat4::identity(), camera);
         };
-
-        // Shadow pass
-        light1.shadow_cast_begin().unwrap();
-        render_scene(light1.shadow_camera().unwrap());
-
-        light2.shadow_cast_begin().unwrap();
-        render_scene(light2.shadow_camera().unwrap());
-
-        light3.shadow_cast_begin().unwrap();
-        render_scene(light3.shadow_camera().unwrap());
-
-        light4.shadow_cast_begin().unwrap();
-        render_scene(light4.shadow_camera().unwrap());
+        spot_light0.generate_shadow_map(50.0, 512, &render_scene);
+        spot_light1.generate_shadow_map(50.0, 512, &render_scene);
+        spot_light2.generate_shadow_map(50.0, 512, &render_scene);
+        spot_light3.generate_shadow_map(50.0, 512, &render_scene);
 
         // Geometry pass
-        renderer.geometry_pass_begin().unwrap();
-        render_scene(&camera);
-        plane.render(&dust::Mat4::from_scale(100.0), &camera);
+        renderer.geometry_pass(width, height, &|| {
+            state::cull(&gl, state::CullType::Back);
+            model.render(&Mat4::identity(), &camera);
+            plane.render(&Mat4::identity(), &camera);
+            wireframe_model.render(&Mat4::identity(), &camera);
+        }).unwrap();
 
         // Light pass
-        renderer.light_pass_begin(&camera).unwrap();
-        renderer.shine_ambient_light(&ambient_light).unwrap();
-        renderer.shine_spot_light(&light1).unwrap();
-        renderer.shine_spot_light(&light2).unwrap();
-        renderer.shine_spot_light(&light3).unwrap();
-        renderer.shine_spot_light(&light4).unwrap();
-
-        renderer.copy_to_screen().unwrap();
+        Screen::write(&gl, 0, 0, width, height, Some(&vec4(0.5, 0.5, 0.5, 1.0)), None, &|| {
+            renderer.light_pass(&camera, Some(&ambient_light), &[], &[&spot_light0, &spot_light1, &spot_light2, &spot_light3], &[]).unwrap();
+        }).unwrap();
     }).unwrap();
 }
