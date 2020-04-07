@@ -2,6 +2,7 @@
 use three_d::*;
 
 mod morph;
+mod stitch;
 
 fn main()
 {
@@ -53,7 +54,8 @@ fn main()
 
     let mut drawable_mesh = DrawableMesh::new(&gl,&mesh);
 
-    let mut morph_operation = None;
+    let mut morph_operation: Option<morph::MorphOperation> = None;
+    let mut stitch_operation: Option<stitch::StitchOperation> = None;
 
     // main loop
     let mut rotating = false;
@@ -70,14 +72,31 @@ fn main()
                         {
                             let (x, y) = (position.0 / window_size.0 as f64, position.1 / window_size.1 as f64);
                             let p = camera.position();
+                            let ray_start_point = tri_mesh::prelude::vec3(p.x as f64, p.y as f64, p.z as f64);
                             let dir = camera.view_direction_at((x, y));
-                            morph_operation = morph::MorphOperation::new(&mesh,&tri_mesh::prelude::vec3(p.x as f64, p.y as f64, p.z as f64), &tri_mesh::prelude::vec3(dir.x as f64, dir.y as f64, dir.z as f64));
-                            if morph_operation.is_none() {
+                            let ray_direction = tri_mesh::prelude::vec3(dir.x as f64, dir.y as f64, dir.z as f64);
+
+                            if let Some(ref mut operation) = morph_operation {
+                                if !operation.start(&mesh, &ray_start_point, &ray_direction) {
+                                    rotating = true;
+                                }
+                            }
+                            else if let Some(ref mut operation) = stitch_operation {
+                                if let Some(mesh) = operation.apply(&mesh, &ray_start_point, &ray_direction) {
+                                    drawable_mesh = DrawableMesh::new(&gl, &mesh);
+                                }
+                                else {
+                                    rotating = true;
+                                }
+                            }
+                            else {
                                 rotating = true;
                             }
                         }
                         else {
-                            morph_operation = None;
+                            if let Some(ref mut operation) = morph_operation {
+                                operation.end();
+                            }
                             rotating = false;
                         }
                     }
@@ -89,16 +108,26 @@ fn main()
                     if rotating {
                         camera.rotate(delta.0 as f32, delta.1 as f32);
                     }
-                    if let Some(ref operation) = morph_operation
+                    if let Some(ref mut operation) = morph_operation
                     {
-                        operation.apply(&mut mesh, 0.001 * delta.1);
+                        operation.update(&mut mesh, 0.001 * delta.1);
                         drawable_mesh.update(&mesh);
                     }
                 },
                 Event::Key { ref state, ref kind } => {
-                    if kind == "Key1" && *state == State::Pressed
-                    {
-                        println!("Begin morph");
+                    if *state == State::Pressed {
+                        morph_operation = None;
+                        stitch_operation = None;
+                        if kind == "Key1"
+                        {
+                            morph_operation = Some(morph::MorphOperation::new());
+                            println!("Morph");
+                        }
+                        else if kind == "Key2"
+                        {
+                            stitch_operation = Some(stitch::StitchOperation::new(scene_radius as f64));
+                            println!("Stitch");
+                        }
                     }
                 }
             }

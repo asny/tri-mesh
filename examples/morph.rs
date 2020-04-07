@@ -2,24 +2,34 @@
 use std::collections::HashMap;
 use tri_mesh::prelude::*;
 
+#[derive(Debug)]
 pub struct MorphOperation {
-    weights: HashMap<VertexID, Vec3>
+    weights: Option<HashMap<VertexID, Vec3>>
 }
 
 impl MorphOperation {
-    pub fn new(mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> Option<Self> {
-
-        if let Some((vertex_id, point)) = Self::pick(&mesh,&ray_start_point, &ray_direction) {
-            Some(Self { weights: Self::compute_weights(mesh, vertex_id, &point) })
-        }
-        else {None}
+    pub fn new() -> Self {
+        Self { weights: None }
     }
 
-    pub fn apply(&self, mesh: &mut Mesh, factor: f64)
-    {
-        for (vertex_id, weight) in self.weights.iter() {
-            mesh.move_vertex_by(*vertex_id,weight * factor);
+    pub fn start(&mut self, mesh: &Mesh, ray_start_point: &Vec3, ray_direction: &Vec3) -> bool {
+        if let Some((vertex_id, point)) = Self::pick(&mesh,&ray_start_point, &ray_direction) {
+            self.weights = Some(Self::compute_weights(mesh, vertex_id, &point));
         }
+        self.weights.is_some()
+    }
+
+    pub fn update(&mut self, mesh: &mut Mesh, factor: f64)
+    {
+        if let Some(ref weights) = self.weights {
+            for (vertex_id, weight) in weights {
+                mesh.move_vertex_by(*vertex_id,weight * factor);
+            }
+        }
+    }
+
+    pub fn end(&mut self) {
+        self.weights = None;
     }
 
     /// Picking used for determining whether a mouse click starts a morph operation. Returns a close vertex and the position of the click on the mesh surface.
