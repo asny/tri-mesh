@@ -8,7 +8,7 @@ pub struct StitchOperation {
 
 impl StitchOperation {
     pub fn new(scene_radius: f64) -> Self {
-        let mut mesh = MeshBuilder::new().with_obj(include_str!("assets/blob.obj").to_string()).build().unwrap();
+        let mut mesh = MeshBuilder::new().with_obj(include_str!("../assets/blob.obj").to_string()).build().unwrap();
         let (min, max) = mesh.extreme_coordinates();
         mesh.translate(-0.5 * (max + min)); // Translate such that the mesh center is in origo.
         let size = max - min;

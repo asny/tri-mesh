@@ -1,6 +1,5 @@
 
 use three_d::*;
-
 mod morph;
 mod stitch;
 
@@ -45,7 +44,7 @@ fn main()
     plane.specular_power = 20.0;
 
     // Mesh
-    let mut mesh = tri_mesh::MeshBuilder::new().with_3d(include_bytes!("assets/suzanne.3d")).unwrap().build().unwrap();
+    let mut mesh = tri_mesh::MeshBuilder::new().with_3d(include_bytes!("../assets/suzanne.3d")).unwrap().build().unwrap();
     let (min, max) = mesh.extreme_coordinates();
     mesh.translate(-0.5 * (max + min)); // Translate such that the mesh center is in origo.
     let size = max - min;
