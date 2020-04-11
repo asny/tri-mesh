@@ -5,6 +5,9 @@ mod stitch;
 
 fn main()
 {
+    let args: Vec<String> = std::env::args().collect();
+    let screenshot_path = if args.len() > 1 { Some(args[1].clone()) } else {None};
+
     let scene_radius = 10.0;
     let scene_center = vec3(0.0, 5.0, 0.0);
 
@@ -152,6 +155,12 @@ fn main()
         Screen::write(&gl, 0, 0, width, height, Some(&vec4(0.5, 0.5, 0.5, 1.0)), None, &|| {
             renderer.light_pass(&camera, Some(&ambient_light), &[], &[&spot_light0, &spot_light1, &spot_light2, &spot_light3], &[]).unwrap();
         }).unwrap();
+
+        if let Some(ref path) = screenshot_path {
+            #[cfg(target_arch = "x86_64")]
+            Screen::save_color(path, &gl, 0, 0, width, height).unwrap();
+            std::process::exit(1);
+        }
     }).unwrap();
 }
 
