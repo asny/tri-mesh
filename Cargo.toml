@@ -9,6 +9,7 @@ readme = "README.md"
 repository = "https://github.com/asny/tri-mesh"
 categories = ["data-structures", "algorithms"]
 keywords = ["mesh", "geometry", "3d", "half-edge", "graphics"]
+exclude = ["/examples", ".gitignore"]
 
 [features]
 default = ["obj-io", "3d-io"]
