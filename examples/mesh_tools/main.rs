@@ -56,7 +56,7 @@ fn main()
 
     let mut drawable_mesh = DrawableMesh::new(&gl,&mesh);
 
-    let mut morph_operation: Option<morph::MorphOperation> = None;
+    let mut morph_operation: Option<morph::MorphOperation> = Some(morph::MorphOperation::new());
     let mut stitch_operation: Option<stitch::StitchOperation> = None;
 
     // main loop
