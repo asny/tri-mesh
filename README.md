@@ -8,8 +8,7 @@ A triangle mesh data structure including basic operations. Use it to create, edi
 
 ## Examples
 
-- [Morph tool](https://asny.github.io/morph-web/) (and [source code](https://github.com/asny/tri-mesh/tree/master/examples/morph.rs))
-- [Stitch tool](https://asny.github.io/stitch-web/) (and [source code](https://github.com/asny/tri-mesh/tree/master/examples/stitch.rs))
+- [Mesh tool](https://asny.github.io/tri-mesh/mesh_tools.html)
 
 ## Features
 
