@@ -250,7 +250,7 @@ impl<K: 'static, V> IDMap<K, V>
 
     pub fn insert_new(&mut self, value: V) -> Option<K>  {
         let id = if let Some(i) = self.free.pop() {
-            self.values[i.get() as usize] = value;
+            self.values[i.deref() as usize] = value;
             i
         }
         else {
@@ -269,11 +269,11 @@ impl<K: 'static, V> IDMap<K, V>
     }
 
     pub fn get(&self, id: K) -> Option<&V> {
-        self.values.get(id.get() as usize)
+        self.values.get(id.deref() as usize)
     }
 
     pub fn get_mut(&mut self, id: K) -> Option<&mut V> {
-        self.values.get_mut(id.get() as usize)
+        self.values.get_mut(id.deref() as usize)
     }
 
     pub fn iter(&self) -> Box<dyn Iterator<Item = K>> {

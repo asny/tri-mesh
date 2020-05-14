@@ -4,8 +4,12 @@ use std::fmt;
 use std::hash::Hash;
 use std::fmt::Debug;
 
-pub(crate) trait ID: Clone + Eq + Copy + Ord + Hash + Debug {
-    fn get(&self) -> u32;
+pub trait Deref {
+    /// Returns the inner value
+    fn deref(&self) -> u32;
+}
+
+pub(crate) trait ID: Clone + Eq + Copy + Ord + Hash + Debug + Deref {
     fn new(val: u32) -> Self;
 }
 
@@ -21,9 +25,12 @@ pub struct VertexID
 impl ID for VertexID {
     fn new(val: u32) -> VertexID
     {
-        VertexID {val}
+        VertexID { val }
     }
-    fn get(&self) -> u32
+}
+
+impl Deref for VertexID {
+    fn deref(&self) -> u32
     {
         self.val
     }
@@ -49,7 +56,10 @@ impl ID for HalfEdgeID {
     {
         HalfEdgeID {val}
     }
-    fn get(&self) -> u32
+}
+
+impl Deref for HalfEdgeID {
+    fn deref(&self) -> u32
     {
         self.val
     }
@@ -75,7 +85,10 @@ impl ID for FaceID {
     {
         FaceID {val}
     }
-    fn get(&self) -> u32
+}
+
+impl Deref for FaceID {
+    fn deref(&self) -> u32
     {
         self.val
     }
