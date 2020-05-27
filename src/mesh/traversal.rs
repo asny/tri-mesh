@@ -224,6 +224,11 @@ impl<'a> Walker<'a>
         self.set_current(halfedge_id);
         self
     }
+    
+    pub fn stop(&mut self)
+    {
+		self.set_current(None);
+    }
 
     /// Returns the id of the vertex pointed to by the current half-edge or `None` if the walker has walked outside of the mesh at some point.
     pub fn vertex_id(&self) -> Option<VertexID>
