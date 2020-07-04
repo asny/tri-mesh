@@ -27,6 +27,7 @@
 
 pub mod mesh;
 pub mod mesh_builder;
+pub mod generation;
 pub mod prelude;
 
 pub use crate::mesh_builder::MeshBuilder as MeshBuilder;
