@@ -109,6 +109,15 @@ impl ConnectivityInfo {
         }
         halfedges.remove(halfedge_id);
     }
+	
+	pub fn remove_halfedge_twin(&self, id: HalfEdgeID)
+    {
+		let mut halfedges = self.halfedges.borrow_mut();
+		if let Some(twin) = halfedges.get(id).unwrap().twin {
+			halfedges.get_mut(twin).unwrap().twin = None;
+		}
+		halfedges.get_mut(id).unwrap().twin = None;
+	}
 
     pub fn remove_face(&self, face_id: FaceID)
     {

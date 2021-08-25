@@ -3,6 +3,7 @@
 use crate::mesh::*;
 use crate::mesh::math::*;
 use crate::mesh::ids::*;
+use std::iter::FromIterator;
 
 /// # Edit
 impl Mesh
@@ -65,6 +66,65 @@ impl Mesh
 
         Ok(())
     }
+    
+	/// split a vertex in two vertices, along the edges `start` and `end`, returning the created point.
+	/// - `start` and `end` must point to the same vertex.
+	/// - the two points remains in the same initial location.
+	/// - the point created becomes the vertex pointed by `start`
+	///
+	/// ```text
+	///        +                           +
+	///        |                          / \
+	///  ------+-------     -->      ----+   +----
+	///        |                          \ /
+	///        +                           +
+	/// ```
+	pub fn split_vertex(&mut self, start: HalfEdgeID, end: HalfEdgeID) -> VertexID {
+        // get start vertex of `start` and `end` and their twin
+        let (vstart, rstart) = {
+            let walker = self.walker_from_halfedge(start).into_twin();
+            (walker.vertex_id().unwrap(), walker.halfedge_id().unwrap())
+            };
+        let (vend, rend) = {
+            let walker = self.walker_from_halfedge(end).into_twin();
+            (walker.vertex_id().unwrap(), walker.halfedge_id().unwrap())
+            };
+        // splited vertex
+        let old = self.walker_from_halfedge(start).vertex_id().unwrap();
+        let created = self.split_vertex_unfinished(start, end);
+        
+        // create twins for the separated halfedges
+        let conn = &mut self.connectivity_info;
+        conn.set_halfedge_twin(start,   conn.new_halfedge(Some(vstart),     None, None));
+        conn.set_halfedge_twin(rstart,  conn.new_halfedge(Some(old),        None, None));
+        conn.set_halfedge_twin(end,     conn.new_halfedge(Some(vend),       None, None));
+        conn.set_halfedge_twin(rend,    conn.new_halfedge(Some(created),    None, None));
+        created
+	}
+	/// variant of split_vertex, that doesn't create empty twin halfedges for the hole (makes it easier to fill it with faces)
+	fn split_vertex_unfinished(&mut self, start: HalfEdgeID, end: HalfEdgeID) -> VertexID {
+		assert_eq!(
+			self.walker_from_halfedge(start).vertex_id().unwrap(), 
+			self.walker_from_halfedge(end).vertex_id().unwrap(),
+			"spliting halfedges doesn't point to the same vertex");
+		
+		// duplicate the vertex
+		let oldvert = self.walker_from_halfedge(start).vertex_id().unwrap();
+		let newvert = self.connectivity_info.new_vertex(self.vertex_position(oldvert));
+		// cut at start and at end
+		self.connectivity_info.remove_halfedge_twin(start);
+		self.connectivity_info.remove_halfedge_twin(end);
+		self.connectivity_info.set_vertex_halfedge(newvert, self.walker_from_halfedge(start).as_next().halfedge_id());
+		self.connectivity_info.set_vertex_halfedge(oldvert, self.walker_from_halfedge(end  ).as_next().halfedge_id());
+		// change refs to old vertex between these two halfedges
+		let mut walker = self.walker_from_halfedge(start);
+		while let Some(he) = walker.halfedge_id() {
+			self.connectivity_info.set_halfedge_vertex(he, newvert);
+			walker.as_next().as_twin();
+		}
+		
+		newvert
+	}
 
     /// Split the given edge into two.
     /// Returns the id of the new vertex positioned at the given position.
@@ -334,7 +394,156 @@ impl Mesh
 
         self.connectivity_info.remove_face(face_id);
     }
+    
+    pub fn remove_vertex(&mut self, vertex: VertexID)
+    {
+		let conn = &self.connectivity_info;
+		let mut walker = self.walker_from_vertex(vertex).into_twin();
+		
+		while let Some(h1) = walker.halfedge_id() {
+			walker.as_next();
+			if let Some(h2) = walker.halfedge_id() {
+				if let Some(face) = walker.face_id() {
+			
+					walker.as_twin();
+					
+					let mut wlk = self.walker_from_halfedge(h2).into_next();
+					let h3 = wlk.halfedge_id().unwrap();
+					wlk.as_twin();
+					if wlk.face_id().is_some() {
+						conn.set_halfedge_face(h3, None);
+						conn.set_halfedge_next(h3, None);
+					}
+					else {
+						conn.remove_halfedge(h3);
+						if let Some(twin) = wlk.halfedge_id()	{ conn.remove_halfedge(twin); }
+					}
+					
+					conn.remove_face(face);
+				}
+				else { walker.stop(); }
+				conn.remove_halfedge(h2);
+			}
+			conn.remove_halfedge(h1);
+			
+		}
+		conn.remove_vertex(vertex);
+    }
+    
+    
+    /// cut a corner by a plane defined by its normal
+    pub fn bevel_vertex(&mut self, vertex: VertexID, distance: f64, normal: Vec3)
+    {
+		let mut tocut = Vec::from_iter(self.vertex_halfedge_iter(vertex));
+		let mut cuts = Vec::with_capacity(tocut.len());
+		let pos = self.vertex_position(vertex);
+		for he in tocut {
+			let edgedir = self.edge_direction(he);
+			let cut = edgedir * (distance / edgedir.dot(normal));
+			cuts.push(self.split_edge(he, pos + cut));
+		}
+		self.remove_vertex(vertex);
+		
+		// triangulate the cuts
+		unimplemented!();
+    }
+    
+    
+    /// Create a bevel on the given edges, these must be contiguous and ordered (ie. `edge[i]` starts from `edge[i-1]`)
+    /// This function is not a realistic chamfer, it can displace the edges that are cutted by the bevel.
+    ///
+    pub fn bevel_curve(&mut self, edge: &[VertexID], amount: f64)
+    {
+        assert!(edge.len() >= 2, "`edge` must be at least two points");
+        
+        let err_continuous = "edge must be a list of contiguous vertices";
+        let err_border = "edge must not be on a border of the mesh";
+        
+        // get the start halfedge (before the first vertex of the edge)
+        let rfirst = self.connecting_edge(edge[0], edge[edge.len()-1])
+                    .or_else(|| next_forward(self, self.connecting_edge(edge[1], edge[0]) .expect(err_continuous)))
+                    .expect(err_border);
+        let startvert = self.walker_from_halfedge(rfirst).vertex_id().unwrap();
+        let first = self.walker_from_halfedge(rfirst).as_twin().halfedge_id().unwrap();
+        // get the end halfedge (after the last vertex of the edge)
+        let last = self.connecting_edge(edge[edge.len()-1], edge[0])
+                    .or_else(|| next_forward(self, self.connecting_edge(edge[edge.len()-2], edge[edge.len()-1]) .expect(err_continuous))) 
+                    .expect(err_border);
+        let mut endvert = if last == first  {None}
+                        else    {Some(self.walker_from_halfedge(last).vertex_id().unwrap())};
+        
+        let displts = {
+            let mut displts = Vec::with_capacity(edge.len());
+        
+            let mut prev = first;
+            let mut next;
+            let dir_prev = self.edge_direction(prev);
+            let mut results_prev = (    self.face_normal(self.walker_from_halfedge(prev).face_id().unwrap())            .cross(dir_prev),
+                                        self.face_normal(self.walker_from_halfedge(prev).as_twin().face_id().unwrap())  .cross(-dir_prev),
+                                    );
+            for i in 0 .. edge.len() {
+                // get the next edge to bevel else the ending one
+                if i < edge.len()-1		{ next = self.connecting_edge(edge[i], edge[i+1]) .expect(err_continuous); }
+                else 					{ next = last; }
+                
+                let dir_next = self.edge_direction(next);
+                let results_next = (    self.face_normal(self.walker_from_halfedge(next).face_id().unwrap())            .cross(dir_next),
+                                        self.face_normal(self.walker_from_halfedge(next).as_twin().face_id().unwrap())  .cross(-dir_next),
+                                    );
+                let d1 = (results_next.0 + results_prev.0).normalize() * amount;
+                let d2 = (results_next.1 + results_prev.1).normalize() * amount;
+                displts.push((prev, self.walker_from_halfedge(next).as_twin().halfedge_id().unwrap(), d1, d2));
+                
+                prev = next;
+                results_prev = results_next;
+            }
+            displts
+        };
+        
+        let mut facing = Vec::with_capacity(edge.len());
+        
+        for (i, &(prev, next, d1, d2)) in displts.iter().enumerate() {
+            // separate the vertex in two vertices
+            let vert1 = edge[i];
+            let vert2 = self.split_vertex_unfinished(prev, next);
+            facing.push([vert1, vert2]);
+            // displace points						
+            self.connectivity_info.set_position(vert1, self.vertex_position(vert1) + d1);
+            self.connectivity_info.set_position(vert2, self.vertex_position(vert2) + d2);
+        }
+        
+        if endvert.is_none()    {endvert = Some(facing[0][1]);}
+        
+        // create start and end face
+        self.connectivity_info.create_face(startvert, facing[0][0], facing[0][1]);
+        self.connectivity_info.create_face(endvert.unwrap(), facing[facing.len()-1][1], facing[facing.len()-1][0]);
+        // create all faces
+        for confront in facing.windows(2) {
+            self.connectivity_info.create_face(confront[0][1], confront[0][0], confront[1][1]);
+            self.connectivity_info.create_face(confront[1][0], confront[1][1], confront[0][0]);
+        }
+        self.twin_alones();
+    }
 }
+
+
+/// return the halfedge starting from `he`'s vertex, that has the closest direction to `he`
+fn next_forward(mesh: &Mesh, start: HalfEdgeID) -> Option<HalfEdgeID> {
+    // nominal direction, the direction of he
+    let nominal = mesh.edge_direction(start);
+    let mut score = -1.;
+    let mut next = None;
+    
+    for he in mesh.vertex_halfedge_iter(mesh.walker_from_halfedge(start).vertex_id().unwrap()) {
+        let s = mesh.edge_direction(he) .dot(nominal);
+        if s > score {
+            next = Some(he);
+            score = s;
+        }
+    }
+    next
+}
+
 
 
 #[cfg(test)]
@@ -645,5 +854,62 @@ mod tests {
         assert_eq!(10, mesh.no_halfedges());
         assert_eq!(2, mesh.no_faces());
         mesh.is_valid().unwrap();
+    }
+    
+    #[test]
+    fn test_split_vertex() {
+        let mut mesh = MeshBuilder::new().icosahedron().build().unwrap();
+        let no_faces = mesh.no_faces();
+        let no_halfedges = mesh.no_halfedges();
+        
+        let vert = mesh.vertex_iter().next().unwrap();
+        let mut walker = mesh.walker_from_vertex(vert);
+        let start = walker.halfedge_id().unwrap();
+        let end = walker.as_next().as_twin().as_next().as_twin().halfedge_id().unwrap();
+        
+        mesh.split_vertex(start, end);
+        
+        assert_eq!(13, mesh.no_vertices());
+        assert_eq!(no_faces, mesh.no_faces());
+        assert_eq!(no_halfedges+4, mesh.no_halfedges());
+        mesh.is_valid().unwrap();
+    }
+    
+    use std::iter::FromIterator;
+    
+    #[test]
+    fn test_bevel_curve() {
+        let mut mesh = MeshBuilder::new().icosahedron().build().unwrap();
+        let nominal_no_vertices = mesh.no_vertices();
+        let nominal_no_halfedges = mesh.no_halfedges();
+        let nominal_no_faces = mesh.no_faces();
+        
+		// non-looped
+        mesh.bevel_curve(&Vec::from_iter([0,4,5].iter().cloned().map(VertexID::new)), 0.1);
+        assert_eq!(nominal_no_vertices+3, mesh.no_vertices());
+        assert_eq!(nominal_no_halfedges+18, mesh.no_halfedges());
+        assert_eq!(nominal_no_faces+6, mesh.no_faces());
+        mesh.is_valid().unwrap();
+        
+        // looped over a face
+        mesh = MeshBuilder::new().icosahedron().build().unwrap();
+        mesh.bevel_curve(&Vec::from_iter([0,1,4].iter().cloned().map(VertexID::new)), 0.1);
+        assert_eq!(nominal_no_vertices+3, mesh.no_vertices());
+        assert_eq!(nominal_no_halfedges+18, mesh.no_halfedges());
+        assert_eq!(nominal_no_faces+6, mesh.no_faces());
+        mesh.is_valid().unwrap();
+        
+        // loop over the whole mesh
+        mesh = MeshBuilder::new().icosahedron().build().unwrap();
+        mesh.bevel_curve(&Vec::from_iter([0,4,5,3,7,6].iter().cloned().map(VertexID::new)), 0.2);
+        mesh.is_valid().unwrap();
+    }
+    
+    #[test]
+    fn test_remove_vertex() {
+		let mut mesh = MeshBuilder::new().cube().build().unwrap();
+		mesh.remove_vertex(mesh.vertex_iter().next().unwrap());
+		assert_eq!(7, mesh.no_vertices());
+		mesh.is_valid().unwrap();
     }
 }
