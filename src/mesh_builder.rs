@@ -209,7 +209,7 @@ impl MeshBuilder {
         let positions = self.positions.ok_or(
             Error::NoPositionsSpecified {message: format!("Did you forget to specify the vertex positions?")})?;
         let indices = self.indices.unwrap_or((0..positions.len() as u32/3).collect());
-        Ok(Mesh::new(indices, positions))
+        Ok(Mesh::new(&indices, &positions))
     }
 
     ///
