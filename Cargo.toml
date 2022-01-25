@@ -2,7 +2,7 @@
 name = "tri-mesh"
 version = "0.5.0" # REMEMBER TO UPDATE VERSION IN README!!
 authors = ["Asger Nyman Christiansen <asgernyman@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "A triangle mesh data structure including basic operations."
 license = "MIT"
 readme = "README.md"
