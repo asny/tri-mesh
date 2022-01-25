@@ -1,6 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::*;
+use crate::prelude::*;
 
 ///
 /// # Export
@@ -211,8 +211,7 @@ fn push_vec3(vec: &mut Vec<f64>, vec3: Vec3) {
 
 #[cfg(test)]
 mod tests {
-    use crate::mesh::*;
-    use crate::MeshBuilder;
+    use super::*;
 
     #[test]
     fn test_indexed_export() {

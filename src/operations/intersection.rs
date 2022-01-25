@@ -1,6 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::*;
+use crate::prelude::*;
 use utility::*;
 
 ///
@@ -255,7 +255,6 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mesh_builder::*;
 
     #[test]
     fn test_face_point_intersection_when_point_in_plane() {

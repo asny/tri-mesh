@@ -50,6 +50,7 @@ impl Mesh {
 
 #[cfg(test)]
 mod tests {
+    use crate::prelude::*;
     #[test]
     fn test_flip_orientation_of_face() {
         let indices: Vec<u32> = vec![0, 1, 2, 1, 2, 3];
