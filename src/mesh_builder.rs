@@ -18,7 +18,7 @@ pub enum MeshBuilderError {
 
 ///
 /// `MeshBuilder` contains functionality to build a mesh from either raw data (indices, positions, normals)
-/// or from simple geometric shapes (box, icosahedron, cylinder, ..) or from file source (.obj).
+/// or from simple geometric shapes (box, icosahedron, cylinder, ..).
 ///
 #[derive(Debug, Default)]
 pub struct MeshBuilder {

@@ -68,7 +68,7 @@ pub fn from_named_obj(source: String, object_name: &str) -> TriMeshResult<Mesh> 
 }
 
 ///
-/// Parses the mesh into a text string that follows the .obj file format and which can then be saved into a file.
+/// Parses the [Mesh] into a text string that follows the .obj file format and which can then be saved into a file.
 ///
 /// # Examples
 ///
