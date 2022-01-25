@@ -80,7 +80,7 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub(crate) fn new(indices: Vec<u32>, positions: Vec<f64>) -> Mesh {
+    pub fn new(indices: Vec<u32>, positions: Vec<f64>) -> Mesh {
         let no_vertices = positions.len() / 3;
         let no_faces = indices.len() / 3;
         let mesh = Mesh {
@@ -112,9 +112,9 @@ impl Mesh {
             let v2 = indices[face * 3 + 2];
 
             let face = mesh.connectivity_info.create_face(
-                VertexID::new(v0),
-                VertexID::new(v1),
-                VertexID::new(v2),
+                unsafe { VertexID::new(v0) },
+                unsafe { VertexID::new(v1) },
+                unsafe { VertexID::new(v2) },
             );
 
             // mark twin halfedges

@@ -3,7 +3,7 @@ use crate::mesh::ids::*;
 use std::cell::RefCell;
 
 #[derive(Clone, Debug)]
-pub(crate) struct ConnectivityInfo {
+pub(super) struct ConnectivityInfo {
     vertices: RefCell<IDMap<VertexID, Vertex>>,
     halfedges: RefCell<IDMap<HalfEdgeID, HalfEdge>>,
     faces: RefCell<IDMap<FaceID, Face>>,
@@ -265,7 +265,7 @@ pub struct Face {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct IDMap<K, V> {
+struct IDMap<K, V> {
     values: Vec<V>,
     free: Vec<K>,
 }
@@ -286,7 +286,7 @@ impl<K: ID + 'static, V> IDMap<K, V> {
             i
         } else {
             self.values.push(value);
-            K::new(self.values.len() as u32 - 1)
+            unsafe { K::new(self.values.len() as u32 - 1) }
         };
         Some(id)
     }
@@ -311,7 +311,7 @@ impl<K: ID + 'static, V> IDMap<K, V> {
         let free: HashSet<_> = self.free.iter().cloned().collect();
         Box::new(
             (0..self.values.len() as u32)
-                .map(|i| K::new(i))
+                .map(|i| unsafe { K::new(i) })
                 .filter(move |i| !free.contains(&i)),
         )
     }

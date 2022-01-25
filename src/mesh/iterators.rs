@@ -359,7 +359,7 @@ mod tests {
         let mesh = Mesh::new(indices, positions);
 
         let mut i = 0;
-        for halfedge_id in mesh.vertex_halfedge_iter(VertexID::new(0)) {
+        for halfedge_id in mesh.vertex_halfedge_iter(unsafe { VertexID::new(0) }) {
             assert!(mesh.walker_from_halfedge(halfedge_id).vertex_id().is_some());
             i = i + 1;
         }
@@ -370,7 +370,7 @@ mod tests {
     fn test_face_halfedge_iterator() {
         let mesh = MeshBuilder::new().triangle().build().unwrap();
         let mut i = 0;
-        for halfedge_id in mesh.face_halfedge_iter(FaceID::new(0)) {
+        for halfedge_id in mesh.face_halfedge_iter(unsafe { FaceID::new(0) }) {
             let walker = mesh.walker_from_halfedge(halfedge_id);
             assert!(walker.halfedge_id().is_some());
             assert!(walker.face_id().is_some());

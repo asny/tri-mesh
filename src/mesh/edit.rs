@@ -163,7 +163,7 @@ impl Mesh {
             .set_face_halfedge(face_id, halfedge_id1);
 
         // Update twin information
-        let mut new_halfedge_id = HalfEdgeID::new(0);
+        let mut new_halfedge_id = unsafe { HalfEdgeID::new(0) };
         for halfedge_id in self.face_halfedge_iter(face_id1) {
             let vid = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
             if vid == vertex_id1 {

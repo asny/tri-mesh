@@ -9,7 +9,7 @@ use crate::mesh::*;
 /// See [Walker] for more information and examples.
 impl Mesh {
     /// Creates an 'empty' [Walker], ie. a walker that is associated with any half-edge.
-    pub(crate) fn walker(&self) -> Walker {
+    pub(super) fn walker(&self) -> Walker {
         Walker::new(&self.connectivity_info)
     }
 
@@ -118,7 +118,7 @@ pub struct Walker<'a> {
 }
 
 impl<'a> Walker<'a> {
-    pub(crate) fn new(connectivity_info: &'a ConnectivityInfo) -> Self {
+    pub(super) fn new(connectivity_info: &'a ConnectivityInfo) -> Self {
         Walker {
             current: None,
             current_info: None,
@@ -127,39 +127,39 @@ impl<'a> Walker<'a> {
     }
 
     /// Jumps to the half-edge pointed to by the given vertex.
-    pub(crate) fn into_vertex_halfedge_walker(mut self, vertex_id: VertexID) -> Self {
+    pub(super) fn into_vertex_halfedge_walker(mut self, vertex_id: VertexID) -> Self {
         self.as_vertex_halfedge_walker(vertex_id);
         self
     }
 
     /// Jumps to the given half-edge.
-    pub(crate) fn into_halfedge_walker(mut self, halfedge_id: HalfEdgeID) -> Self {
+    pub(super) fn into_halfedge_walker(mut self, halfedge_id: HalfEdgeID) -> Self {
         self.as_halfedge_walker(halfedge_id);
         self
     }
 
     /// Jumps to the half-edge pointed to by the given face.
-    pub(crate) fn into_face_halfedge_walker(mut self, face_id: FaceID) -> Self {
+    pub(super) fn into_face_halfedge_walker(mut self, face_id: FaceID) -> Self {
         self.as_face_halfedge_walker(face_id);
         self
     }
 
     /// Jumps to the half-edge pointed to by the given vertex.
-    pub(crate) fn as_vertex_halfedge_walker(&mut self, vertex_id: VertexID) -> &mut Self {
+    pub(super) fn as_vertex_halfedge_walker(&mut self, vertex_id: VertexID) -> &mut Self {
         let halfedge_id = self.connectivity_info.vertex_halfedge(vertex_id);
         self.set_current(halfedge_id);
         self
     }
 
     /// Jumps to the given half-edge.
-    pub(crate) fn as_halfedge_walker(&mut self, halfedge_id: HalfEdgeID) -> &mut Self {
+    pub(super) fn as_halfedge_walker(&mut self, halfedge_id: HalfEdgeID) -> &mut Self {
         let halfedge_id = Some(halfedge_id);
         self.set_current(halfedge_id);
         self
     }
 
     /// Jumps to the half-edge pointed to by the given face.
-    pub(crate) fn as_face_halfedge_walker(&mut self, face_id: FaceID) -> &mut Self {
+    pub(super) fn as_face_halfedge_walker(&mut self, face_id: FaceID) -> &mut Self {
         let halfedge_id = self.connectivity_info.face_halfedge(face_id);
         self.set_current(halfedge_id);
         self

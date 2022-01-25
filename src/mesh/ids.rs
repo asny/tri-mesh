@@ -5,8 +5,8 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::Deref;
 
-pub(crate) trait ID: Clone + Eq + Copy + Ord + Hash + Debug + Deref<Target = u32> {
-    fn new(val: u32) -> Self;
+pub trait ID: Clone + Eq + Copy + Ord + Hash + Debug + Deref<Target = u32> {
+    unsafe fn new(val: u32) -> Self;
 }
 
 ///
@@ -18,7 +18,7 @@ pub struct VertexID {
 }
 
 impl ID for VertexID {
-    fn new(val: u32) -> VertexID {
+    unsafe fn new(val: u32) -> VertexID {
         VertexID { val }
     }
 }
@@ -45,7 +45,7 @@ pub struct HalfEdgeID {
 }
 
 impl ID for HalfEdgeID {
-    fn new(val: u32) -> HalfEdgeID {
+    unsafe fn new(val: u32) -> HalfEdgeID {
         HalfEdgeID { val }
     }
 }
@@ -72,7 +72,7 @@ pub struct FaceID {
 }
 
 impl ID for FaceID {
-    fn new(val: u32) -> FaceID {
+    unsafe fn new(val: u32) -> FaceID {
         FaceID { val }
     }
 }
@@ -95,11 +95,13 @@ mod tests {
     use super::*;
     #[test]
     fn test_equality() {
-        let v0 = VertexID::new(0);
-        let v1 = VertexID::new(1);
-        let v1_ = VertexID::new(1);
+        unsafe {
+            let v0 = VertexID::new(0);
+            let v1 = VertexID::new(1);
+            let v1_ = VertexID::new(1);
 
-        assert!(v0 != v1);
-        assert!(v1 == v1_);
+            assert!(v0 != v1);
+            assert!(v1 == v1_);
+        }
     }
 }

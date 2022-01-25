@@ -22,8 +22,8 @@ pub enum MeshBuilderError {
 ///
 #[derive(Debug, Default)]
 pub struct MeshBuilder {
-    pub(crate) indices: Option<Vec<u32>>,
-    pub(crate) positions: Option<Vec<f64>>,
+    indices: Option<Vec<u32>>,
+    positions: Option<Vec<f64>>,
 }
 
 impl MeshBuilder {
