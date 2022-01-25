@@ -66,26 +66,6 @@ pub enum Error {
         /// Error reason.
         message: String,
     },
-    /// Invalid 3d file format
-    #[cfg(feature = "3d-io")]
-    Bincode(bincode::Error),
-    /// IO error
-    #[cfg(feature = "3d-io")]
-    IO(std::io::Error),
-}
-
-#[cfg(feature = "3d-io")]
-impl From<bincode::Error> for Error {
-    fn from(err: bincode::Error) -> Error {
-        Error::Bincode(err).into()
-    }
-}
-
-#[cfg(feature = "3d-io")]
-impl From<std::io::Error> for Error {
-    fn from(err: std::io::Error) -> Error {
-        Error::IO(err).into()
-    }
 }
 
 ///
@@ -258,16 +238,6 @@ impl std::fmt::Display for Mesh {
         writeln!(f, "{}", self.connectivity_info)?;
         Ok(())
     }
-}
-
-#[cfg(feature = "3d-io")]
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub(crate) struct IOMesh {
-    pub magic_number: u8, // Always 61
-    pub version: u8,
-    pub indices: Vec<u32>,
-    pub positions: Vec<f32>,
-    pub normals: Vec<f32>,
 }
 
 #[cfg(test)]

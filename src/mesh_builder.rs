@@ -17,16 +17,6 @@ pub enum Error {
         /// Error reason.
         message: String,
     },
-    /// Invalid 3d file format
-    #[cfg(feature = "3d-io")]
-    Bincode(bincode::Error),
-}
-
-#[cfg(feature = "3d-io")]
-impl From<bincode::Error> for Error {
-    fn from(err: bincode::Error) -> Error {
-        Error::Bincode(err).into()
-    }
 }
 
 ///
@@ -169,32 +159,6 @@ impl MeshBuilder {
         self.positions = Some(positions);
         self.indices = Some(indices);
         self
-    }
-
-    ///
-    /// Parses the .3d file and extracts the connectivity information (indices) and positions which is used to construct a mesh when the `build` method is called.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
-    ///     let bytes = std::fs::read("foo.3d").expect("Something went wrong reading the file");
-    ///     let mesh = tri_mesh::mesh_builder::MeshBuilder::new().with_3d(&bytes)?.build()?;
-    /// #    Ok(())
-    /// # }
-    /// ```
-    #[cfg(feature = "3d-io")]
-    pub fn with_3d(mut self, bytes: &[u8]) -> Result<Self, Error> {
-        let decoded: crate::mesh::IOMesh = bincode::deserialize(bytes)?;
-        if decoded.magic_number != 61 {
-            Err(Error::InvalidFile {
-                message: "Invalid 3d file!".to_string(),
-            })
-        } else {
-            self.positions = Some(decoded.positions.iter().map(|x| *x as f64).collect());
-            self.indices = Some(decoded.indices);
-            Ok(self)
-        }
     }
 
     ///
