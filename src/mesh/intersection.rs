@@ -1,7 +1,7 @@
 //! See [Mesh](crate::mesh::Mesh).
 
 use crate::mesh::intersection::utility::*;
-use crate::prelude::*;
+use crate::mesh::*;
 
 ///
 /// An enum describing the types of primitives.
@@ -255,6 +255,7 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::mesh_builder::*;
 
     #[test]
     fn test_face_point_intersection_when_point_in_plane() {
@@ -566,7 +567,7 @@ mod tests {
 }
 
 mod utility {
-    use crate::prelude::*;
+    use crate::math::*;
 
     pub const MARGIN: f64 = 0.0000001;
     pub const SQR_MARGIN: f64 = MARGIN * MARGIN;

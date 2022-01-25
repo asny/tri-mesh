@@ -2,8 +2,7 @@
 //! See [Mesh](crate::mesh::Mesh) for how to construct a walker.
 
 use crate::mesh::connectivity_info::{ConnectivityInfo, HalfEdge};
-use crate::mesh::ids::*;
-use crate::mesh::Mesh;
+use crate::mesh::*;
 
 /// # Traversal
 /// Methods to construct a [Walker] which is used for easy and efficient traversal of the mesh.
@@ -97,7 +96,7 @@ impl Mesh {
 /// ## \# 6
 ///
 /// ```
-/// # use tri_mesh::prelude::*;
+/// # use tri_mesh::*;
 /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
 /// // Compute the average edge length
 /// let mut avg_edge_length = 0.0f64;

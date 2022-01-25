@@ -28,16 +28,13 @@
 pub mod math;
 pub use math::*;
 
-mod mesh;
-#[doc(inline)]
+pub mod mesh;
 pub use mesh::*;
 
-mod mesh_builder;
-#[doc(inline)]
+pub mod mesh_builder;
 pub use mesh_builder::*;
 
 pub mod prelude;
 
-pub use crate::mesh_builder::MeshBuilder;
 /// Result returned from an `tri-mesh` operation.
 pub type TriMeshResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;

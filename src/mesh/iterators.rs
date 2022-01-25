@@ -1,9 +1,7 @@
 //! Defines iterator types for easy iterating mesh primitives. See [Mesh](crate::mesh::Mesh) for more information.
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
-use crate::mesh::ids::*;
-use crate::mesh::traversal::Walker;
-use crate::mesh::Mesh;
+use crate::mesh::*;
 
 /// An iterator over the vertices. See [here](../struct.Mesh.html#method.vertex_iter) for more information.
 pub type VertexIter = Box<dyn Iterator<Item = VertexID>>;
@@ -133,7 +131,7 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
     /// let mut sum_vertex_positions = Vec3::zero();
     /// for vertex_id in mesh.vertex_iter() {
@@ -153,7 +151,7 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
     /// let mut halfedge_length_average = 0.0;
     /// let mut i = 0;
@@ -177,7 +175,7 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
     /// let mut edge_length_average = 0.0;
     /// let mut i = 0;
@@ -199,7 +197,7 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
     /// let mut sum_face_area = 0.0;
     /// for face_id in mesh.face_iter() {
@@ -221,7 +219,7 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
     /// # let vertex_id = mesh.vertex_iter().next().unwrap();
     /// let mut one_ring_average_position = Vec3::zero();
@@ -244,7 +242,7 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
     /// # let face_id = mesh.face_iter().next().unwrap();
     /// let mut face_circumference = 0.0f64;

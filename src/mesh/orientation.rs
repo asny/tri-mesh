@@ -1,7 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::ids::*;
-use crate::mesh::Mesh;
+use crate::mesh::*;
 
 /// # Orientation
 impl Mesh {

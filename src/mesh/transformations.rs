@@ -20,9 +20,9 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     ///     let mut mesh = MeshBuilder::new().cube().build()?;
     /// #   let first_face_id = mesh.face_iter().next().unwrap();
     /// #   let face_area_before = mesh.face_area(first_face_id);
@@ -46,9 +46,9 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     ///     let mut mesh = MeshBuilder::new().cube().build()?;
     /// #   let first_face_id = mesh.face_iter().find(|f| mesh.face_normal(*f) == vec3(0.0, 1.0, 0.0)).unwrap();
     /// #   let second_face_id = mesh.face_iter().find(|f| mesh.face_normal(*f) == vec3(1.0, 0.0, 0.0)).unwrap();
@@ -74,9 +74,9 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     ///     let mut mesh = MeshBuilder::new().cube().build()?;
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
@@ -100,9 +100,9 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     ///     let mut mesh = MeshBuilder::new().cube().build()?;
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
@@ -127,9 +127,9 @@ impl Mesh {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::prelude::*;
+    /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     ///     let mut mesh = MeshBuilder::new().cube().build()?;
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);

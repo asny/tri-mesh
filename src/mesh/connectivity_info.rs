@@ -1,5 +1,4 @@
-use crate::math::*;
-use crate::mesh::ids::*;
+use crate::mesh::*;
 use std::cell::RefCell;
 
 #[derive(Clone, Debug)]

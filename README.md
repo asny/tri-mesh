@@ -33,7 +33,7 @@ tri-mesh = "0.5.0"
 ### I have a mesh without normals, how can I use `tri-mesh` to compute them?
 
 ```rust
-use tri_mesh::prelude::*;
+use tri_mesh::*;
 
 fn main() {
     // Construct a mesh from indices and positions buffers.
@@ -51,7 +51,7 @@ fn main() {
 ### I need the bounding box of my mesh, how can I get that?
 
 ```rust
-use tri_mesh::prelude::*;
+use tri_mesh::*;
 
 fn main() {
     // Construct any mesh, this time, we will construct a simple icosahedron
@@ -71,7 +71,7 @@ fn main() {
 ### I want to stitch two meshes together, how do I do that?
 
 ```rust
-use tri_mesh::prelude::*;
+use tri_mesh::*;
 
 fn main() {
     // Construct two meshes
@@ -91,7 +91,7 @@ fn main() {
 ### How can I use `tri-mesh` to compute my own very special curvature measure?
 
 ```rust
-use tri_mesh::prelude::*;
+use tri_mesh::*;
 
 fn main() {
     // Construct any mesh, for simplicity, let's use a cube mesh
