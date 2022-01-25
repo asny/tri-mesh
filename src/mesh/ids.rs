@@ -1,15 +1,11 @@
 //! Defines unique id's for a vertex, half-edge and face.
 
 use std::fmt;
-use std::hash::Hash;
 use std::fmt::Debug;
+use std::hash::Hash;
+use std::ops::Deref;
 
-pub trait Deref {
-    /// Returns the inner value
-    fn deref(&self) -> u32;
-}
-
-pub(crate) trait ID: Clone + Eq + Copy + Ord + Hash + Debug + Deref {
+pub(crate) trait ID: Clone + Eq + Copy + Ord + Hash + Debug + Deref<Target = u32> {
     fn new(val: u32) -> Self;
 }
 
@@ -17,22 +13,20 @@ pub(crate) trait ID: Clone + Eq + Copy + Ord + Hash + Debug + Deref {
 /// An unique ID for a vertex
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct VertexID
-{
-    val: u32
+pub struct VertexID {
+    val: u32,
 }
 
 impl ID for VertexID {
-    fn new(val: u32) -> VertexID
-    {
+    fn new(val: u32) -> VertexID {
         VertexID { val }
     }
 }
 
 impl Deref for VertexID {
-    fn deref(&self) -> u32
-    {
-        self.val
+    type Target = u32;
+    fn deref(&self) -> &Self::Target {
+        &self.val
     }
 }
 
@@ -46,22 +40,20 @@ impl fmt::Display for VertexID {
 /// An unique ID for a halfedge
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct HalfEdgeID
-{
-    val: u32
+pub struct HalfEdgeID {
+    val: u32,
 }
 
 impl ID for HalfEdgeID {
-    fn new(val: u32) -> HalfEdgeID
-    {
-        HalfEdgeID {val}
+    fn new(val: u32) -> HalfEdgeID {
+        HalfEdgeID { val }
     }
 }
 
 impl Deref for HalfEdgeID {
-    fn deref(&self) -> u32
-    {
-        self.val
+    type Target = u32;
+    fn deref(&self) -> &Self::Target {
+        &self.val
     }
 }
 
@@ -75,22 +67,20 @@ impl fmt::Display for HalfEdgeID {
 /// An unique ID for a face
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct FaceID
-{
-    val: u32
+pub struct FaceID {
+    val: u32,
 }
 
 impl ID for FaceID {
-    fn new(val: u32) -> FaceID
-    {
-        FaceID {val}
+    fn new(val: u32) -> FaceID {
+        FaceID { val }
     }
 }
 
 impl Deref for FaceID {
-    fn deref(&self) -> u32
-    {
-        self.val
+    type Target = u32;
+    fn deref(&self) -> &Self::Target {
+        &self.val
     }
 }
 
@@ -103,10 +93,8 @@ impl fmt::Display for FaceID {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
     #[test]
-    fn test_equality()
-    {
+    fn test_equality() {
         let v0 = VertexID::new(0);
         let v1 = VertexID::new(1);
         let v1_ = VertexID::new(1);
