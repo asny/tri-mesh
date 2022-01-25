@@ -38,7 +38,7 @@ use tri_mesh::*;
 fn main() {
     // Construct a mesh from indices and positions buffers.
     let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
-    let positions: Vec<f32> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
+    let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
     let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
     
     // Get the indices, positions and normal buffers
