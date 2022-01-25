@@ -84,6 +84,7 @@ pub struct Mesh {
 }
 
 impl Mesh {
+    /// Constructs a new mesh. For more options to construct a mesh, see [MeshBuilder](crate::MeshBuilder) or the [io](crate::io) module.
     pub fn new(indices: Vec<u32>, positions: Vec<f64>) -> Mesh {
         let no_vertices = positions.len() / 3;
         let no_faces = indices.len() / 3;

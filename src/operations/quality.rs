@@ -159,7 +159,6 @@ fn triangle_quality(p0: &Vec3, p1: &Vec3, p2: &Vec3) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MeshBuilder;
 
     #[test]
     fn test_collapse_small_faces() {

@@ -5,7 +5,9 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::Deref;
 
+/// A unique ID
 pub trait ID: Clone + Eq + Copy + Ord + Hash + Debug + Deref<Target = u32> {
+    /// Constructs a new ID from an integer. Should only be used for testing or similar.
     unsafe fn new(val: u32) -> Self;
 }
 
