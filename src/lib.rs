@@ -26,6 +26,7 @@
 #![warn(missing_docs)]
 
 pub mod math;
+pub use math::*;
 
 pub mod mesh;
 pub use mesh::*;
