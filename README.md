@@ -1,14 +1,11 @@
 # tri-mesh
 
-[![](http://meritbadge.herokuapp.com/tri-mesh)](https://crates.io/crates/tri-mesh)
+[![crates.io](https://img.shields.io/crates/v/tri-mesh.svg)](https://crates.io/crates/tri-mesh)
 [![Docs.rs](https://docs.rs/tri-mesh/badge.svg)](https://docs.rs/tri-mesh)
-[![Build Status](https://travis-ci.org/asny/tri-mesh.svg?branch=master)](https://travis-ci.org/asny/tri-mesh)
+[![Continuous integration](https://github.com/asny/tri-mesh/actions/workflows/rust.yml/badge.svg)](https://github.com/asny/tri-mesh/actions/workflows/rust.yml)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/asny/tri-mesh/blob/master/LICENSE)
 
 A triangle mesh data structure including basic operations. Use it to create, edit and compute on 3D models.
-
-## Examples
-
-- [Mesh tool](https://asny.github.io/tri-mesh/mesh_tools.html)
 
 ## Features
 
