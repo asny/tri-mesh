@@ -24,6 +24,10 @@ mod validity;
 #[doc(inline)]
 pub use validity::*;
 
+mod orientation;
+#[doc(inline)]
+pub use orientation::*;
+
 mod merge;
 #[doc(inline)]
 pub use merge::*;
@@ -344,5 +348,22 @@ mod tests {
     fn test_is_closed_when_closed() {
         let mesh = MeshBuilder::new().cube().build().unwrap();
         assert!(mesh.is_closed());
+    }
+
+    #[test]
+    fn test_remove_lonely_vertices() {
+        let mut mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
+        let mut iter = mesh.face_iter();
+        let face_id1 = iter.next().unwrap();
+        let face_id2 = iter.next().unwrap();
+        mesh.remove_face_unsafe(face_id1);
+        mesh.remove_face_unsafe(face_id2);
+
+        mesh.remove_lonely_primitives();
+
+        assert_eq!(3, mesh.no_vertices());
+        assert_eq!(6, mesh.no_halfedges());
+        assert_eq!(1, mesh.no_faces());
+        mesh.is_valid().unwrap();
     }
 }

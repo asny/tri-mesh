@@ -26,10 +26,6 @@ mod intersection;
 #[doc(inline)]
 pub use intersection::*;
 
-mod orientation;
-#[doc(inline)]
-pub use orientation::*;
-
 mod quality;
 #[doc(inline)]
 pub use quality::*;

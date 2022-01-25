@@ -317,37 +317,6 @@ impl Mesh {
         walker.as_twin();
     }
 
-    pub(crate) fn flip_orientation_of_face(&mut self, face_id: FaceID) {
-        let mut update_list = [(None, None, None); 3];
-
-        let mut i = 0;
-        for halfedge_id in self.face_halfedge_iter(face_id) {
-            let mut walker = self.walker_from_halfedge(halfedge_id);
-            let vertex_id = walker.vertex_id();
-            walker.as_previous();
-            update_list[i] = (Some(halfedge_id), walker.vertex_id(), walker.halfedge_id());
-            i += 1;
-
-            self.connectivity_info
-                .set_vertex_halfedge(walker.vertex_id().unwrap(), walker.halfedge_id());
-
-            walker.as_next().as_twin();
-            if walker.face_id().is_none() {
-                self.connectivity_info
-                    .set_vertex_halfedge(walker.vertex_id().unwrap(), walker.halfedge_id());
-                self.connectivity_info
-                    .set_halfedge_vertex(walker.halfedge_id().unwrap(), vertex_id.unwrap());
-            }
-        }
-
-        for (halfedge_id, new_vertex_id, new_next_id) in update_list.iter() {
-            self.connectivity_info
-                .set_halfedge_vertex(halfedge_id.unwrap(), new_vertex_id.unwrap());
-            self.connectivity_info
-                .set_halfedge_next(halfedge_id.unwrap(), *new_next_id);
-        }
-    }
-
     /// Removes the given face and the adjacent edges if they are then not connected to any face.
     pub fn remove_face(&mut self, face_id: FaceID) {
         let edges: Vec<HalfEdgeID> = self.face_halfedge_iter(face_id).collect();
@@ -357,7 +326,19 @@ impl Mesh {
         }
     }
 
-    pub(crate) fn remove_edge_if_lonely(&mut self, halfedge_id: HalfEdgeID) {
+    /// Removes edges and vertices that are not connected to a face.
+    pub fn remove_lonely_primitives(&mut self) {
+        let edges: Vec<HalfEdgeID> = self.edge_iter().collect();
+        for halfedge_id in edges {
+            self.remove_edge_if_lonely(halfedge_id);
+        }
+
+        for vertex_id in self.vertex_iter() {
+            self.remove_vertex_if_lonely(vertex_id);
+        }
+    }
+
+    fn remove_edge_if_lonely(&mut self, halfedge_id: HalfEdgeID) {
         let mut walker = self.walker_from_halfedge(halfedge_id);
         if walker.face_id().is_none() && walker.as_twin().face_id().is_none() {
             let vertex_id1 = walker.vertex_id().unwrap();
@@ -395,13 +376,13 @@ impl Mesh {
         }
     }
 
-    pub(crate) fn remove_vertex_if_lonely(&mut self, vertex_id: VertexID) {
+    pub(super) fn remove_vertex_if_lonely(&mut self, vertex_id: VertexID) {
         if self.connectivity_info.vertex_halfedge(vertex_id).is_none() {
             self.connectivity_info.remove_vertex(vertex_id);
         }
     }
 
-    pub(crate) fn remove_face_unsafe(&mut self, face_id: FaceID) {
+    pub(super) fn remove_face_unsafe(&mut self, face_id: FaceID) {
         let mut walker = self.walker_from_face(face_id);
         let he_id1 = walker.halfedge_id().unwrap();
         walker.as_next();

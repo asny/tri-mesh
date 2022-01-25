@@ -47,18 +47,6 @@ impl Mesh {
         }
     }
 
-    /// Removes edges and vertices that are not connected to a face.
-    pub fn remove_lonely_primitives(&mut self) {
-        let edges: Vec<HalfEdgeID> = self.edge_iter().collect();
-        for halfedge_id in edges {
-            self.remove_edge_if_lonely(halfedge_id);
-        }
-
-        for vertex_id in self.vertex_iter() {
-            self.remove_vertex_if_lonely(vertex_id);
-        }
-    }
-
     ///
     /// Flip all edges in the mesh
     /// * which is not on the boundary
@@ -182,23 +170,6 @@ mod tests {
         let mut mesh = Mesh::new(indices, positions);
 
         mesh.collapse_small_faces(0.2);
-        mesh.is_valid().unwrap();
-    }
-
-    #[test]
-    fn test_remove_lonely_vertices() {
-        let mut mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
-        let mut iter = mesh.face_iter();
-        let face_id1 = iter.next().unwrap();
-        let face_id2 = iter.next().unwrap();
-        mesh.remove_face_unsafe(face_id1);
-        mesh.remove_face_unsafe(face_id2);
-
-        mesh.remove_lonely_primitives();
-
-        assert_eq!(3, mesh.no_vertices());
-        assert_eq!(6, mesh.no_halfedges());
-        assert_eq!(1, mesh.no_faces());
         mesh.is_valid().unwrap();
     }
 }

@@ -24,6 +24,37 @@ impl Mesh {
         }
     }
 
+    fn flip_orientation_of_face(&mut self, face_id: FaceID) {
+        let mut update_list = [(None, None, None); 3];
+
+        let mut i = 0;
+        for halfedge_id in self.face_halfedge_iter(face_id) {
+            let mut walker = self.walker_from_halfedge(halfedge_id);
+            let vertex_id = walker.vertex_id();
+            walker.as_previous();
+            update_list[i] = (Some(halfedge_id), walker.vertex_id(), walker.halfedge_id());
+            i += 1;
+
+            self.connectivity_info
+                .set_vertex_halfedge(walker.vertex_id().unwrap(), walker.halfedge_id());
+
+            walker.as_next().as_twin();
+            if walker.face_id().is_none() {
+                self.connectivity_info
+                    .set_vertex_halfedge(walker.vertex_id().unwrap(), walker.halfedge_id());
+                self.connectivity_info
+                    .set_halfedge_vertex(walker.halfedge_id().unwrap(), vertex_id.unwrap());
+            }
+        }
+
+        for (halfedge_id, new_vertex_id, new_next_id) in update_list.iter() {
+            self.connectivity_info
+                .set_halfedge_vertex(halfedge_id.unwrap(), new_vertex_id.unwrap());
+            self.connectivity_info
+                .set_halfedge_next(halfedge_id.unwrap(), *new_next_id);
+        }
+    }
+
     fn find_faces_to_flip_orientation(
         &self,
         face_id: FaceID,
