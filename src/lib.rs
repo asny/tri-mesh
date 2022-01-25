@@ -25,11 +25,11 @@
 
 #![warn(missing_docs)]
 
-pub mod math;
-pub use math::*;
-
 pub mod mesh;
 pub use mesh::*;
+
+pub mod operations;
+pub use operations::*;
 
 pub mod mesh_builder;
 pub use mesh_builder::*;

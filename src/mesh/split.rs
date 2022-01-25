@@ -1,6 +1,7 @@
 //! See [Mesh](crate::mesh::Mesh).
 
 use crate::mesh::*;
+use crate::operations::*;
 use std::collections::{HashMap, HashSet};
 
 /// # Split

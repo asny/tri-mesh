@@ -6,7 +6,7 @@ use crate::mesh::*;
 impl Mesh {
     /// Moves the vertex to the specified position.
     pub fn move_vertex_to(&mut self, vertex_id: VertexID, value: Vec3) {
-        self.connectivity_info.set_position(vertex_id, value);
+        self.set_vertex_position(vertex_id, value);
     }
 
     /// Moves the vertex by the specified vector, i.e. the new position is `mesh.vertex_position(vertex_id) + value`.

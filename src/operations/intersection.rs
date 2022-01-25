@@ -1,7 +1,7 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::intersection::utility::*;
 use crate::mesh::*;
+use utility::*;
 
 ///
 /// An enum describing the types of primitives.

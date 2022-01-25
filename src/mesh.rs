@@ -2,81 +2,35 @@
 //! Module containing the [Mesh](crate::mesh::Mesh) definition and functionality.
 //!
 
-mod bounding_box;
-#[doc(inline)]
-pub use bounding_box::*;
-
-mod connected_components;
-#[doc(inline)]
-pub use connected_components::*;
-
-mod connectivity;
-#[doc(inline)]
-pub use connectivity::*;
-
-mod edge_measures;
-#[doc(inline)]
-pub use edge_measures::*;
-
-mod edit;
-#[doc(inline)]
-pub use edit::*;
-
-mod export;
-#[doc(inline)]
-pub use export::*;
-
-mod face_measures;
-#[doc(inline)]
-pub use face_measures::*;
+pub mod math;
+pub use math::*;
 
 mod ids;
 #[doc(inline)]
 pub use ids::*;
 
-mod intersection;
-#[doc(inline)]
-pub use intersection::*;
-
 mod iterators;
 #[doc(inline)]
 pub use iterators::*;
-
-mod merge;
-#[doc(inline)]
-pub use merge::*;
-
-mod orientation;
-#[doc(inline)]
-pub use orientation::*;
-
-mod quality;
-#[doc(inline)]
-pub use quality::*;
-
-mod split;
-#[doc(inline)]
-pub use split::*;
-
-mod transformations;
-#[doc(inline)]
-pub use transformations::*;
 
 mod traversal;
 #[doc(inline)]
 pub use traversal::*;
 
-mod validity;
+mod edit;
 #[doc(inline)]
-pub use validity::*;
+pub use edit::*;
 
-mod vertex_measures;
+mod merge;
 #[doc(inline)]
-pub use vertex_measures::*;
+pub use merge::*;
+
+mod split;
+#[doc(inline)]
+pub use split::*;
 
 mod connectivity_info;
 
-use crate::math::*;
 use crate::mesh::connectivity_info::ConnectivityInfo;
 
 use std::collections::HashMap;
@@ -203,6 +157,16 @@ impl Mesh {
         Mesh { connectivity_info }
     }
 
+    /// Returns the vertex position.
+    pub fn vertex_position(&self, vertex_id: VertexID) -> Vec3 {
+        self.connectivity_info.position(vertex_id)
+    }
+
+    /// Moves the vertex to the specified position.
+    pub fn set_vertex_position(&mut self, vertex_id: VertexID, value: Vec3) {
+        self.connectivity_info.set_position(vertex_id, value);
+    }
+
     /// Returns the number of vertices in the mesh.
     pub fn no_vertices(&self) -> usize {
         self.connectivity_info.no_vertices()
@@ -233,11 +197,11 @@ impl Mesh {
         true
     }
 
-    fn create_vertex(&mut self, position: Vec3) -> VertexID {
+    pub(crate) fn create_vertex(&mut self, position: Vec3) -> VertexID {
         self.connectivity_info.new_vertex(position)
     }
 
-    fn create_boundary_edges(&mut self) {
+    pub(crate) fn create_boundary_edges(&mut self) {
         let mut walker = self.walker();
         for halfedge_id in self.halfedge_iter() {
             walker.as_halfedge_walker(halfedge_id);
