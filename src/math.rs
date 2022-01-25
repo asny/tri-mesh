@@ -16,7 +16,9 @@ pub type Mat3 = Matrix3<f64>;
 /// 4x4 matrix.
 pub type Mat4 = Matrix4<f64>;
 
+/// Degrees
 pub type Degrees = Deg<f64>;
+/// Radians
 pub type Radians = Rad<f64>;
 
 /// Constructs a [Vec3]
@@ -29,9 +31,11 @@ pub const fn vec4(x: f64, y: f64, z: f64, w: f64) -> Vec4 {
     Vector4::new(x, y, z, w)
 }
 
+/// Constructs a [Degrees]
 pub const fn degrees(v: f64) -> Degrees {
     Deg(v)
 }
+/// Constructs a [Radians]
 pub const fn radians(v: f64) -> Radians {
     Rad(v)
 }
