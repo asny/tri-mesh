@@ -1,7 +1,0 @@
-#!/bin/sh
-
-RUSTFLAGS=-g cargo build --example stitch --release
-rm -f out.stacks
-rm -f pretty-graph.svg
-sudo dtrace -c './target/release/examples/stitch' -o out.stacks -n 'profile-997 /execname == "stitch"/ { @[ustack(100)] = count(); }'
-./../FlameGraph/stackcollapse.pl out.stacks | ./../FlameGraph/flamegraph.pl > pretty-graph.svg

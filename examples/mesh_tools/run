@@ -1,4 +1,0 @@
-#!/bin/sh
-
-wasm-pack build examples/mesh_tools --target web --out-name web --out-dir ../pkg
-cargo run --release --example mesh_tools
