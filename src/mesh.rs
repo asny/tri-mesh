@@ -2,8 +2,7 @@
 //! Module containing the [Mesh](crate::mesh::Mesh) definition and functionality.
 //!
 
-pub mod math;
-pub use math::*;
+pub use crate::math::*;
 
 mod ids;
 #[doc(inline)]
@@ -36,7 +35,6 @@ pub use split::*;
 mod connectivity_info;
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
-
 use std::collections::HashMap;
 
 use thiserror::Error;
