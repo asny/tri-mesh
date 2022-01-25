@@ -201,60 +201,6 @@ impl Mesh {
         }
         normals
     }
-
-    ///
-    /// Parses the mesh into a text string that follows the .obj file format and which can then be saved into a file.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// # fn main() -> std::io::Result<()> {
-    /// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
-    /// // Write the mesh data to a string
-    /// let obj_source = mesh.parse_as_obj();
-    ///
-    /// // Write the string to an .obj file
-    /// std::fs::write("foo.obj", obj_source)?;
-    /// # Ok(())
-    /// # }
-    /// ```
-    #[cfg(feature = "obj-io")]
-    pub fn parse_as_obj(&self) -> String {
-        let mut output = String::from("o object\n");
-
-        let positions = self.positions_buffer();
-        for i in 0..self.no_vertices() {
-            output = format!(
-                "{}v {} {} {}\n",
-                output,
-                positions[i * 3],
-                positions[i * 3 + 1],
-                positions[i * 3 + 2]
-            );
-        }
-
-        let normals = self.normals_buffer();
-        for i in 0..self.no_vertices() {
-            output = format!(
-                "{}vn {} {} {}\n",
-                output,
-                normals[i * 3],
-                normals[i * 3 + 1],
-                normals[i * 3 + 2]
-            );
-        }
-
-        let indices = self.indices_buffer();
-        for i in 0..self.no_faces() {
-            let mut face = String::new();
-            for j in 0..3 {
-                let index = indices[i * 3 + j] + 1;
-                face = format!("{} {}//{}", face, index, index);
-            }
-            output = format!("{}f{}\n", output, face);
-        }
-        output
-    }
 }
 
 fn push_vec3(vec: &mut Vec<f64>, vec3: Vec3) {

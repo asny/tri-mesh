@@ -67,6 +67,60 @@ pub fn from_named_obj(source: String, object_name: &str) -> TriMeshResult<Mesh> 
     Ok(Mesh::new(indices, positions))
 }
 
+///
+/// Parses the mesh into a text string that follows the .obj file format and which can then be saved into a file.
+///
+/// # Examples
+///
+/// ```no_run
+/// # use tri_mesh::*;
+/// # fn main() -> tri_mesh::TriMeshResult<()> {
+/// # let mesh = MeshBuilder::new().cube().build()?;
+/// // Write the mesh data to a string
+/// let obj_source = parse_to_obj(&mesh);
+///
+/// // Write the string to an .obj file
+/// std::fs::write("foo.obj", obj_source)?;
+/// # Ok(())
+/// # }
+/// ```
+pub fn parse_to_obj(mesh: &Mesh) -> String {
+    let mut output = String::from("o object\n");
+
+    let positions = mesh.positions_buffer();
+    for i in 0..mesh.no_vertices() {
+        output = format!(
+            "{}v {} {} {}\n",
+            output,
+            positions[i * 3],
+            positions[i * 3 + 1],
+            positions[i * 3 + 2]
+        );
+    }
+
+    let normals = mesh.normals_buffer();
+    for i in 0..mesh.no_vertices() {
+        output = format!(
+            "{}vn {} {} {}\n",
+            output,
+            normals[i * 3],
+            normals[i * 3 + 1],
+            normals[i * 3 + 2]
+        );
+    }
+
+    let indices = mesh.indices_buffer();
+    for i in 0..mesh.no_faces() {
+        let mut face = String::new();
+        for j in 0..3 {
+            let index = indices[i * 3 + j] + 1;
+            face = format!("{} {}//{}", face, index, index);
+        }
+        output = format!("{}f{}\n", output, face);
+    }
+    output
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
