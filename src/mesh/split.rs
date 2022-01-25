@@ -1,8 +1,5 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::ids::*;
-use crate::mesh::intersection::*;
-use crate::mesh::math::*;
 use crate::mesh::*;
 use std::collections::{HashMap, HashSet};
 

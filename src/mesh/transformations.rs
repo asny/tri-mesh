@@ -1,8 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::ids::*;
-use crate::mesh::math::*;
-use crate::mesh::Mesh;
+use crate::mesh::*;
 
 /// # Transformations
 impl Mesh {
@@ -108,7 +106,7 @@ impl Mesh {
     ///     let mut mesh = MeshBuilder::new().cube().build()?;
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
-    ///     mesh.apply_transformation(Mat4::from_angle_y(Deg(360.0)));
+    ///     mesh.apply_transformation(Mat4::from_angle_y(degrees(360.0)));
     /// #   let vertex_position_after = mesh.vertex_position(first_vertex_id);
     /// #   assert!((vertex_position_before - vertex_position_after).magnitude() < 0.000001);
     /// #   mesh.is_valid().unwrap();

@@ -4,7 +4,7 @@
 //! # Features
 //!
 //! - The main struct [Mesh](crate::mesh::Mesh) implements the half-edge mesh data structure for easy and efficient traversal
-//! - Half-edge [walker](crate::mesh::traversal::Walker) to traverse the mesh
+//! - Half-edge [Walker] to traverse the mesh
 //! - [Iterators](mesh/struct.Mesh.html#iterators) over primitives (vertices, half-edges, edges, faces)
 //! - Convenient [connectivity](mesh/struct.Mesh.html#connectivity) functionality (e.g. vertices of a face, edge between two vertices)
 //! - Measures on [vertices](mesh/struct.Mesh.html#vertex-measures), [edges](mesh/struct.Mesh.html#edge-measures) and [faces](mesh/struct.Mesh.html#face-measures) (e.g. position of vertex, area of face)
@@ -25,13 +25,19 @@
 
 #![warn(missing_docs)]
 
-pub mod mesh;
-pub mod mesh_builder;
-pub mod prelude;
+mod mesh;
+#[doc(inline)]
+pub use mesh::*;
+
+mod mesh_builder;
+#[doc(inline)]
+pub use mesh_builder::*;
 
 mod parser;
 #[doc(inline)]
 pub use parser::*;
+
+pub mod prelude;
 
 pub use crate::mesh_builder::MeshBuilder;
 /// Result returned from an `tri-mesh` operation.

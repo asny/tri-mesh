@@ -1,7 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::ids::*;
-use crate::mesh::Mesh;
+use crate::mesh::*;
 
 ///
 /// # Export
@@ -258,7 +257,7 @@ impl Mesh {
     }
 }
 
-fn push_vec3(vec: &mut Vec<f64>, vec3: crate::mesh::math::Vec3) {
+fn push_vec3(vec: &mut Vec<f64>, vec3: Vec3) {
     for i in 0..3 {
         vec.push(vec3[i]);
     }
@@ -266,7 +265,7 @@ fn push_vec3(vec: &mut Vec<f64>, vec3: crate::mesh::math::Vec3) {
 
 #[cfg(test)]
 mod tests {
-    use crate::mesh::math::*;
+    use crate::mesh::*;
     use crate::MeshBuilder;
 
     #[test]

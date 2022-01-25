@@ -27,7 +27,7 @@ pub struct MeshBuilder {
 }
 
 impl MeshBuilder {
-    /// Creates a new [MeshBuilder](crate::mesh_builder::MeshBuilder) instance.
+    /// Creates a new [MeshBuilder] instance.
     pub fn new() -> Self {
         MeshBuilder {
             indices: None,
@@ -40,9 +40,9 @@ impl MeshBuilder {
     ///
     /// # Examples
     /// ```
-    /// # use tri_mesh::mesh_builder::MeshBuilder;
+    /// # use tri_mesh::prelude::*;
     /// #
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # fn main() -> TriMeshResult<()> {
     /// let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
     /// let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
     /// let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build()?;
@@ -68,9 +68,9 @@ impl MeshBuilder {
     /// Build from positions (note: Use [merge_overlapping_primitives](crate::mesh::Mesh::merge_overlapping_primitives) if you want to merge
     /// unconnected but overlapping parts of the mesh):
     /// ```
-    /// # use tri_mesh::mesh_builder::MeshBuilder;
+    /// # use tri_mesh::prelude::*;
     /// #
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # fn main() -> TriMeshResult<()> {
     /// let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
     ///                                    0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
     ///                                    0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5];
@@ -112,9 +112,9 @@ impl MeshBuilder {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::mesh_builder::MeshBuilder;
+    /// # use tri_mesh::prelude::*;
     /// #
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # fn main() -> TriMeshResult<()> {
     /// let mesh = MeshBuilder::new().cube().build()?;
     ///
     /// assert_eq!(mesh.no_faces(), 12);

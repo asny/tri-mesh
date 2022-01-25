@@ -8,9 +8,10 @@ impl MeshBuilder {
     /// # Examples
     ///
     /// ```no_run
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # use tri_mesh::prelude::*;
+    /// # fn main() -> TriMeshResult<()> {
     ///     let obj_source = std::fs::read_to_string("foo.obj").expect("Something went wrong reading the file");
-    ///     let mesh = tri_mesh::mesh_builder::MeshBuilder::new().with_obj(obj_source).build()?;
+    ///     let mesh = MeshBuilder::new().with_obj(obj_source).build()?;
     /// #    Ok(())
     /// # }
     /// ```
@@ -26,9 +27,10 @@ impl MeshBuilder {
     /// # Examples
     ///
     /// ```no_run
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # use tri_mesh::prelude::*;
+    /// # fn main() -> TriMeshResult<()> {
     ///     let obj_source = std::fs::read_to_string("foo.obj").expect("Something went wrong reading the file");
-    ///     let mesh = tri_mesh::mesh_builder::MeshBuilder::new().with_named_obj(obj_source, "my_object").build()?;
+    ///     let mesh = MeshBuilder::new().with_named_obj(obj_source, "my_object").build()?;
     /// #    Ok(())
     /// # }
     /// ```

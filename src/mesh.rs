@@ -7,8 +7,9 @@ pub mod math {
     //! Linear algebra types for vector calculations. Basically re-export the [cgmath](https://crates.io/crates/cgmath) library.
     //!
 
-    pub use cgmath;
-    pub use cgmath::*;
+    use cgmath;
+    pub use cgmath::prelude::*;
+    use cgmath::{Deg, Matrix3, Matrix4, Rad, Vector3, Vector4};
 
     /// Vector with three elements.
     pub type Vec3 = Vector3<f64>;
@@ -19,32 +20,104 @@ pub mod math {
     pub type Mat3 = Matrix3<f64>;
     /// 4x4 matrix.
     pub type Mat4 = Matrix4<f64>;
-}
 
-pub mod bounding_box;
-pub mod connected_components;
-pub mod connectivity;
-pub mod edge_measures;
-pub mod edit;
-pub mod export;
-pub mod face_measures;
-pub mod ids;
-pub mod intersection;
-pub mod iterators;
-pub mod merge;
-pub mod orientation;
-pub mod quality;
-pub mod split;
-pub mod transformations;
-pub mod traversal;
-pub mod validity;
-pub mod vertex_measures;
+    pub type Degrees = Deg<f64>;
+    pub type Radians = Rad<f64>;
+
+    /// Constructs a [Vec3]
+    pub const fn vec3(x: f64, y: f64, z: f64) -> Vec3 {
+        Vector3::new(x, y, z)
+    }
+
+    /// Constructs a [Vec4]
+    pub const fn vec4(x: f64, y: f64, z: f64, w: f64) -> Vec4 {
+        Vector4::new(x, y, z, w)
+    }
+
+    pub const fn degrees(v: f64) -> Degrees {
+        Deg(v)
+    }
+    pub const fn radians(v: f64) -> Radians {
+        Rad(v)
+    }
+}
+pub use crate::mesh::math::*;
+
+mod bounding_box;
+#[doc(inline)]
+pub use bounding_box::*;
+
+mod connected_components;
+#[doc(inline)]
+pub use connected_components::*;
+
+mod connectivity;
+#[doc(inline)]
+pub use connectivity::*;
+
+mod edge_measures;
+#[doc(inline)]
+pub use edge_measures::*;
+
+mod edit;
+#[doc(inline)]
+pub use edit::*;
+
+mod export;
+#[doc(inline)]
+pub use export::*;
+
+mod face_measures;
+#[doc(inline)]
+pub use face_measures::*;
+
+mod ids;
+#[doc(inline)]
+pub use ids::*;
+
+mod intersection;
+#[doc(inline)]
+pub use intersection::*;
+
+mod iterators;
+#[doc(inline)]
+pub use iterators::*;
+
+mod merge;
+#[doc(inline)]
+pub use merge::*;
+
+mod orientation;
+#[doc(inline)]
+pub use orientation::*;
+
+mod quality;
+#[doc(inline)]
+pub use quality::*;
+
+mod split;
+#[doc(inline)]
+pub use split::*;
+
+mod transformations;
+#[doc(inline)]
+pub use transformations::*;
+
+mod traversal;
+#[doc(inline)]
+pub use traversal::*;
+
+mod validity;
+#[doc(inline)]
+pub use validity::*;
+
+mod vertex_measures;
+#[doc(inline)]
+pub use vertex_measures::*;
 
 mod connectivity_info;
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
-use crate::mesh::ids::*;
-use crate::mesh::math::*;
 
 use std::collections::HashMap;
 

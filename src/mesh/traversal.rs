@@ -1,4 +1,4 @@
-//! Defines a [Walker](crate::mesh::traversal::Walker) for easy and efficient traversal of the mesh.
+//! Defines a [Walker] for easy and efficient traversal of the mesh.
 //! See [Mesh](crate::mesh::Mesh) for how to construct a walker.
 
 use crate::mesh::connectivity_info::{ConnectivityInfo, HalfEdge};
@@ -6,25 +6,25 @@ use crate::mesh::ids::*;
 use crate::mesh::Mesh;
 
 /// # Traversal
-/// Methods to construct a [Walker](crate::mesh::traversal::Walker) which is used for easy and efficient traversal of the mesh.
-/// See [Walker](crate::mesh::traversal::Walker) for more information and examples.
+/// Methods to construct a [Walker] which is used for easy and efficient traversal of the mesh.
+/// See [Walker] for more information and examples.
 impl Mesh {
-    /// Creates an 'empty' [walker](crate::mesh::traversal::Walker), ie. a walker that is associated with any half-edge.
+    /// Creates an 'empty' [Walker], ie. a walker that is associated with any half-edge.
     pub(crate) fn walker(&self) -> Walker {
         Walker::new(&self.connectivity_info)
     }
 
-    /// Creates a [walker](crate::mesh::traversal::Walker) at the half-edge pointed to by the given vertex.
+    /// Creates a [Walker] at the half-edge pointed to by the given vertex.
     pub fn walker_from_vertex(&self, vertex_id: VertexID) -> Walker {
         self.walker().into_vertex_halfedge_walker(vertex_id)
     }
 
-    /// Creates a [walker](crate::mesh::traversal::Walker) at the given half-edge.
+    /// Creates a [Walker] at the given half-edge.
     pub fn walker_from_halfedge(&self, halfedge_id: HalfEdgeID) -> Walker {
         self.walker().into_halfedge_walker(halfedge_id)
     }
 
-    /// Creates a [walker](crate::mesh::traversal::Walker) at the half-edge pointed to by the given face.
+    /// Creates a [Walker] at the half-edge pointed to by the given face.
     pub fn walker_from_face(&self, face_id: FaceID) -> Walker {
         self.walker().into_face_halfedge_walker(face_id)
     }

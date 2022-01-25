@@ -1,7 +1,5 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::ids::*;
-use crate::mesh::math::*;
 use crate::mesh::*;
 use crate::TriMeshResult;
 use std::collections::{HashMap, HashSet};

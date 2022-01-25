@@ -1,7 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::math::*;
-use crate::mesh::Mesh;
+use crate::mesh::*;
 
 /// # Bounding box
 impl Mesh {
