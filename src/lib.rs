@@ -29,6 +29,10 @@ pub mod mesh;
 pub mod mesh_builder;
 pub mod prelude;
 
+mod parser;
+#[doc(inline)]
+pub use parser::*;
+
 pub use crate::mesh_builder::MeshBuilder;
 /// Result returned from an `tri-mesh` operation.
 pub type TriMeshResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
