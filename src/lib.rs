@@ -30,3 +30,5 @@ pub mod mesh_builder;
 pub mod prelude;
 
 pub use crate::mesh_builder::MeshBuilder;
+/// Result returned from an `tri-mesh` operation.
+pub type TriMeshResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;

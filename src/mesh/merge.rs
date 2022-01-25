@@ -3,6 +3,7 @@
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
 use crate::mesh::*;
+use crate::TriMeshResult;
 use std::collections::{HashMap, HashSet};
 
 /// # Merge
@@ -16,7 +17,7 @@ impl Mesh {
     ///
     /// Returns an error if the merging will result in a non-manifold mesh.
     ///
-    pub fn merge_with(&mut self, other: &Self) -> Result<(), Error> {
+    pub fn merge_with(&mut self, other: &Self) -> TriMeshResult<()> {
         self.append(other);
         self.merge_overlapping_primitives()?;
         Ok(())
@@ -85,7 +86,7 @@ impl Mesh {
     ///
     /// Returns an error if the merging will result in a non-manifold mesh.
     ///
-    pub fn merge_overlapping_primitives(&mut self) -> Result<(), Error> {
+    pub fn merge_overlapping_primitives(&mut self) -> TriMeshResult<()> {
         let set_of_vertices_to_merge = self.find_overlapping_vertices();
         let set_of_edges_to_merge = self.find_overlapping_edges(&set_of_vertices_to_merge);
         let set_of_faces_to_merge = self.find_overlapping_faces(&set_of_vertices_to_merge);
@@ -123,7 +124,7 @@ impl Mesh {
         &mut self,
         halfedge_id1: HalfEdgeID,
         halfedge_id2: HalfEdgeID,
-    ) -> Result<HalfEdgeID, Error> {
+    ) -> TriMeshResult<HalfEdgeID> {
         let mut walker1 = self.walker_from_halfedge(halfedge_id1);
         let mut walker2 = self.walker_from_halfedge(halfedge_id2);
 
@@ -136,12 +137,10 @@ impl Mesh {
         let edge2_boundary = !edge2_alone && !edge2_interior;
 
         if edge1_interior && !edge2_alone || edge2_interior && !edge1_alone {
-            return Err(Error::ActionWillResultInNonManifoldMesh {
-                message: format!(
-                    "Merging halfedges {} and {} will create a non-manifold mesh",
-                    halfedge_id1, halfedge_id2
-                ),
-            });
+            Err(MeshError::ActionWillResultInNonManifoldMesh(format!(
+                "Merging halfedges {} and {} will create a non-manifold mesh",
+                halfedge_id1, halfedge_id2
+            )))?;
         }
 
         let mut halfedge_to_remove1 = None;
@@ -223,7 +222,7 @@ impl Mesh {
         &mut self,
         vertex_id1: VertexID,
         vertex_id2: VertexID,
-    ) -> Result<VertexID, Error> {
+    ) -> TriMeshResult<VertexID> {
         for halfedge_id in self.halfedge_iter() {
             let walker = self.walker_from_halfedge(halfedge_id);
             if walker.vertex_id().unwrap() == vertex_id2 {

@@ -48,24 +48,19 @@ use crate::mesh::math::*;
 
 use std::collections::HashMap;
 
-/// Mesh errors.
-#[derive(Debug)]
-pub enum Error {
-    /// Returned from a Mesh method when applying the method with the given configuration is not valid.
-    ActionWillResultInInvalidMesh {
-        /// Error reason.
-        message: String,
-    },
-    /// Returned from a Mesh method when applying a method will produce a non-manifold mesh.
-    ActionWillResultInNonManifoldMesh {
-        /// Error reason.
-        message: String,
-    },
-    /// Returned from [is_valid](crate::mesh::Mesh::is_valid) method when the mesh has ended up in an invalid state.
-    MeshIsInvalid {
-        /// Error reason.
-        message: String,
-    },
+use thiserror::Error;
+///
+/// Error when performing a mesh operation
+///
+#[derive(Debug, Error)]
+#[allow(missing_docs)]
+pub enum MeshError {
+    #[error("configuration is not valid: {0}")]
+    ActionWillResultInInvalidMesh(String),
+    #[error("action will produce a non-manifold mesh: {0}")]
+    ActionWillResultInNonManifoldMesh(String),
+    #[error("the mesh has ended up in an invalid state: {0}")]
+    MeshIsInvalid(String),
 }
 
 ///

@@ -3,20 +3,17 @@
 //!
 
 use crate::mesh::Mesh;
+use crate::TriMeshResult;
 
-/// MeshBuilder errors.
-#[derive(Debug)]
-pub enum Error {
-    /// Returned when the positions haven't been specified before calling the build function.
-    NoPositionsSpecified {
-        /// Error reason.
-        message: String,
-    },
-    /// Invalid file format
-    InvalidFile {
-        /// Error reason.
-        message: String,
-    },
+use thiserror::Error;
+///
+/// Error when building a mesh
+///
+#[derive(Debug, Error)]
+#[allow(missing_docs)]
+pub enum MeshBuilderError {
+    #[error("the positions haven't been specified before calling the build function")]
+    NoPositionsSpecified,
 }
 
 ///
@@ -43,9 +40,9 @@ impl MeshBuilder {
     ///
     /// # Examples
     /// ```
-    /// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
+    /// # use tri_mesh::mesh_builder::MeshBuilder;
     /// #
-    /// # fn main() -> Result<(), Box<Error>> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     /// let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
     /// let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
     /// let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build()?;
@@ -71,9 +68,9 @@ impl MeshBuilder {
     /// Build from positions (note: Use [merge_overlapping_primitives](crate::mesh::Mesh::merge_overlapping_primitives) if you want to merge
     /// unconnected but overlapping parts of the mesh):
     /// ```
-    /// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
+    /// # use tri_mesh::mesh_builder::MeshBuilder;
     /// #
-    /// # fn main() -> Result<(), Box<Error>> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     /// let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5,
     ///                                    0.0, 0.0, 0.0,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
     ///                                    0.0, 0.0, 0.0,  0.0, 0.0, 1.0,  1.0, 0.0, -0.5];
@@ -99,7 +96,7 @@ impl MeshBuilder {
     /// # Examples
     ///
     /// ```no_run
-    /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     ///     let obj_source = std::fs::read_to_string("foo.obj").expect("Something went wrong reading the file");
     ///     let mesh = tri_mesh::mesh_builder::MeshBuilder::new().with_obj(obj_source).build()?;
     /// #    Ok(())
@@ -117,7 +114,7 @@ impl MeshBuilder {
     /// # Examples
     ///
     /// ```no_run
-    /// # fn main() -> Result<(), Box<tri_mesh::mesh_builder::Error>> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     ///     let obj_source = std::fs::read_to_string("foo.obj").expect("Something went wrong reading the file");
     ///     let mesh = tri_mesh::mesh_builder::MeshBuilder::new().with_named_obj(obj_source, "my_object").build()?;
     /// #    Ok(())
@@ -168,10 +165,10 @@ impl MeshBuilder {
     ///
     /// If no positions are specified, [NoPositionsSpecified](crate::mesh_builder::Error::NoPositionsSpecified) error is returned.
     ///
-    pub fn build(self) -> Result<Mesh, Error> {
-        let positions = self.positions.ok_or(Error::NoPositionsSpecified {
-            message: format!("Did you forget to specify the vertex positions?"),
-        })?;
+    pub fn build(self) -> TriMeshResult<Mesh> {
+        let positions = self
+            .positions
+            .ok_or(MeshBuilderError::NoPositionsSpecified)?;
         let indices = self
             .indices
             .unwrap_or((0..positions.len() as u32 / 3).collect());
@@ -184,9 +181,9 @@ impl MeshBuilder {
     /// # Examples
     ///
     /// ```
-    /// # use tri_mesh::mesh_builder::{MeshBuilder, Error};
+    /// # use tri_mesh::mesh_builder::MeshBuilder;
     /// #
-    /// # fn main() -> Result<(), Box<Error>> {
+    /// # fn main() -> tri_mesh::TriMeshResult<()> {
     /// let mesh = MeshBuilder::new().cube().build()?;
     ///
     /// assert_eq!(mesh.no_faces(), 12);

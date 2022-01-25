@@ -12,3 +12,5 @@ pub use crate::mesh::traversal::Walker;
 pub use crate::mesh::Mesh;
 
 pub use crate::mesh_builder::MeshBuilder;
+
+pub use crate::TriMeshResult;

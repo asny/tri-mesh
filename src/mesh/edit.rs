@@ -3,6 +3,7 @@
 use crate::mesh::ids::*;
 use crate::mesh::math::*;
 use crate::mesh::*;
+use crate::TriMeshResult;
 
 /// # Edit
 impl Mesh {
@@ -22,13 +23,13 @@ impl Mesh {
     ///
     /// Returns an error if trying to flip an edge on the boundary or the flip will connect two vertices that are already connected by another edge.
     ///
-    pub fn flip_edge(&mut self, halfedge_id: HalfEdgeID) -> Result<(), Error> {
+    pub fn flip_edge(&mut self, halfedge_id: HalfEdgeID) -> TriMeshResult<()> {
         let mut walker = self.walker_from_halfedge(halfedge_id);
         let face_id = walker
             .face_id()
-            .ok_or(Error::ActionWillResultInInvalidMesh {
-                message: format!("Trying to flip edge on boundary"),
-            })?;
+            .ok_or(MeshError::ActionWillResultInInvalidMesh(format!(
+                "Trying to flip edge on boundary"
+            )))?;
         let next_id = walker.next_id().unwrap();
         let previous_id = walker.previous_id().unwrap();
         let v0 = walker.vertex_id().unwrap();
@@ -40,16 +41,16 @@ impl Mesh {
         let twin_id = walker.halfedge_id().unwrap();
         let twin_face_id = walker
             .face_id()
-            .ok_or(Error::ActionWillResultInInvalidMesh {
-                message: format!("Trying to flip edge on boundary"),
-            })?;
+            .ok_or(MeshError::ActionWillResultInInvalidMesh(format!(
+                "Trying to flip edge on boundary"
+            )))?;
         let twin_next_id = walker.next_id().unwrap();
         let twin_previous_id = walker.previous_id().unwrap();
         let v1 = walker.vertex_id().unwrap();
         let v2 = walker.as_next().vertex_id().unwrap();
 
         if self.connecting_edge(v2, v3).is_some() {
-            return Err(Error::ActionWillResultInInvalidMesh {message: format!("Trying to flip edge which will connect two vertices that are already connected by another edge")});
+            Err(MeshError::ActionWillResultInInvalidMesh ( format!("Trying to flip edge which will connect two vertices that are already connected by another edge")))?;
         }
 
         self.connectivity_info
