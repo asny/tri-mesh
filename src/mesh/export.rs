@@ -1,7 +1,7 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::Mesh;
 use crate::mesh::ids::*;
+use crate::mesh::Mesh;
 
 ///
 /// # Export
@@ -75,19 +75,16 @@ use crate::mesh::ids::*;
 /// ```
 ///
 ///
-impl Mesh
-{
+impl Mesh {
     ///
     /// Returns the face indices in an array `(i0, i1, i2) = (indices[3*x], indices[3*x+1], indices[3*x+2])` which is meant to be used for visualisation.
     /// Use the `positions_buffer` method and `normals_buffer` method to get the positions and normals of the vertices.
     /// See [this](#index-based-arrays) example.
     ///
-    pub fn indices_buffer(&self) -> Vec<u32>
-    {
+    pub fn indices_buffer(&self) -> Vec<u32> {
         let vertices: Vec<VertexID> = self.vertex_iter().collect();
         let mut indices = Vec::with_capacity(self.no_faces() * 3);
-        for face_id in self.face_iter()
-        {
+        for face_id in self.face_iter() {
             for halfedge_id in self.face_halfedge_iter(face_id) {
                 let vertex_id = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
                 let index = vertices.iter().position(|v| v == &vertex_id).unwrap();
@@ -103,10 +100,12 @@ impl Mesh
     ///
     /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
     ///
-    pub fn positions_buffer(&self) -> Vec<f64>
-    {
+    pub fn positions_buffer(&self) -> Vec<f64> {
         let mut positions = Vec::with_capacity(self.no_vertices() * 3);
-        for position in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
+        for position in self
+            .vertex_iter()
+            .map(|vertex_id| self.vertex_position(vertex_id))
+        {
             push_vec3(&mut positions, position);
         }
         positions
@@ -118,10 +117,12 @@ impl Mesh
     ///
     /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
     ///
-    pub fn positions_buffer_f32(&self) -> Vec<f32>
-    {
+    pub fn positions_buffer_f32(&self) -> Vec<f32> {
         let mut positions = Vec::with_capacity(self.no_vertices() * 3);
-        for position in self.vertex_iter().map(|vertex_id| self.vertex_position(vertex_id)) {
+        for position in self
+            .vertex_iter()
+            .map(|vertex_id| self.vertex_position(vertex_id))
+        {
             for i in 0..3 {
                 positions.push(position[i] as f32);
             }
@@ -139,8 +140,7 @@ impl Mesh
     ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
-    pub fn normals_buffer(&self) -> Vec<f64>
-    {
+    pub fn normals_buffer(&self) -> Vec<f64> {
         let mut normals = Vec::with_capacity(self.no_vertices() * 3);
         for vertex_id in self.vertex_iter() {
             push_vec3(&mut normals, self.vertex_normal(vertex_id));
@@ -158,8 +158,7 @@ impl Mesh
     ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
-    pub fn normals_buffer_f32(&self) -> Vec<f32>
-    {
+    pub fn normals_buffer_f32(&self) -> Vec<f32> {
         let mut normals = Vec::with_capacity(self.no_vertices() * 3);
         for vertex_id in self.vertex_iter() {
             let n = self.vertex_normal(vertex_id);
@@ -174,11 +173,9 @@ impl Mesh
     /// Returns the positions of the face corners in an array which is meant to be used for visualisation.
     /// See [this](#non-index-based-arrays) example.
     ///
-    pub fn non_indexed_positions_buffer(&self) -> Vec<f64>
-    {
+    pub fn non_indexed_positions_buffer(&self) -> Vec<f64> {
         let mut positions = Vec::with_capacity(self.no_faces() * 3 * 3);
-        for face_id in self.face_iter()
-        {
+        for face_id in self.face_iter() {
             let (p0, p1, p2) = self.face_positions(face_id);
             push_vec3(&mut positions, p0);
             push_vec3(&mut positions, p1);
@@ -195,11 +192,9 @@ impl Mesh
     ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
-    pub fn non_indexed_normals_buffer(&self) -> Vec<f64>
-    {
+    pub fn non_indexed_normals_buffer(&self) -> Vec<f64> {
         let mut normals = Vec::with_capacity(self.no_faces() * 3 * 3);
-        for face_id in self.face_iter()
-        {
+        for face_id in self.face_iter() {
             let (v0, v1, v2) = self.face_vertices(face_id);
             push_vec3(&mut normals, self.vertex_normal(v0));
             push_vec3(&mut normals, self.vertex_normal(v1));
@@ -225,27 +220,36 @@ impl Mesh
     /// # }
     /// ```
     #[cfg(feature = "obj-io")]
-    pub fn parse_as_obj(&self) -> String
-    {
+    pub fn parse_as_obj(&self) -> String {
         let mut output = String::from("o object\n");
 
         let positions = self.positions_buffer();
-        for i in 0..self.no_vertices()
-        {
-            output = format!("{}v {} {} {}\n", output, positions[i*3], positions[i*3 + 1], positions[i*3 + 2]);
+        for i in 0..self.no_vertices() {
+            output = format!(
+                "{}v {} {} {}\n",
+                output,
+                positions[i * 3],
+                positions[i * 3 + 1],
+                positions[i * 3 + 2]
+            );
         }
 
         let normals = self.normals_buffer();
-        for i in 0..self.no_vertices()
-        {
-            output = format!("{}vn {} {} {}\n", output, normals[i*3], normals[i*3 + 1], normals[i*3 + 2]);
+        for i in 0..self.no_vertices() {
+            output = format!(
+                "{}vn {} {} {}\n",
+                output,
+                normals[i * 3],
+                normals[i * 3 + 1],
+                normals[i * 3 + 2]
+            );
         }
 
         let indices = self.indices_buffer();
         for i in 0..self.no_faces() {
             let mut face = String::new();
             for j in 0..3 {
-                let index = indices[i*3 + j] + 1;
+                let index = indices[i * 3 + j] + 1;
                 face = format!("{} {}//{}", face, index, index);
             }
             output = format!("{}f{}\n", output, face);
@@ -277,16 +281,19 @@ impl Mesh
     /// # }
     /// ```
     #[cfg(feature = "3d-io")]
-    pub fn parse_as_3d(&self) -> Result<Vec<u8>, bincode::Error>
-    {
-        let export_mesh = crate::mesh::IOMesh {magic_number: 61, version: 1, indices: self.indices_buffer(),
-            positions: self.positions_buffer_f32(), normals: self.normals_buffer_f32()};
+    pub fn parse_as_3d(&self) -> Result<Vec<u8>, bincode::Error> {
+        let export_mesh = crate::mesh::IOMesh {
+            magic_number: 61,
+            version: 1,
+            indices: self.indices_buffer(),
+            positions: self.positions_buffer_f32(),
+            normals: self.normals_buffer_f32(),
+        };
         bincode::serialize(&export_mesh)
     }
 }
 
-fn push_vec3(vec: &mut Vec<f64>, vec3: crate::mesh::math::Vec3)
-{
+fn push_vec3(vec: &mut Vec<f64>, vec3: crate::mesh::math::Vec3) {
     for i in 0..3 {
         vec.push(vec3[i]);
     }
@@ -294,14 +301,18 @@ fn push_vec3(vec: &mut Vec<f64>, vec3: crate::mesh::math::Vec3)
 
 #[cfg(test)]
 mod tests {
-    use crate::MeshBuilder;
     use crate::mesh::math::*;
+    use crate::MeshBuilder;
 
     #[test]
     fn test_parse_as_3d() {
         let mesh = MeshBuilder::new().cylinder(3, 16).build().unwrap();
         let encoded: Vec<u8> = mesh.parse_as_3d().unwrap();
-        let decoded = MeshBuilder::new().with_3d(&encoded).unwrap().build().unwrap();
+        let decoded = MeshBuilder::new()
+            .with_3d(&encoded)
+            .unwrap()
+            .build()
+            .unwrap();
 
         assert_eq!(mesh.no_vertices(), decoded.no_vertices());
         assert_eq!(mesh.no_faces(), decoded.no_faces());
@@ -318,24 +329,66 @@ mod tests {
         assert_eq!(positions.len(), mesh.no_vertices() * 3);
         assert_eq!(normals.len(), mesh.no_vertices() * 3);
 
-        for face in 0..positions.len()/9 {
-            let vertices = (indices[3*face] as usize, indices[3*face + 1] as usize, indices[3*face + 2] as usize);
-            let p0 = vec3(positions[3*vertices.0], positions[3*vertices.0+1], positions[3*vertices.0+2]);
-            let p1 = vec3(positions[3*vertices.1], positions[3*vertices.1+1], positions[3*vertices.1+2]);
-            let p2 = vec3(positions[3*vertices.2], positions[3*vertices.2+1], positions[3*vertices.2+2]);
+        for face in 0..positions.len() / 9 {
+            let vertices = (
+                indices[3 * face] as usize,
+                indices[3 * face + 1] as usize,
+                indices[3 * face + 2] as usize,
+            );
+            let p0 = vec3(
+                positions[3 * vertices.0],
+                positions[3 * vertices.0 + 1],
+                positions[3 * vertices.0 + 2],
+            );
+            let p1 = vec3(
+                positions[3 * vertices.1],
+                positions[3 * vertices.1 + 1],
+                positions[3 * vertices.1 + 2],
+            );
+            let p2 = vec3(
+                positions[3 * vertices.2],
+                positions[3 * vertices.2 + 1],
+                positions[3 * vertices.2 + 2],
+            );
             let center = (p0 + p1 + p2) / 3.0;
-            let face_id = mesh.face_iter().find(|face_id| (mesh.face_center(*face_id) - center).magnitude() < 0.00001);
+            let face_id = mesh
+                .face_iter()
+                .find(|face_id| (mesh.face_center(*face_id) - center).magnitude() < 0.00001);
             assert!(face_id.is_some());
 
-            let n0 = vec3(normals[3*vertices.0], normals[3*vertices.0+1], normals[3*vertices.0+2]);
-            let n1 = vec3(normals[3*vertices.1], normals[3*vertices.1+1], normals[3*vertices.1+2]);
-            let n2 = vec3(normals[3*vertices.2], normals[3*vertices.2+1], normals[3*vertices.2+2]);
+            let n0 = vec3(
+                normals[3 * vertices.0],
+                normals[3 * vertices.0 + 1],
+                normals[3 * vertices.0 + 2],
+            );
+            let n1 = vec3(
+                normals[3 * vertices.1],
+                normals[3 * vertices.1 + 1],
+                normals[3 * vertices.1 + 2],
+            );
+            let n2 = vec3(
+                normals[3 * vertices.2],
+                normals[3 * vertices.2 + 1],
+                normals[3 * vertices.2 + 2],
+            );
 
             let (v0, v1, v2) = mesh.face_vertices(face_id.unwrap());
 
-            assert!(n0 == mesh.vertex_normal(v0) || n1 == mesh.vertex_normal(v0) || n2 == mesh.vertex_normal(v0));
-            assert!(n0 == mesh.vertex_normal(v1) || n1 == mesh.vertex_normal(v1) || n2 == mesh.vertex_normal(v1));
-            assert!(n0 == mesh.vertex_normal(v2) || n1 == mesh.vertex_normal(v2) || n2 == mesh.vertex_normal(v2));
+            assert!(
+                n0 == mesh.vertex_normal(v0)
+                    || n1 == mesh.vertex_normal(v0)
+                    || n2 == mesh.vertex_normal(v0)
+            );
+            assert!(
+                n0 == mesh.vertex_normal(v1)
+                    || n1 == mesh.vertex_normal(v1)
+                    || n2 == mesh.vertex_normal(v1)
+            );
+            assert!(
+                n0 == mesh.vertex_normal(v2)
+                    || n1 == mesh.vertex_normal(v2)
+                    || n2 == mesh.vertex_normal(v2)
+            );
         }
     }
 
@@ -348,25 +401,63 @@ mod tests {
         assert_eq!(positions.len(), mesh.no_faces() * 3 * 3);
         assert_eq!(normals.len(), mesh.no_faces() * 3 * 3);
 
-        for face in 0..positions.len()/9 {
-            let vertices = (9*face, 9*face+3, 9*face+6);
-            let p0 = vec3(positions[vertices.0], positions[vertices.0+1], positions[vertices.0+2]);
-            let p1 = vec3(positions[vertices.1], positions[vertices.1+1], positions[vertices.1+2]);
-            let p2 = vec3(positions[vertices.2], positions[vertices.2+1], positions[vertices.2+2]);
+        for face in 0..positions.len() / 9 {
+            let vertices = (9 * face, 9 * face + 3, 9 * face + 6);
+            let p0 = vec3(
+                positions[vertices.0],
+                positions[vertices.0 + 1],
+                positions[vertices.0 + 2],
+            );
+            let p1 = vec3(
+                positions[vertices.1],
+                positions[vertices.1 + 1],
+                positions[vertices.1 + 2],
+            );
+            let p2 = vec3(
+                positions[vertices.2],
+                positions[vertices.2 + 1],
+                positions[vertices.2 + 2],
+            );
             let center = (p0 + p1 + p2) / 3.0;
 
-            let face_id = mesh.face_iter().find(|face_id| (mesh.face_center(*face_id) - center).magnitude() < 0.00001);
+            let face_id = mesh
+                .face_iter()
+                .find(|face_id| (mesh.face_center(*face_id) - center).magnitude() < 0.00001);
             assert!(face_id.is_some());
 
-            let n0 = vec3(normals[vertices.0], normals[vertices.0+1], normals[vertices.0+2]);
-            let n1 = vec3(normals[vertices.1], normals[vertices.1+1], normals[vertices.1+2]);
-            let n2 = vec3(normals[vertices.2], normals[vertices.2+1], normals[vertices.2+2]);
+            let n0 = vec3(
+                normals[vertices.0],
+                normals[vertices.0 + 1],
+                normals[vertices.0 + 2],
+            );
+            let n1 = vec3(
+                normals[vertices.1],
+                normals[vertices.1 + 1],
+                normals[vertices.1 + 2],
+            );
+            let n2 = vec3(
+                normals[vertices.2],
+                normals[vertices.2 + 1],
+                normals[vertices.2 + 2],
+            );
 
             let (v0, v1, v2) = mesh.face_vertices(face_id.unwrap());
 
-            assert!(n0 == mesh.vertex_normal(v0) || n1 == mesh.vertex_normal(v0) || n2 == mesh.vertex_normal(v0));
-            assert!(n0 == mesh.vertex_normal(v1) || n1 == mesh.vertex_normal(v1) || n2 == mesh.vertex_normal(v1));
-            assert!(n0 == mesh.vertex_normal(v2) || n1 == mesh.vertex_normal(v2) || n2 == mesh.vertex_normal(v2));
+            assert!(
+                n0 == mesh.vertex_normal(v0)
+                    || n1 == mesh.vertex_normal(v0)
+                    || n2 == mesh.vertex_normal(v0)
+            );
+            assert!(
+                n0 == mesh.vertex_normal(v1)
+                    || n1 == mesh.vertex_normal(v1)
+                    || n2 == mesh.vertex_normal(v1)
+            );
+            assert!(
+                n0 == mesh.vertex_normal(v2)
+                    || n1 == mesh.vertex_normal(v2)
+                    || n2 == mesh.vertex_normal(v2)
+            );
         }
     }
 }

@@ -1,21 +1,18 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::Mesh;
-use crate::mesh::math::*;
 use crate::mesh::ids::*;
+use crate::mesh::math::*;
+use crate::mesh::Mesh;
 
 /// # Vertex measures
-impl Mesh
-{
+impl Mesh {
     /// Returns the vertex position.
-    pub fn vertex_position(&self, vertex_id: VertexID) -> Vec3
-    {
+    pub fn vertex_position(&self, vertex_id: VertexID) -> Vec3 {
         self.connectivity_info.position(vertex_id)
     }
 
     /// Returns the normal of the vertex given as the average of the normals of the neighbouring faces.
-    pub fn vertex_normal(&self, vertex_id: VertexID) -> Vec3
-    {
+    pub fn vertex_normal(&self, vertex_id: VertexID) -> Vec3 {
         let mut normal = Vec3::zero();
         for halfedge_id in self.vertex_halfedge_iter(vertex_id) {
             if let Some(face_id) = self.walker_from_halfedge(halfedge_id).face_id() {
@@ -26,13 +23,11 @@ impl Mesh
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::MeshBuilder;
-    
+
     #[test]
     fn test_vertex_normal() {
         let mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();

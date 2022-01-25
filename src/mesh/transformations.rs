@@ -1,21 +1,18 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::Mesh;
-use crate::mesh::math::*;
 use crate::mesh::ids::*;
+use crate::mesh::math::*;
+use crate::mesh::Mesh;
 
 /// # Transformations
-impl Mesh
-{
+impl Mesh {
     /// Moves the vertex to the specified position.
-    pub fn move_vertex_to(&mut self, vertex_id: VertexID, value: Vec3)
-    {
+    pub fn move_vertex_to(&mut self, vertex_id: VertexID, value: Vec3) {
         self.connectivity_info.set_position(vertex_id, value);
     }
 
     /// Moves the vertex by the specified vector, i.e. the new position is `mesh.vertex_position(vertex_id) + value`.
-    pub fn move_vertex_by(&mut self, vertex_id: VertexID, value: Vec3)
-    {
+    pub fn move_vertex_by(&mut self, vertex_id: VertexID, value: Vec3) {
         let p = value + self.vertex_position(vertex_id);
         self.move_vertex_to(vertex_id, p);
     }
@@ -39,8 +36,7 @@ impl Mesh
     /// # }
     /// ```
     ///
-    pub fn scale(&mut self, scale: f64)
-    {
+    pub fn scale(&mut self, scale: f64) {
         for vertex_id in self.vertex_iter() {
             let p = self.vertex_position(vertex_id);
             self.move_vertex_to(vertex_id, p * scale);
@@ -68,8 +64,7 @@ impl Mesh
     /// # }
     /// ```
     ///
-    pub fn non_uniform_scale(&mut self, scale_x: f64, scale_y: f64, scale_z: f64)
-    {
+    pub fn non_uniform_scale(&mut self, scale_x: f64, scale_y: f64, scale_z: f64) {
         for vertex_id in self.vertex_iter() {
             let p = self.vertex_position(vertex_id);
             self.move_vertex_to(vertex_id, vec3(p.x * scale_x, p.y * scale_y, p.z * scale_z));
@@ -95,8 +90,7 @@ impl Mesh
     /// # }
     /// ```
     ///
-    pub fn translate(&mut self, translation: Vec3)
-    {
+    pub fn translate(&mut self, translation: Vec3) {
         for vertex_id in self.vertex_iter() {
             self.move_vertex_by(vertex_id, translation);
         }
@@ -122,8 +116,7 @@ impl Mesh
     /// # }
     /// ```
     ///
-    pub fn rotate(&mut self, rotation: Mat3)
-    {
+    pub fn rotate(&mut self, rotation: Mat3) {
         for vertex_id in self.vertex_iter() {
             let p = self.vertex_position(vertex_id);
             self.move_vertex_to(vertex_id, rotation * p);
@@ -150,8 +143,7 @@ impl Mesh
     /// # }
     /// ```
     ///
-    pub fn apply_transformation(&mut self, transformation: Mat4)
-    {
+    pub fn apply_transformation(&mut self, transformation: Mat4) {
         for vertex_id in self.vertex_iter() {
             let p = self.vertex_position(vertex_id);
             let p_new = (transformation * p.extend(1.0)).truncate();

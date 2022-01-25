@@ -10,16 +10,16 @@ pub enum Error {
     /// Returned when the positions haven't been specified before calling the build function.
     NoPositionsSpecified {
         /// Error reason.
-        message: String
+        message: String,
     },
     /// Invalid file format
     InvalidFile {
         /// Error reason.
-        message: String
+        message: String,
     },
     /// Invalid 3d file format
     #[cfg(feature = "3d-io")]
-    Bincode(bincode::Error)
+    Bincode(bincode::Error),
 }
 
 #[cfg(feature = "3d-io")]
@@ -36,15 +36,16 @@ impl From<bincode::Error> for Error {
 #[derive(Debug, Default)]
 pub struct MeshBuilder {
     indices: Option<Vec<u32>>,
-    positions: Option<Vec<f64>>
+    positions: Option<Vec<f64>>,
 }
 
 impl MeshBuilder {
-
     /// Creates a new [MeshBuilder](crate::mesh_builder::MeshBuilder) instance.
-    pub fn new() -> Self
-    {
-        MeshBuilder {indices: None, positions: None}
+    pub fn new() -> Self {
+        MeshBuilder {
+            indices: None,
+            positions: None,
+        }
     }
 
     ///
@@ -67,8 +68,7 @@ impl MeshBuilder {
     /// # }
     /// ```
     ///
-    pub fn with_indices(mut self, indices: Vec<u32>) -> Self
-    {
+    pub fn with_indices(mut self, indices: Vec<u32>) -> Self {
         self.indices = Some(indices);
         self
     }
@@ -97,8 +97,7 @@ impl MeshBuilder {
     /// # }
     /// ```
     ///
-    pub fn with_positions(mut self, positions: Vec<f64>) -> Self
-    {
+    pub fn with_positions(mut self, positions: Vec<f64>) -> Self {
         self.positions = Some(positions);
         self
     }
@@ -117,8 +116,7 @@ impl MeshBuilder {
     /// # }
     /// ```
     #[cfg(feature = "obj-io")]
-    pub fn with_obj(self, source: String) -> Self
-    {
+    pub fn with_obj(self, source: String) -> Self {
         self.with_named_obj(source, "")
     }
 
@@ -136,29 +134,31 @@ impl MeshBuilder {
     /// # }
     /// ```
     #[cfg(feature = "obj-io")]
-    pub fn with_named_obj(mut self, source: String, object_name: &str) -> Self
-    {
+    pub fn with_named_obj(mut self, source: String, object_name: &str) -> Self {
         let objs = wavefront_obj::obj::parse(source).unwrap();
         let mut positions = Vec::new();
         let mut indices = Vec::new();
 
-        for obj in objs.objects.iter() { // Objects consisting of several meshes with different materials
+        for obj in objs.objects.iter() {
+            // Objects consisting of several meshes with different materials
             if &obj.name == object_name || object_name == "" {
-                let start_index = positions.len()/3;
+                let start_index = positions.len() / 3;
                 obj.vertices.iter().for_each(|v| {
                     positions.push(v.x);
                     positions.push(v.y);
                     positions.push(v.z);
                 });
 
-                for mesh in obj.geometry.iter() { // All meshes with different materials
-                    for primitive in mesh.shapes.iter() { // All triangles with same material
+                for mesh in obj.geometry.iter() {
+                    // All meshes with different materials
+                    for primitive in mesh.shapes.iter() {
+                        // All triangles with same material
                         match primitive.primitive {
                             wavefront_obj::obj::Primitive::Triangle(i0, i1, i2) => {
                                 indices.push((start_index + i0.0) as u32);
                                 indices.push((start_index + i1.0) as u32);
                                 indices.push((start_index + i2.0) as u32);
-                            },
+                            }
                             _ => {}
                         }
                     }
@@ -184,13 +184,13 @@ impl MeshBuilder {
     /// # }
     /// ```
     #[cfg(feature = "3d-io")]
-    pub fn with_3d(mut self, bytes: &[u8]) -> Result<Self, Error>
-    {
+    pub fn with_3d(mut self, bytes: &[u8]) -> Result<Self, Error> {
         let decoded: crate::mesh::IOMesh = bincode::deserialize(bytes)?;
         if decoded.magic_number != 61 {
-            Err(Error::InvalidFile {message: "Invalid 3d file!".to_string()})
-        }
-        else {
+            Err(Error::InvalidFile {
+                message: "Invalid 3d file!".to_string(),
+            })
+        } else {
             self.positions = Some(decoded.positions.iter().map(|x| *x as f64).collect());
             self.indices = Some(decoded.indices);
             Ok(self)
@@ -204,11 +204,13 @@ impl MeshBuilder {
     ///
     /// If no positions are specified, [NoPositionsSpecified](crate::mesh_builder::Error::NoPositionsSpecified) error is returned.
     ///
-    pub fn build(self) -> Result<Mesh, Error>
-    {
-        let positions = self.positions.ok_or(
-            Error::NoPositionsSpecified {message: format!("Did you forget to specify the vertex positions?")})?;
-        let indices = self.indices.unwrap_or((0..positions.len() as u32/3).collect());
+    pub fn build(self) -> Result<Mesh, Error> {
+        let positions = self.positions.ok_or(Error::NoPositionsSpecified {
+            message: format!("Did you forget to specify the vertex positions?"),
+        })?;
+        let indices = self
+            .indices
+            .unwrap_or((0..positions.len() as u32 / 3).collect());
         Ok(Mesh::new(indices, positions))
     }
 
@@ -231,105 +233,53 @@ impl MeshBuilder {
     /// # }
     /// ```
     ///
-    pub fn cube(self) -> Self
-    {
+    pub fn cube(self) -> Self {
         self.with_positions(vec![
-            1.0, -1.0, -1.0,
-            1.0, -1.0, 1.0,
-            -1.0, -1.0, 1.0,
-            -1.0, -1.0, -1.0,
-            1.0, 1.0, -1.0,
-            1.0, 1.0, 1.0,
-            -1.0, 1.0, 1.0,
-            -1.0, 1.0, -1.0
-        ]).with_indices(vec![
-            0, 1, 2,
-            0, 2, 3,
-            4, 7, 6,
-            4, 6, 5,
-            0, 4, 5,
-            0, 5, 1,
-            1, 5, 6,
-            1, 6, 2,
-            2, 6, 7,
-            2, 7, 3,
-            4, 0, 3,
-            4, 3, 7]
-        )
+            1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0,
+            1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0,
+        ])
+        .with_indices(vec![
+            0, 1, 2, 0, 2, 3, 4, 7, 6, 4, 6, 5, 0, 4, 5, 0, 5, 1, 1, 5, 6, 1, 6, 2, 2, 6, 7, 2, 7,
+            3, 4, 0, 3, 4, 3, 7,
+        ])
     }
 
     /// Creates a cube where each face is not connected to any other face.
-    pub fn unconnected_cube(self) -> Self
-    {
+    pub fn unconnected_cube(self) -> Self {
         self.with_positions(vec![
-            1.0, 1.0, -1.0,
-            -1.0, 1.0, -1.0,
-            1.0, 1.0, 1.0,
-            -1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0,
-            -1.0, 1.0, -1.0,
-
-            -1.0, -1.0, -1.0,
-            1.0, -1.0, -1.0,
-            1.0, -1.0, 1.0,
-            1.0, -1.0, 1.0,
-            -1.0, -1.0, 1.0,
-            -1.0, -1.0, -1.0,
-
-            1.0, -1.0, -1.0,
-            -1.0, -1.0, -1.0,
-            1.0, 1.0, -1.0,
-            -1.0, 1.0, -1.0,
-            1.0, 1.0, -1.0,
-            -1.0, -1.0, -1.0,
-
-            -1.0, -1.0, 1.0,
-            1.0, -1.0, 1.0,
-            1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0,
-            -1.0, 1.0, 1.0,
-            -1.0, -1.0, 1.0,
-
-            1.0, -1.0, -1.0,
-            1.0, 1.0, -1.0,
-            1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0,
-            1.0, -1.0, 1.0,
-            1.0, -1.0, -1.0,
-
-            -1.0, 1.0, -1.0,
-            -1.0, -1.0, -1.0,
-            -1.0, 1.0, 1.0,
-            -1.0, -1.0, 1.0,
-            -1.0, 1.0, 1.0,
-            -1.0, -1.0, -1.0
+            1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0,
+            1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0,
+            -1.0, 1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0,
+            1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0,
         ])
     }
 
     /// Creates an icosahedron, i.e. a discretised sphere.
-    pub fn icosahedron(self) -> Self
-    {
+    pub fn icosahedron(self) -> Self {
         let x = 0.525731112119133606;
         let z = 0.850650808352039932;
 
-        self.with_positions(vec!(
-            -x, 0.0, z, x, 0.0, z, -x, 0.0, -z, x, 0.0, -z,
-            0.0, z, x, 0.0, z, -x, 0.0, -z, x, 0.0, -z, -x,
-            z, x, 0.0, -z, x, 0.0, z, -x, 0.0, -z, -x, 0.0
-        )).with_indices(vec!(
-            0, 1, 4, 0, 4, 9, 9, 4, 5, 4, 8, 5, 4, 1, 8,
-            8, 1, 10, 8, 10, 3, 5, 8, 3, 5, 3, 2, 2, 3, 7,
-            7, 3, 10, 7, 10, 6, 7, 6, 11, 11, 6, 0, 0, 6, 1,
-            6, 10, 1, 9, 11, 0, 9, 2, 11, 9, 5, 2, 7, 11, 2
-        ))
+        self.with_positions(vec![
+            -x, 0.0, z, x, 0.0, z, -x, 0.0, -z, x, 0.0, -z, 0.0, z, x, 0.0, z, -x, 0.0, -z, x, 0.0,
+            -z, -x, z, x, 0.0, -z, x, 0.0, z, -x, 0.0, -z, -x, 0.0,
+        ])
+        .with_indices(vec![
+            0, 1, 4, 0, 4, 9, 9, 4, 5, 4, 8, 5, 4, 1, 8, 8, 1, 10, 8, 10, 3, 5, 8, 3, 5, 3, 2, 2,
+            3, 7, 7, 3, 10, 7, 10, 6, 7, 6, 11, 11, 6, 0, 0, 6, 1, 6, 10, 1, 9, 11, 0, 9, 2, 11, 9,
+            5, 2, 7, 11, 2,
+        ])
     }
 
     /// Creates a cylinder with the x-direction as axis, length 1 and radius 1.
     /// `x_subdivisions` defines the number of subdivisions in the x-direction
     /// and `angle_subdivisions` defines the number of circular subdivisions.
-    pub fn cylinder(self, x_subdivisions: usize, angle_subdivisions: usize) -> Self
-    {
-        if x_subdivisions < 2 || angle_subdivisions < 3 { return self; }
+    pub fn cylinder(self, x_subdivisions: usize, angle_subdivisions: usize) -> Self {
+        if x_subdivisions < 2 || angle_subdivisions < 3 {
+            return self;
+        }
         let mut positions = Vec::new();
         for i in 0..x_subdivisions + 1 {
             let x = i as f64 / x_subdivisions as f64;
@@ -347,10 +297,14 @@ impl MeshBuilder {
             for j in 0..angle_subdivisions as u32 {
                 indices.push(i * angle_subdivisions as u32 + j);
                 indices.push(i * angle_subdivisions as u32 + (j + 1) % angle_subdivisions as u32);
-                indices.push((i + 1) * angle_subdivisions as u32 + (j + 1) % angle_subdivisions as u32);
+                indices.push(
+                    (i + 1) * angle_subdivisions as u32 + (j + 1) % angle_subdivisions as u32,
+                );
 
                 indices.push(i * angle_subdivisions as u32 + j);
-                indices.push((i + 1) * angle_subdivisions as u32 + (j + 1) % angle_subdivisions as u32);
+                indices.push(
+                    (i + 1) * angle_subdivisions as u32 + (j + 1) % angle_subdivisions as u32,
+                );
                 indices.push((i + 1) * angle_subdivisions as u32 + j);
             }
         }
@@ -358,44 +312,38 @@ impl MeshBuilder {
     }
 
     /// Creates a triangle in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0` which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
-    pub fn triangle(self) -> Self
-    {
-        self.with_positions(vec![-3.0, -1.0, 0.0,  3.0, -1.0, 0.0,  0.0, 2.0, 0.0])
+    pub fn triangle(self) -> Self {
+        self.with_positions(vec![-3.0, -1.0, 0.0, 3.0, -1.0, 0.0, 0.0, 2.0, 0.0])
     }
 
     /// Creates a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
-    pub fn square(self) -> Self
-    {
-        self.with_indices(vec![0, 1, 2,  2, 1, 3])
-            .with_positions(vec![-1.0, -1.0, 0.0,  1.0, -1.0, 0.0,  -1.0, 1.0, 0.0,  1.0, 1.0, 0.0])
+    pub fn square(self) -> Self {
+        self.with_indices(vec![0, 1, 2, 2, 1, 3])
+            .with_positions(vec![
+                -1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0,
+            ])
     }
 
     /// Creates three connected triangles in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0`
     /// which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`
     /// and has a common vertex in `(0, 0, 0)`.
-    pub fn subdivided_triangle(self) -> Self
-    {
-        self.with_indices(vec![0, 2, 3,  0, 3, 1,  0, 1, 2])
-            .with_positions(vec![0.0, 0.0, 0.0,  -3.0, -1.0, 0.0,  3.0, -1.0, 0.0,  0.0, 2.0, 0.0])
+    pub fn subdivided_triangle(self) -> Self {
+        self.with_indices(vec![0, 2, 3, 0, 3, 1, 0, 1, 2])
+            .with_positions(vec![
+                0.0, 0.0, 0.0, -3.0, -1.0, 0.0, 3.0, -1.0, 0.0, 0.0, 2.0, 0.0,
+            ])
     }
 
     /// Creates a square in `x = [-1, 1]`, `z = [-1, 1]` and `y = 0`.
-    pub fn plane(self) -> Self
-    {
+    pub fn plane(self) -> Self {
         let plane_positions: Vec<f64> = vec![
-            -1.0, 0.0, -1.0,
-            1.0, 0.0, -1.0,
-            1.0, 0.0, 1.0,
-            -1.0, 0.0, 1.0
+            -1.0, 0.0, -1.0, 1.0, 0.0, -1.0, 1.0, 0.0, 1.0, -1.0, 0.0, 1.0,
         ];
-        let plane_indices: Vec<u32> = vec![
-            0, 2, 1,
-            0, 3, 2,
-        ];
-        self.with_indices(plane_indices).with_positions(plane_positions)
+        let plane_indices: Vec<u32> = vec![0, 2, 1, 0, 3, 2];
+        self.with_indices(plane_indices)
+            .with_positions(plane_positions)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -423,7 +371,8 @@ mod tests {
         f 3 7 8
         f 3 8 4
         f 5 1 4
-        f 5 4 8".to_string();
+        f 5 4 8"
+            .to_string();
 
         let mesh = MeshBuilder::new().with_obj(source).build().unwrap();
 

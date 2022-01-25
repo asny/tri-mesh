@@ -1,18 +1,15 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::mesh::Mesh;
 use crate::mesh::math::*;
+use crate::mesh::Mesh;
 
 /// # Bounding box
-impl Mesh
-{
+impl Mesh {
     /// Returns minimum and maximum coordinates of the axis aligned bounding box of the mesh.
-    pub fn extreme_coordinates(&self) -> (Vec3, Vec3)
-    {
+    pub fn extreme_coordinates(&self) -> (Vec3, Vec3) {
         let mut min_coordinates = vec3(std::f64::MAX, std::f64::MAX, std::f64::MAX);
         let mut max_coordinates = vec3(std::f64::MIN, std::f64::MIN, std::f64::MIN);
-        for vertex_id in self.vertex_iter()
-        {
+        for vertex_id in self.vertex_iter() {
             let position = self.vertex_position(vertex_id);
             for i in 0..3 {
                 min_coordinates[i] = min_coordinates[i].min(position[i]);
@@ -23,15 +20,13 @@ impl Mesh
     }
 
     /// Returns the center of the smallest axis aligned box which contains the entire mesh, ie. the axis aligned bounding box.
-    pub fn axis_aligned_bounding_box_center(&self) -> Vec3
-    {
+    pub fn axis_aligned_bounding_box_center(&self) -> Vec3 {
         let (min_coord, max_coord) = self.extreme_coordinates();
         0.5 * (max_coord + min_coord)
     }
 
     /// Returns the smallest axis aligned box which contains the entire mesh, ie. the axis aligned bounding box.
-    pub fn axis_aligned_bounding_box(&self) -> Mesh
-    {
+    pub fn axis_aligned_bounding_box(&self) -> Mesh {
         let (min_coord, max_coord) = self.extreme_coordinates();
         let mut mesh = crate::MeshBuilder::new().cube().build().unwrap();
         let scale = 0.5 * (max_coord - min_coord);
@@ -40,7 +35,6 @@ impl Mesh
         mesh.translate(translation);
         mesh
     }
-
 }
 
 #[cfg(test)]

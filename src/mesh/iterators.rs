@@ -1,12 +1,12 @@
 //! Defines iterator types for easy iterating mesh primitives. See [Mesh](crate::mesh::Mesh) for more information.
 
-use crate::mesh::Mesh;
+use crate::mesh::connectivity_info::ConnectivityInfo;
 use crate::mesh::ids::*;
 use crate::mesh::traversal::Walker;
-use crate::mesh::connectivity_info::ConnectivityInfo;
+use crate::mesh::Mesh;
 
 /// An iterator over the vertices. See [here](../struct.Mesh.html#method.vertex_iter) for more information.
-pub type VertexIter = Box<dyn Iterator<Item=VertexID>>;
+pub type VertexIter = Box<dyn Iterator<Item = VertexID>>;
 
 /// An iterator over the half-edges. See [here](../struct.Mesh.html#method.halfedge_iter) for more information.
 pub type HalfEdgeIter = Box<dyn Iterator<Item = HalfEdgeID>>;
@@ -15,35 +15,42 @@ pub type HalfEdgeIter = Box<dyn Iterator<Item = HalfEdgeID>>;
 pub type FaceIter = Box<dyn Iterator<Item = FaceID>>;
 
 /// An iterator over the half-edges starting in a given vertex. See [here](../struct.Mesh.html#method.vertex_halfedge_iter) for more information.
-pub struct VertexHalfedgeIter<'a>
-{
+pub struct VertexHalfedgeIter<'a> {
     walker: Walker<'a>,
     start: HalfEdgeID,
-    is_done: bool
+    is_done: bool,
 }
 
 impl<'a> VertexHalfedgeIter<'a> {
-    pub(crate) fn new(vertex_id: VertexID, connectivity_info: &'a ConnectivityInfo) -> VertexHalfedgeIter<'a>
-    {
+    pub(crate) fn new(
+        vertex_id: VertexID,
+        connectivity_info: &'a ConnectivityInfo,
+    ) -> VertexHalfedgeIter<'a> {
         let walker = Walker::new(connectivity_info).into_vertex_halfedge_walker(vertex_id);
         let start = walker.halfedge_id().unwrap();
-        VertexHalfedgeIter { walker, start, is_done: false }
+        VertexHalfedgeIter {
+            walker,
+            start,
+            is_done: false,
+        }
     }
 }
 
 impl<'a> Iterator for VertexHalfedgeIter<'a> {
     type Item = HalfEdgeID;
 
-    fn next(&mut self) -> Option<HalfEdgeID>
-    {
-        if self.is_done { return None; }
+    fn next(&mut self) -> Option<HalfEdgeID> {
+        if self.is_done {
+            return None;
+        }
         let curr = self.walker.halfedge_id().unwrap();
 
         match self.walker.face_id() {
             Some(_) => {
                 self.walker.as_previous().as_twin();
-            },
-            None => { // In the case there are holes in the one-ring
+            }
+            None => {
+                // In the case there are holes in the one-ring
                 self.walker.as_twin();
                 while let Some(_) = self.walker.face_id() {
                     self.walker.as_next().as_twin();
@@ -57,25 +64,30 @@ impl<'a> Iterator for VertexHalfedgeIter<'a> {
 }
 
 /// An iterator over the three half-edges in a face. See [here](../struct.Mesh.html#method.face_halfedge_iter) for more information.
-pub struct FaceHalfedgeIter<'a>
-{
+pub struct FaceHalfedgeIter<'a> {
     walker: Walker<'a>,
-    count: usize
+    count: usize,
 }
 
 impl<'a> FaceHalfedgeIter<'a> {
-    pub(crate) fn new(face_id: FaceID, connectivity_info: &'a ConnectivityInfo) -> FaceHalfedgeIter<'a>
-    {
-        FaceHalfedgeIter { walker: Walker::new(connectivity_info).into_face_halfedge_walker(face_id), count: 0 }
+    pub(crate) fn new(
+        face_id: FaceID,
+        connectivity_info: &'a ConnectivityInfo,
+    ) -> FaceHalfedgeIter<'a> {
+        FaceHalfedgeIter {
+            walker: Walker::new(connectivity_info).into_face_halfedge_walker(face_id),
+            count: 0,
+        }
     }
 }
 
 impl<'a> Iterator for FaceHalfedgeIter<'a> {
     type Item = HalfEdgeID;
 
-    fn next(&mut self) -> Option<HalfEdgeID>
-    {
-        if self.count == 3 { return None; }
+    fn next(&mut self) -> Option<HalfEdgeID> {
+        if self.count == 3 {
+            return None;
+        }
         self.walker.as_next();
         self.count += 1;
         Some(self.walker.halfedge_id().unwrap())
@@ -83,42 +95,38 @@ impl<'a> Iterator for FaceHalfedgeIter<'a> {
 }
 
 /// An iterator over the edges. See [here](../struct.Mesh.html#method.edge_iter) for more information.
-pub struct EdgeIter<'a>
-{
+pub struct EdgeIter<'a> {
     walker: Walker<'a>,
-    iter: HalfEdgeIter
+    iter: HalfEdgeIter,
 }
 
 impl<'a> EdgeIter<'a> {
-    pub(crate) fn new(connectivity_info: &'a ConnectivityInfo) -> EdgeIter<'a>
-    {
-        EdgeIter { walker: Walker::new(connectivity_info), iter: connectivity_info.halfedge_iterator() }
+    pub(crate) fn new(connectivity_info: &'a ConnectivityInfo) -> EdgeIter<'a> {
+        EdgeIter {
+            walker: Walker::new(connectivity_info),
+            iter: connectivity_info.halfedge_iterator(),
+        }
     }
 }
 
 impl<'a> Iterator for EdgeIter<'a> {
     type Item = HalfEdgeID;
 
-    fn next(&mut self) -> Option<HalfEdgeID>
-    {
+    fn next(&mut self) -> Option<HalfEdgeID> {
         if let Some(next_id) = self.iter.next() {
-            if self.walker.as_halfedge_walker(next_id).twin_id().unwrap() < next_id
-            {
+            if self.walker.as_halfedge_walker(next_id).twin_id().unwrap() < next_id {
                 self.next()
-            }
-            else {
+            } else {
                 Some(next_id)
             }
-        }
-        else {
+        } else {
             None
         }
     }
 }
 
 /// # Iterators
-impl Mesh
-{
+impl Mesh {
     ///
     /// Iterator over the vertex ids.
     ///
@@ -133,8 +141,7 @@ impl Mesh
     /// }
     /// ```
     ///
-    pub fn vertex_iter(&self) -> VertexIter
-    {
+    pub fn vertex_iter(&self) -> VertexIter {
         self.connectivity_info.vertex_iterator()
     }
 
@@ -158,8 +165,7 @@ impl Mesh
     /// # assert_eq!(i, 36);
     /// ```
     ///
-    pub fn halfedge_iter(&self) -> HalfEdgeIter
-    {
+    pub fn halfedge_iter(&self) -> HalfEdgeIter {
         self.connectivity_info.halfedge_iterator()
     }
 
@@ -183,8 +189,7 @@ impl Mesh
     /// # assert_eq!(i, 18);
     /// ```
     ///
-    pub fn edge_iter(&self) -> EdgeIter
-    {
+    pub fn edge_iter(&self) -> EdgeIter {
         EdgeIter::new(&self.connectivity_info)
     }
 
@@ -202,8 +207,7 @@ impl Mesh
     /// }
     /// ```
     ///
-    pub fn face_iter(&self) -> FaceIter
-    {
+    pub fn face_iter(&self) -> FaceIter {
         self.connectivity_info.face_iterator()
     }
 
@@ -230,8 +234,7 @@ impl Mesh
     /// one_ring_average_position /= i as f64;
     /// ```
     ///
-    pub fn vertex_halfedge_iter(&self, vertex_id: VertexID) -> VertexHalfedgeIter
-    {
+    pub fn vertex_halfedge_iter(&self, vertex_id: VertexID) -> VertexHalfedgeIter {
         VertexHalfedgeIter::new(vertex_id, &self.connectivity_info)
     }
 
@@ -251,8 +254,7 @@ impl Mesh
     /// # assert_eq!(face_circumference, 4.0f64 + 8.0f64.sqrt());
     /// ```
     ///
-    pub fn face_halfedge_iter(&self, face_id: FaceID) -> FaceHalfedgeIter
-    {
+    pub fn face_halfedge_iter(&self, face_id: FaceID) -> FaceHalfedgeIter {
         FaceHalfedgeIter::new(face_id, &self.connectivity_info)
     }
 }
@@ -268,7 +270,7 @@ mod tests {
 
         let mut i = 0;
         for _ in mesh.vertex_iter() {
-            i = i+1;
+            i = i + 1;
         }
         assert_eq!(4, i);
 
@@ -277,7 +279,7 @@ mod tests {
         i = 0;
         for vertex_id in mesh.vertex_iter() {
             assert_eq!(vertex_id, vec[i]);
-            i = i+1;
+            i = i + 1;
         }
     }
 
@@ -287,7 +289,7 @@ mod tests {
 
         let mut i = 0;
         for _ in mesh.halfedge_iter() {
-            i = i+1;
+            i = i + 1;
         }
         assert_eq!(12, i);
 
@@ -296,7 +298,7 @@ mod tests {
         i = 0;
         for halfedge_id in mesh.halfedge_iter() {
             assert_eq!(halfedge_id, vec[i]);
-            i = i+1;
+            i = i + 1;
         }
     }
 
@@ -306,7 +308,7 @@ mod tests {
 
         let mut i = 0;
         for _ in mesh.edge_iter() {
-            i = i+1;
+            i = i + 1;
         }
         assert_eq!(6, i);
 
@@ -315,7 +317,7 @@ mod tests {
         i = 0;
         for halfedge_id in mesh.edge_iter() {
             assert_eq!(halfedge_id, vec[i]);
-            i = i+1;
+            i = i + 1;
         }
 
         // Test that the twin is not returned
@@ -332,7 +334,7 @@ mod tests {
 
         let mut i = 0;
         for _ in mesh.face_iter() {
-            i = i+1;
+            i = i + 1;
         }
         assert_eq!(3, i);
 
@@ -341,7 +343,7 @@ mod tests {
         i = 0;
         for face_id in mesh.face_iter() {
             assert_eq!(face_id, vec[i]);
-            i = i+1;
+            i = i + 1;
         }
     }
 
@@ -360,17 +362,16 @@ mod tests {
 
     #[test]
     fn test_vertex_halfedge_iterator_with_holes() {
-        let indices: Vec<u32> = vec![0, 2, 3,  0, 4, 1,  0, 1, 2];
+        let indices: Vec<u32> = vec![0, 2, 3, 0, 4, 1, 0, 1, 2];
         let positions: Vec<f64> = vec![0.0; 5 * 3];
         let mesh = Mesh::new(indices, positions);
 
         let mut i = 0;
         for halfedge_id in mesh.vertex_halfedge_iter(VertexID::new(0)) {
             assert!(mesh.walker_from_halfedge(halfedge_id).vertex_id().is_some());
-            i = i+1;
+            i = i + 1;
         }
-        assert_eq!(i,4, "All edges of a one-ring are not visited");
-
+        assert_eq!(i, 4, "All edges of a one-ring are not visited");
     }
 
     #[test]
@@ -381,7 +382,7 @@ mod tests {
             let walker = mesh.walker_from_halfedge(halfedge_id);
             assert!(walker.halfedge_id().is_some());
             assert!(walker.face_id().is_some());
-            i = i+1;
+            i = i + 1;
         }
         assert_eq!(i, 3, "All edges of a face are not visited");
     }
