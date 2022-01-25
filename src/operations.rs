@@ -38,10 +38,6 @@ mod transformations;
 #[doc(inline)]
 pub use transformations::*;
 
-mod validity;
-#[doc(inline)]
-pub use validity::*;
-
 mod vertex_measures;
 #[doc(inline)]
 pub use vertex_measures::*;

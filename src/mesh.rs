@@ -21,6 +21,10 @@ mod edit;
 #[doc(inline)]
 pub use edit::*;
 
+mod validity;
+#[doc(inline)]
+pub use validity::*;
+
 mod merge;
 #[doc(inline)]
 pub use merge::*;
