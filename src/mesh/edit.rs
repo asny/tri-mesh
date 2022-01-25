@@ -419,7 +419,7 @@ mod tests {
                 let edge = mesh.connecting_edge(v2, v3).unwrap();
                 let twin = mesh.walker_from_halfedge(edge).twin_id().unwrap();
                 assert!(edge == halfedge_id || twin == halfedge_id,
-                        format!("Flipped edge {} or flipped edge twin {} should be equal to before flipped edge id {}", edge, twin, halfedge_id));
+                        "Flipped edge {} or flipped edge twin {} should be equal to before flipped edge id {}", edge, twin, halfedge_id);
                 no_flips = no_flips + 1;
             }
         }
@@ -450,7 +450,7 @@ mod tests {
                 let edge = mesh.connecting_edge(v2, v3).unwrap();
                 let twin = mesh.walker_from_halfedge(edge).twin_id().unwrap();
                 assert!(edge == halfedge_id || twin == halfedge_id,
-                        format!("Flipped edge {} or flipped edge twin {} should be equal to before flipped edge id {}", edge, twin, halfedge_id));
+                        "Flipped edge {} or flipped edge twin {} should be equal to before flipped edge id {}", edge, twin, halfedge_id);
                 no_flips = no_flips + 1;
             }
         }
