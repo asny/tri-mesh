@@ -1,5 +1,5 @@
 //!
-//! Contains functionality for parsing to and from a [Mesh](crate::Mesh).
+//! Contains functionality for parsing from a 3d file to a [Mesh](crate::Mesh) and back.
 //!
 
 #[cfg(feature = "obj-io")]

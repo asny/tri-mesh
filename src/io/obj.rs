@@ -11,12 +11,12 @@ use crate::TriMeshResult;
 /// # use tri_mesh::*;
 /// # fn main() -> tri_mesh::TriMeshResult<()> {
 ///     let obj_source = std::fs::read_to_string("foo.obj").expect("Something went wrong reading the file");
-///     let mesh = from_obj(obj_source)?;
+///     let mesh = parse_from_obj(obj_source)?;
 /// #    Ok(())
 /// # }
 /// ```
-pub fn from_obj(source: String) -> TriMeshResult<Mesh> {
-    from_named_obj(source, "")
+pub fn parse_from_obj(source: String) -> TriMeshResult<Mesh> {
+    parse_from_named_obj(source, "")
 }
 
 ///
@@ -29,11 +29,11 @@ pub fn from_obj(source: String) -> TriMeshResult<Mesh> {
 /// # use tri_mesh::*;
 /// # fn main() -> tri_mesh::TriMeshResult<()> {
 ///     let obj_source = std::fs::read_to_string("foo.obj").expect("Something went wrong reading the file");
-///     let mesh = from_named_obj(obj_source, "my_object")?;
+///     let mesh = parse_from_named_obj(obj_source, "my_object")?;
 /// #    Ok(())
 /// # }
 /// ```
-pub fn from_named_obj(source: String, object_name: &str) -> TriMeshResult<Mesh> {
+pub fn parse_from_named_obj(source: String, object_name: &str) -> TriMeshResult<Mesh> {
     let objs = wavefront_obj::obj::parse(source).unwrap();
     let mut positions = Vec::new();
     let mut indices = Vec::new();
@@ -150,7 +150,7 @@ mod tests {
         f 5 4 8"
             .to_string();
 
-        let mesh = from_obj(source).unwrap();
+        let mesh = parse_from_obj(source).unwrap();
 
         assert_eq!(mesh.no_faces(), 12);
         assert_eq!(mesh.no_vertices(), 8);
