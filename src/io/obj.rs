@@ -1,6 +1,7 @@
-use crate::MeshBuilder;
+use crate::mesh::Mesh;
+use crate::TriMeshResult;
 
-impl MeshBuilder {
+impl Mesh {
     ///
     /// Parses the .obj file and extracts the connectivity information (indices) and positions which is used to construct a mesh when the `build` method is called.
     /// If the .obj file contains multiple objects, all objects are added to the mesh, but they will not be connected.
@@ -11,13 +12,12 @@ impl MeshBuilder {
     /// # use tri_mesh::*;
     /// # fn main() -> tri_mesh::TriMeshResult<()> {
     ///     let obj_source = std::fs::read_to_string("foo.obj").expect("Something went wrong reading the file");
-    ///     let mesh = MeshBuilder::new().with_obj(obj_source).build()?;
+    ///     let mesh = Mesh::from_obj(obj_source)?;
     /// #    Ok(())
     /// # }
     /// ```
-    #[cfg(feature = "obj-io")]
-    pub fn with_obj(self, source: String) -> Self {
-        self.with_named_obj(source, "")
+    pub fn from_obj(source: String) -> TriMeshResult<Self> {
+        Self::from_named_obj(source, "")
     }
 
     ///
@@ -30,12 +30,11 @@ impl MeshBuilder {
     /// # use tri_mesh::*;
     /// # fn main() -> tri_mesh::TriMeshResult<()> {
     ///     let obj_source = std::fs::read_to_string("foo.obj").expect("Something went wrong reading the file");
-    ///     let mesh = MeshBuilder::new().with_named_obj(obj_source, "my_object").build()?;
+    ///     let mesh = Mesh::from_named_obj(obj_source, "my_object")?;
     /// #    Ok(())
     /// # }
     /// ```
-    #[cfg(feature = "obj-io")]
-    pub fn with_named_obj(mut self, source: String, object_name: &str) -> Self {
+    pub fn from_named_obj(source: String, object_name: &str) -> TriMeshResult<Self> {
         let objs = wavefront_obj::obj::parse(source).unwrap();
         let mut positions = Vec::new();
         let mut indices = Vec::new();
@@ -66,9 +65,7 @@ impl MeshBuilder {
                 }
             }
         }
-        self.positions = Some(positions);
-        self.indices = Some(indices);
-        self
+        Ok(Mesh::new(indices, positions))
     }
 }
 
@@ -101,7 +98,7 @@ mod tests {
         f 5 4 8"
             .to_string();
 
-        let mesh = MeshBuilder::new().with_obj(source).build().unwrap();
+        let mesh = Mesh::from_obj(source).unwrap();
 
         assert_eq!(mesh.no_faces(), 12);
         assert_eq!(mesh.no_vertices(), 8);

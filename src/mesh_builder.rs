@@ -1,13 +1,6 @@
 //!
-//! Module containing [MeshBuilder](crate::mesh_builder::MeshBuilder) which has functionality to build a new [Mesh](crate::mesh::Mesh) instance.
+//! Module containing [MeshBuilder] which has functionality to build a new [Mesh] instance.
 //!
-
-#[cfg(feature = "obj-io")]
-#[cfg_attr(docsrs, doc(cfg(feature = "obj-io")))]
-mod obj;
-#[doc(inline)]
-#[cfg(feature = "obj-io")]
-pub use obj::*;
 
 use crate::mesh::Mesh;
 use crate::TriMeshResult;
