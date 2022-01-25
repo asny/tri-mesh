@@ -1,0 +1,41 @@
+name: build
+
+on: [ push, pull_request ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  runs-on: ${{ matrix.os }}
+  strategy:
+    matrix:
+      os: [ ubuntu-latest, windows-latest, macos-latest ]
+      rust: [ stable, nightly ]
+
+  steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Rust Toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        components: rustfmt, clippy
+        override: true
+
+    - name: Check
+      uses: actions-rs/cargo@v1
+      with:
+        command: check
+
+    - name: Rustfmt
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: -- --check
+
+    - name: Test
+      uses: actions-rs/cargo@v1
+      with:
+        command: test
+
