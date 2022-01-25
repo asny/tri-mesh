@@ -36,10 +36,6 @@ mod mesh_builder;
 #[doc(inline)]
 pub use mesh_builder::*;
 
-mod parser;
-#[doc(inline)]
-pub use parser::*;
-
 pub mod prelude;
 
 pub use crate::mesh_builder::MeshBuilder;
