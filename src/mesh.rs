@@ -81,13 +81,13 @@ impl Mesh {
     pub(crate) fn new(indices: Vec<u32>, positions: Vec<f64>) -> Mesh {
         let no_vertices = positions.len() / 3;
         let no_faces = indices.len() / 3;
-        let mut mesh = Mesh {
+        let mesh = Mesh {
             connectivity_info: ConnectivityInfo::new(no_vertices, no_faces),
         };
 
         // Create vertices
         for i in 0..no_vertices {
-            mesh.create_vertex(vec3(
+            mesh.connectivity_info.new_vertex(vec3(
                 positions[i * 3],
                 positions[i * 3 + 1],
                 positions[i * 3 + 2],
@@ -195,26 +195,6 @@ impl Mesh {
             }
         }
         true
-    }
-
-    pub(crate) fn create_vertex(&mut self, position: Vec3) -> VertexID {
-        self.connectivity_info.new_vertex(position)
-    }
-
-    pub(crate) fn create_boundary_edges(&mut self) {
-        let mut walker = self.walker();
-        for halfedge_id in self.halfedge_iter() {
-            walker.as_halfedge_walker(halfedge_id);
-            if walker.twin_id().is_none() {
-                let boundary_halfedge_id = self.connectivity_info.new_halfedge(
-                    walker.as_previous().vertex_id(),
-                    None,
-                    None,
-                );
-                self.connectivity_info
-                    .set_halfedge_twin(halfedge_id, boundary_halfedge_id);
-            }
-        }
     }
 }
 

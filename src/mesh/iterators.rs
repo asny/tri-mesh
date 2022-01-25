@@ -20,10 +20,7 @@ pub struct VertexHalfedgeIter<'a> {
 }
 
 impl<'a> VertexHalfedgeIter<'a> {
-    pub(crate) fn new(
-        vertex_id: VertexID,
-        connectivity_info: &'a ConnectivityInfo,
-    ) -> VertexHalfedgeIter<'a> {
+    fn new(vertex_id: VertexID, connectivity_info: &'a ConnectivityInfo) -> VertexHalfedgeIter<'a> {
         let walker = Walker::new(connectivity_info).into_vertex_halfedge_walker(vertex_id);
         let start = walker.halfedge_id().unwrap();
         VertexHalfedgeIter {
@@ -68,10 +65,7 @@ pub struct FaceHalfedgeIter<'a> {
 }
 
 impl<'a> FaceHalfedgeIter<'a> {
-    pub(crate) fn new(
-        face_id: FaceID,
-        connectivity_info: &'a ConnectivityInfo,
-    ) -> FaceHalfedgeIter<'a> {
+    fn new(face_id: FaceID, connectivity_info: &'a ConnectivityInfo) -> FaceHalfedgeIter<'a> {
         FaceHalfedgeIter {
             walker: Walker::new(connectivity_info).into_face_halfedge_walker(face_id),
             count: 0,
@@ -99,7 +93,7 @@ pub struct EdgeIter<'a> {
 }
 
 impl<'a> EdgeIter<'a> {
-    pub(crate) fn new(connectivity_info: &'a ConnectivityInfo) -> EdgeIter<'a> {
+    fn new(connectivity_info: &'a ConnectivityInfo) -> EdgeIter<'a> {
         EdgeIter {
             walker: Walker::new(connectivity_info),
             iter: connectivity_info.halfedge_iterator(),

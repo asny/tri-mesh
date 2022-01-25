@@ -31,7 +31,7 @@ impl Mesh {
                 return *vid;
             }
             let p = other.vertex_position(vertex_id);
-            let vid = mesh.create_vertex(p.clone());
+            let vid = mesh.connectivity_info.new_vertex(p.clone());
             mapping.insert(vertex_id, vid);
             vid
         };
@@ -75,6 +75,22 @@ impl Mesh {
         }
 
         self.create_boundary_edges();
+    }
+
+    fn create_boundary_edges(&mut self) {
+        let mut walker = self.walker();
+        for halfedge_id in self.halfedge_iter() {
+            walker.as_halfedge_walker(halfedge_id);
+            if walker.twin_id().is_none() {
+                let boundary_halfedge_id = self.connectivity_info.new_halfedge(
+                    walker.as_previous().vertex_id(),
+                    None,
+                    None,
+                );
+                self.connectivity_info
+                    .set_halfedge_twin(halfedge_id, boundary_halfedge_id);
+            }
+        }
     }
 
     ///

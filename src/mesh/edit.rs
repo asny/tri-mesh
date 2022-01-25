@@ -99,7 +99,7 @@ impl Mesh {
         let twin_vertex_id = walker.vertex_id();
         let is_boundary = walker.face_id().is_none();
 
-        let new_vertex_id = self.create_vertex(position);
+        let new_vertex_id = self.connectivity_info.new_vertex(position);
         self.split_one_face(split_halfedge_id, twin_halfedge_id, new_vertex_id);
 
         if !is_boundary {
@@ -120,7 +120,7 @@ impl Mesh {
     /// Split the given face into three new faces.
     /// Returns the id of the new vertex positioned at the given position.
     pub fn split_face(&mut self, face_id: FaceID, position: Vec3) -> VertexID {
-        let new_vertex_id = self.create_vertex(position);
+        let new_vertex_id = self.connectivity_info.new_vertex(position);
 
         let mut walker = self.walker_from_face(face_id);
         let halfedge_id1 = walker.halfedge_id().unwrap();
