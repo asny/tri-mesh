@@ -1,5 +1,5 @@
+use crate::math::*;
 use crate::mesh::ids::*;
-use crate::mesh::math::Vec3;
 use std::cell::RefCell;
 
 #[derive(Clone, Debug)]
