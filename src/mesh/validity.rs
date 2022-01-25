@@ -13,7 +13,7 @@ impl Mesh {
     ///
     /// # Errors
     ///
-    /// If the mesh is not valid, an [IsNotValid](crate::mesh::Error::MeshIsInvalid) error with a description of the problem is returned.
+    /// If the mesh is not valid, an [MeshError::MeshIsInvalid] error with a description of the problem is returned.
     ///
     pub fn is_valid(&self) -> TriMeshResult<()> {
         for vertex_id in self.vertex_iter() {

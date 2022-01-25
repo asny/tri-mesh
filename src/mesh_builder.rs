@@ -94,7 +94,7 @@ impl MeshBuilder {
     ///
     /// # Errors
     ///
-    /// If no positions are specified, [NoPositionsSpecified](crate::mesh_builder::Error::NoPositionsSpecified) error is returned.
+    /// If no positions are specified, [MeshBuilderError::NoPositionsSpecified] error is returned.
     ///
     pub fn build(self) -> TriMeshResult<Mesh> {
         let positions = self
