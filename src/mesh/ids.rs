@@ -15,26 +15,24 @@ pub trait ID: Clone + Eq + Copy + Ord + Hash + Debug + Deref<Target = u32> {
 /// An unique ID for a vertex
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct VertexID {
-    val: u32,
-}
+pub struct VertexID(u32);
 
 impl ID for VertexID {
     unsafe fn new(val: u32) -> VertexID {
-        VertexID { val }
+        VertexID(val)
     }
 }
 
 impl Deref for VertexID {
     type Target = u32;
     fn deref(&self) -> &Self::Target {
-        &self.val
+        &self.0
     }
 }
 
 impl fmt::Display for VertexID {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.val)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -42,26 +40,24 @@ impl fmt::Display for VertexID {
 /// An unique ID for a halfedge
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct HalfEdgeID {
-    val: u32,
-}
+pub struct HalfEdgeID(u32);
 
 impl ID for HalfEdgeID {
     unsafe fn new(val: u32) -> HalfEdgeID {
-        HalfEdgeID { val }
+        HalfEdgeID(val)
     }
 }
 
 impl Deref for HalfEdgeID {
     type Target = u32;
     fn deref(&self) -> &Self::Target {
-        &self.val
+        &self.0
     }
 }
 
 impl fmt::Display for HalfEdgeID {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.val)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -69,26 +65,24 @@ impl fmt::Display for HalfEdgeID {
 /// An unique ID for a face
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct FaceID {
-    val: u32,
-}
+pub struct FaceID(u32);
 
 impl ID for FaceID {
     unsafe fn new(val: u32) -> FaceID {
-        FaceID { val }
+        FaceID(val)
     }
 }
 
 impl Deref for FaceID {
     type Target = u32;
     fn deref(&self) -> &Self::Target {
-        &self.val
+        &self.0
     }
 }
 
 impl fmt::Display for FaceID {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.val)
+        write!(f, "{}", self.0)
     }
 }
 
