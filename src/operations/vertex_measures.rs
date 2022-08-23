@@ -19,11 +19,10 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MeshBuilder;
 
     #[test]
     fn test_vertex_normal() {
-        let mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
+        let mesh = crate::test_utility::subdivided_triangle();
         let computed_normal = mesh.vertex_normal(unsafe { VertexID::new(0) });
         assert_eq!(0.0, computed_normal.x);
         assert_eq!(0.0, computed_normal.y);

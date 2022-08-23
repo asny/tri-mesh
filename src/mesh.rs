@@ -332,7 +332,7 @@ mod tests {
 
     #[test]
     fn test_three_face_connectivity() {
-        let mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
+        let mesh = crate::test_utility::subdivided_triangle();
         let mut id = None;
         for vertex_id in mesh.vertex_iter() {
             let mut round = true;
@@ -380,11 +380,7 @@ mod tests {
         let positions: Vec<f64> = vec![
             0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
         ];
-        let mesh = MeshBuilder::new()
-            .with_indices(indices)
-            .with_positions(positions)
-            .build()
-            .unwrap();
+        let mesh = Mesh::new(indices, positions);
 
         let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
 

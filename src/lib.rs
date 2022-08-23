@@ -41,3 +41,18 @@ pub mod prelude;
 
 /// Result returned from an `tri-mesh` operation.
 pub type TriMeshResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+#[cfg(test)]
+mod test_utility {
+    /// Creates three connected triangles in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0`
+    /// which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`
+    /// and has a common vertex in `(0, 0, 0)`.
+    pub(crate) fn subdivided_triangle() -> super::Mesh {
+        super::Mesh::new(
+            vec![0, 2, 3, 0, 3, 1, 0, 1, 2],
+            vec![
+                0.0, 0.0, 0.0, -3.0, -1.0, 0.0, 3.0, -1.0, 0.0, 0.0, 2.0, 0.0,
+            ],
+        )
+    }
+}

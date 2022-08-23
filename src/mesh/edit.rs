@@ -602,7 +602,7 @@ mod tests {
 
     #[test]
     fn test_collapse_edge() {
-        let mut mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
+        let mut mesh = crate::test_utility::subdivided_triangle();
         for halfedge_id in mesh.halfedge_iter() {
             if !mesh.is_edge_on_boundary(halfedge_id) {
                 mesh.collapse_edge(halfedge_id);
@@ -672,7 +672,7 @@ mod tests {
 
     #[test]
     fn test_remove_face_when_three_connected_faces() {
-        let mut mesh = MeshBuilder::new().subdivided_triangle().build().unwrap();
+        let mut mesh = crate::test_utility::subdivided_triangle();
 
         let face_id = mesh.face_iter().next().unwrap();
 
