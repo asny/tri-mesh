@@ -219,6 +219,25 @@ impl std::fmt::Display for Mesh {
     }
 }
 
+impl From<three_d_asset::TriMesh> for Mesh {
+    fn from(tri_mesh: three_d_asset::TriMesh) -> Self {
+        Self::new(
+            tri_mesh
+                .indices
+                .map(|i| i.into_u32())
+                .unwrap_or((0..tri_mesh.positions.len() as u32).collect::<Vec<_>>())
+                .into_iter()
+                .collect::<Vec<_>>(),
+            tri_mesh
+                .positions
+                .into_f64()
+                .into_iter()
+                .flat_map(|v| [v.x, v.y, v.z])
+                .collect::<Vec<_>>(),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -16,4 +16,5 @@ default = []
 
 [dependencies]
 cgmath = "0.18"
+three-d-asset = {git="https://github.com/asny/three-d-asset" }
 thiserror = "1.0"
