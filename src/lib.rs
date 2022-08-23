@@ -37,9 +37,6 @@ pub use operations::*;
 pub mod mesh_builder;
 pub use mesh_builder::*;
 
-pub mod io;
-pub use io::*;
-
 pub mod prelude;
 
 /// Result returned from an `tri-mesh` operation.

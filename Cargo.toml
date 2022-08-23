@@ -12,10 +12,8 @@ keywords = ["mesh", "geometry", "3d", "half-edge", "graphics"]
 exclude = ["/examples", ".gitignore"]
 
 [features]
-default = ["obj-io"]
-obj-io = ["wavefront_obj"] # Support for loading/saving .obj files
+default = []
 
 [dependencies]
 cgmath = "0.18"
 thiserror = "1.0"
-wavefront_obj = { version = "5.1", optional = true }
