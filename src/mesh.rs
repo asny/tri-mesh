@@ -32,6 +32,10 @@ mod cleanup;
 #[doc(inline)]
 pub use cleanup::*;
 
+mod append;
+#[doc(inline)]
+pub use append::*;
+
 mod connectivity_info;
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
