@@ -37,3 +37,11 @@ pub use transformations::*;
 mod vertex_measures;
 #[doc(inline)]
 pub use vertex_measures::*;
+
+mod merge;
+#[doc(inline)]
+pub use merge::*;
+
+mod split;
+#[doc(inline)]
+pub use split::*;

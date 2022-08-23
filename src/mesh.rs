@@ -28,13 +28,9 @@ mod orientation;
 #[doc(inline)]
 pub use orientation::*;
 
-mod merge;
+mod cleanup;
 #[doc(inline)]
-pub use merge::*;
-
-mod split;
-#[doc(inline)]
-pub use split::*;
+pub use cleanup::*;
 
 mod connectivity_info;
 
