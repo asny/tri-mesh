@@ -317,6 +317,18 @@ impl Mesh {
         walker.as_twin();
     }
 
+    pub fn add_vertex(&mut self, position: Vec3) -> VertexID {
+        self.connectivity_info.new_vertex(position)
+    }
+
+    
+
+    pub fn remove_vertex_if_lonely(&mut self, vertex_id: VertexID) {
+        if self.connectivity_info.vertex_halfedge(vertex_id).is_none() {
+            self.connectivity_info.remove_vertex(vertex_id);
+        }
+    }
+
     /// Removes the given face and the adjacent edges if they are then not connected to any face.
     pub fn remove_face(&mut self, face_id: FaceID) {
         let edges: Vec<HalfEdgeID> = self.face_halfedge_iter(face_id).collect();

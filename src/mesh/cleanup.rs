@@ -18,7 +18,7 @@ impl Mesh {
         }
     }
 
-    pub fn remove_edge_if_lonely(&mut self, halfedge_id: HalfEdgeID) {
+    pub(super) fn remove_edge_if_lonely(&mut self, halfedge_id: HalfEdgeID) {
         let mut walker = self.walker_from_halfedge(halfedge_id);
         if walker.face_id().is_none() && walker.as_twin().face_id().is_none() {
             let vertex_id1 = walker.vertex_id().unwrap();
@@ -53,12 +53,6 @@ impl Mesh {
                     .set_vertex_halfedge(vertex_id2, new_edge);
                 self.remove_vertex_if_lonely(vertex_id2);
             }
-        }
-    }
-
-    pub fn remove_vertex_if_lonely(&mut self, vertex_id: VertexID) {
-        if self.connectivity_info.vertex_halfedge(vertex_id).is_none() {
-            self.connectivity_info.remove_vertex(vertex_id);
         }
     }
 
