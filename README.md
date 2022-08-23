@@ -54,17 +54,14 @@ fn main() {
 use tri_mesh::*;
 
 fn main() {
-    // Construct any mesh, this time, we will construct a simple icosahedron
-    let mesh = MeshBuilder::new().icosahedron().build().unwrap();
-    
+    // Construct any mesh, this time, we will construct a simple sphere
+    let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
+
     // Compute the extreme coordinates which defines the axis aligned bounding box..
     let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
     
     // .. or construct an actual mesh representing the axis aligned bounding box
     let aabb = mesh.axis_aligned_bounding_box();
-    
-    // Export the bounding box to an obj file
-    std::fs::write("foo.obj", mesh.parse_as_obj()).unwrap();
 }
 ```
 
