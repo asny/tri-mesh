@@ -254,7 +254,6 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MeshBuilder;
 
     #[test]
     fn test_vertex_iterator() {
@@ -368,7 +367,7 @@ mod tests {
 
     #[test]
     fn test_face_halfedge_iterator() {
-        let mesh = MeshBuilder::new().triangle().build().unwrap();
+        let mesh = crate::test_utility::triangle();
         let mut i = 0;
         for halfedge_id in mesh.face_halfedge_iter(unsafe { FaceID::new(0) }) {
             let walker = mesh.walker_from_halfedge(halfedge_id);

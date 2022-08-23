@@ -51,18 +51,16 @@ impl Mesh {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
-
     #[test]
     fn test_face_area() {
-        let mesh = MeshBuilder::new().triangle().build().unwrap();
+        let mesh = crate::test_utility::triangle();
         let face_id = mesh.face_iter().next().unwrap();
         assert_eq!(9.0, mesh.face_area(face_id));
     }
 
     #[test]
     fn test_face_normal() {
-        let mesh = MeshBuilder::new().triangle().build().unwrap();
+        let mesh = crate::test_utility::triangle();
         let face_id = mesh.face_iter().next().unwrap();
         let computed_normal = mesh.face_normal(face_id);
         assert_eq!(0.0, computed_normal.x);
@@ -72,7 +70,7 @@ mod tests {
 
     #[test]
     fn test_face_center() {
-        let mesh = MeshBuilder::new().triangle().build().unwrap();
+        let mesh = crate::test_utility::triangle();
         let face_id = mesh.face_iter().next().unwrap();
         let center = mesh.face_center(face_id);
         assert_eq!(0.0, center.x);

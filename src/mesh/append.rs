@@ -81,9 +81,9 @@ mod tests {
     use crate::MeshBuilder;
 
     #[test]
-    fn test_box_icosahedron_append() {
+    fn test_box_sphere_append() {
         let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
-        let mut mesh2 = MeshBuilder::new().icosahedron().build().unwrap();
+        let mut mesh2: Mesh = three_d_asset::TriMesh::sphere(3).into();
         mesh2.translate(vec3(0.5, 0.5, 0.5));
 
         mesh1.append(&mesh2);

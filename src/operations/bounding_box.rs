@@ -39,11 +39,10 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MeshBuilder;
 
     #[test]
     fn test_axis_aligned_bounding_box() {
-        let mut mesh = MeshBuilder::new().cylinder(3, 16).build().unwrap();
+        let mut mesh: Mesh = three_d_asset::TriMesh::cylinder(16).into();
         mesh.non_uniform_scale(4.5, 0.1, -4.5);
         mesh.translate(vec3(-1.5, 3.7, 9.1));
 

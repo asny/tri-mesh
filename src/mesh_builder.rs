@@ -136,60 +136,6 @@ impl MeshBuilder {
         ])
     }
 
-    /// Creates an icosahedron, i.e. a discretised sphere.
-    pub fn icosahedron(self) -> Self {
-        let x = 0.525731112119133606;
-        let z = 0.850650808352039932;
-
-        self.with_positions(vec![
-            -x, 0.0, z, x, 0.0, z, -x, 0.0, -z, x, 0.0, -z, 0.0, z, x, 0.0, z, -x, 0.0, -z, x, 0.0,
-            -z, -x, z, x, 0.0, -z, x, 0.0, z, -x, 0.0, -z, -x, 0.0,
-        ])
-        .with_indices(vec![
-            0, 1, 4, 0, 4, 9, 9, 4, 5, 4, 8, 5, 4, 1, 8, 8, 1, 10, 8, 10, 3, 5, 8, 3, 5, 3, 2, 2,
-            3, 7, 7, 3, 10, 7, 10, 6, 7, 6, 11, 11, 6, 0, 0, 6, 1, 6, 10, 1, 9, 11, 0, 9, 2, 11, 9,
-            5, 2, 7, 11, 2,
-        ])
-    }
-
-    /// Creates a cylinder with the x-direction as axis, length 1 and radius 1.
-    /// `x_subdivisions` defines the number of subdivisions in the x-direction
-    /// and `angle_subdivisions` defines the number of circular subdivisions.
-    pub fn cylinder(self, x_subdivisions: usize, angle_subdivisions: usize) -> Self {
-        if x_subdivisions < 2 || angle_subdivisions < 3 {
-            return self;
-        }
-        let mut positions = Vec::new();
-        for i in 0..x_subdivisions + 1 {
-            let x = i as f64 / x_subdivisions as f64;
-            for j in 0..angle_subdivisions {
-                let angle = 2.0 * std::f64::consts::PI * j as f64 / angle_subdivisions as f64;
-
-                positions.push(x);
-                positions.push(angle.cos());
-                positions.push(angle.sin());
-            }
-        }
-
-        let mut indices = Vec::new();
-        for i in 0..x_subdivisions as u32 {
-            for j in 0..angle_subdivisions as u32 {
-                indices.push(i * angle_subdivisions as u32 + j);
-                indices.push(i * angle_subdivisions as u32 + (j + 1) % angle_subdivisions as u32);
-                indices.push(
-                    (i + 1) * angle_subdivisions as u32 + (j + 1) % angle_subdivisions as u32,
-                );
-
-                indices.push(i * angle_subdivisions as u32 + j);
-                indices.push(
-                    (i + 1) * angle_subdivisions as u32 + (j + 1) % angle_subdivisions as u32,
-                );
-                indices.push((i + 1) * angle_subdivisions as u32 + j);
-            }
-        }
-        self.with_positions(positions).with_indices(indices)
-    }
-
     /// Creates a triangle in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0` which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
     pub fn triangle(self) -> Self {
         self.with_positions(vec![-3.0, -1.0, 0.0, 3.0, -1.0, 0.0, 0.0, 2.0, 0.0])

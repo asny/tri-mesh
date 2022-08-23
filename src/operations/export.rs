@@ -215,7 +215,7 @@ mod tests {
 
     #[test]
     fn test_indexed_export() {
-        let mesh = MeshBuilder::new().cylinder(3, 16).build().unwrap();
+        let mesh: Mesh = three_d_asset::TriMesh::cylinder(16).into();
         let indices = mesh.indices_buffer();
         let positions = mesh.positions_buffer();
         let normals = mesh.normals_buffer();
@@ -289,7 +289,7 @@ mod tests {
 
     #[test]
     fn test_non_indexed_export() {
-        let mesh = MeshBuilder::new().cylinder(3, 16).build().unwrap();
+        let mesh: Mesh = three_d_asset::TriMesh::cylinder(16).into();
         let positions = mesh.non_indexed_positions_buffer();
         let normals = mesh.non_indexed_normals_buffer();
 
