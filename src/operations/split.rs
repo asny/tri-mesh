@@ -11,33 +11,8 @@ impl Mesh {
         let mut clone = self.clone();
         for face_id in clone.face_iter() {
             if !is_included(&clone, face_id) {
-                let edges: Vec<HalfEdgeID> = clone.face_halfedge_iter(face_id).collect();
-                clone.remove_face_unsafe(face_id);
-                for halfedge_id in edges {
-                    let mut walker = clone.walker_from_halfedge(halfedge_id);
-                    walker.as_twin();
-                    if walker.face_id().is_none() {
-                        clone
-                            .connectivity_info
-                            .remove_halfedge(walker.halfedge_id().unwrap());
-                        clone.connectivity_info.remove_halfedge(halfedge_id);
-                    }
-                }
+                clone.remove_face(face_id);
             }
-        }
-
-        for vertex_id in clone.vertex_iter() {
-            clone.connectivity_info.set_vertex_halfedge(vertex_id, None);
-        }
-
-        for halfedge_id in clone.halfedge_iter() {
-            let walker = clone.walker_from_halfedge(halfedge_id);
-            clone
-                .connectivity_info
-                .set_vertex_halfedge(walker.vertex_id().unwrap(), walker.twin_id());
-        }
-        for vertex_id in clone.vertex_iter() {
-            clone.remove_vertex_if_lonely(vertex_id);
         }
         clone
     }
