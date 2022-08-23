@@ -242,6 +242,7 @@ impl From<three_d_asset::TriMesh> for Mesh {
 mod tests {
     use super::*;
     use crate::MeshBuilder;
+
     #[test]
     fn test_with_obj() {
         let source = b"o Cube
@@ -317,6 +318,15 @@ mod tests {
         let t8 = mesh.walker_from_vertex(v3).face_id();
         assert_eq!(t8, Some(f1));
 
+        mesh.is_valid().unwrap();
+    }
+
+    #[test]
+    fn test_with_cube() {
+        let mut mesh: Mesh = three_d_asset::TriMesh::cube().into();
+        mesh.merge_overlapping_primitives().unwrap();
+        assert_eq!(mesh.no_faces(), 12);
+        assert_eq!(mesh.no_vertices(), 8);
         mesh.is_valid().unwrap();
     }
 
