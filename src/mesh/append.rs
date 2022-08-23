@@ -24,7 +24,9 @@ impl Mesh {
             let vertex_id0 = get_or_create_vertex(self, vertex_ids.0);
             let vertex_id1 = get_or_create_vertex(self, vertex_ids.1);
             let vertex_id2 = get_or_create_vertex(self, vertex_ids.2);
-            let new_face_id = self.add_face(vertex_id0, vertex_id1, vertex_id2);
+            let new_face_id = self
+                .connectivity_info
+                .create_face(vertex_id0, vertex_id1, vertex_id2);
 
             for halfedge_id in other.face_halfedge_iter(other_face_id) {
                 if let Some(fid) = other.walker_from_halfedge(halfedge_id).as_twin().face_id() {

@@ -321,7 +321,27 @@ impl Mesh {
         self.connectivity_info.new_vertex(position)
     }
 
-    
+    pub fn add_face(
+        &mut self,
+        vertex_id1: VertexID,
+        vertex_id2: VertexID,
+        vertex_id3: VertexID,
+    ) -> FaceID {
+        let face_id = self
+            .connectivity_info
+            .create_face(vertex_id1, vertex_id2, vertex_id3);
+        for halfedge in self.halfedge_iter() {
+            let walker = self.walker_from_halfedge(halfedge);
+            let new_halfedge = self.connectivity_info.new_halfedge(
+                walker.into_next().into_next().vertex_id(),
+                None,
+                None,
+            );
+            self.connectivity_info
+                .set_halfedge_twin(new_halfedge, halfedge);
+        }
+        face_id
+    }
 
     pub fn remove_vertex_if_lonely(&mut self, vertex_id: VertexID) {
         if self.connectivity_info.vertex_halfedge(vertex_id).is_none() {
