@@ -242,6 +242,38 @@ impl From<three_d_asset::TriMesh> for Mesh {
 mod tests {
     use super::*;
     use crate::MeshBuilder;
+    #[test]
+    fn test_with_obj() {
+        let source = b"o Cube
+        v 1.000000 -1.000000 -1.000000
+        v 1.000000 -1.000000 1.000000
+        v -1.000000 -1.000000 1.000000
+        v -1.000000 -1.000000 -1.000000
+        v 1.000000 1.000000 -1.000000
+        v 0.999999 1.000000 1.000001
+        v -1.000000 1.000000 1.000000
+        v -1.000000 1.000000 -1.000000
+        f 1 2 3
+        f 1 3 4
+        f 5 8 7
+        f 5 7 6
+        f 1 5 6
+        f 1 6 2
+        f 2 6 7
+        f 2 7 3
+        f 3 7 8
+        f 3 8 4
+        f 5 1 4
+        f 5 4 8"
+            .to_vec();
+        let mut raw_assets = three_d_asset::io::RawAssets::new();
+        raw_assets.insert("cube.obj", source);
+        let mut model: three_d_asset::Model = raw_assets.deserialize(".obj").unwrap();
+        let mesh: Mesh = model.geometries.remove(0).into();
+        assert_eq!(mesh.no_faces(), 12);
+        assert_eq!(mesh.no_vertices(), 8);
+        mesh.is_valid().unwrap();
+    }
 
     #[test]
     fn test_one_face_connectivity() {
