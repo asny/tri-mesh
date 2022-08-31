@@ -350,9 +350,12 @@ mod tests {
 
     #[test]
     fn test_vertex_halfedge_iterator_with_holes() {
-        let indices: Vec<u32> = vec![0, 2, 3, 0, 4, 1, 0, 1, 2];
-        let positions: Vec<f64> = vec![0.0; 5 * 3];
-        let mesh = Mesh::new(indices, positions);
+        let mesh: Mesh = RawMesh {
+            indices: Some(Indices::U8(vec![0, 2, 3, 0, 4, 1, 0, 1, 2])),
+            positions: Positions::F64(vec![vec3(0.0, 0.0, 0.0); 5]),
+            ..Default::default()
+        }
+        .into();
 
         let mut i = 0;
         for halfedge_id in mesh.vertex_halfedge_iter(unsafe { VertexID::new(0) }) {

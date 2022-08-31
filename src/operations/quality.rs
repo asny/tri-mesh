@@ -162,11 +162,17 @@ mod tests {
 
     #[test]
     fn test_collapse_small_faces() {
-        let indices: Vec<u32> = vec![0, 2, 3, 0, 3, 1, 0, 1, 2];
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.1, 0.0, -0.1, -1.0, 0.0, -0.5,
-        ];
-        let mut mesh = Mesh::new(indices, positions);
+        let mut mesh: Mesh = RawMesh {
+            indices: Some(Indices::U8(vec![0, 2, 3, 0, 3, 1, 0, 1, 2])),
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 0.1),
+                vec3(0.1, 0.0, -0.1),
+                vec3(-1.0, 0.0, -0.5),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         mesh.collapse_small_faces(0.2);
         mesh.is_valid().unwrap();
