@@ -258,12 +258,15 @@ mod tests {
 
     #[test]
     fn test_face_point_intersection_when_point_in_plane() {
-        let positions: Vec<f64> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
-        let mut mesh = MeshBuilder::new()
-            .with_positions(positions)
-            .build()
-            .unwrap();
-        mesh.scale(3.0);
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 3.0),
+                vec3(3.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let face_id = mesh.face_iter().next().unwrap();
         let (v0, v1, v2) = mesh.ordered_face_vertices(face_id);
         let p0 = mesh.vertex_position(v0);

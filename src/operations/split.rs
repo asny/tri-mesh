@@ -662,17 +662,18 @@ mod tests {
     #[test]
     fn test_is_at_intersection() {
         let mesh1 = crate::test_utility::cube();
-
-        let positions = vec![
-            -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 0.0, 2.0, 0.0,
-        ];
-        let indices = vec![0, 1, 2, 0, 2, 3, 0, 3, 4];
-        let mesh2 = MeshBuilder::new()
-            .with_positions(positions)
-            .with_indices(indices)
-            .build()
-            .unwrap();
-
+        let mesh2: Mesh = RawMesh {
+            indices: Some(Indices::U8(vec![0, 1, 2, 0, 2, 3, 0, 3, 4])),
+            positions: Positions::F64(vec![
+                vec3(-1.0, 1.0, 1.0),
+                vec3(-1.0, -1.0, 1.0),
+                vec3(1.0, -1.0, -1.0),
+                vec3(1.0, 1.0, -1.0),
+                vec3(0.0, 2.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let mut map = HashMap::new();
         for vertex_id1 in mesh1.vertex_iter() {
             for vertex_id2 in mesh2.vertex_iter() {
@@ -721,13 +722,15 @@ mod tests {
     #[test]
     fn test_finding_face_edge_intersections() {
         let mesh1 = create_simple_mesh_x_z();
-        let indices: Vec<u32> = vec![0, 1, 2];
-        let positions: Vec<f64> = vec![0.5, -0.5, 0.0, 0.5, 0.5, 0.75, 0.5, 0.5, 0.0];
-        let mesh2 = MeshBuilder::new()
-            .with_positions(positions)
-            .with_indices(indices)
-            .build()
-            .unwrap();
+        let mesh2: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.5, -0.5, 0.0),
+                vec3(0.5, 0.5, 0.75),
+                vec3(0.5, 0.5, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         let intersections = find_intersections(&mesh1, &mesh2);
         assert_eq!(intersections.len(), 2);
@@ -736,13 +739,7 @@ mod tests {
     #[test]
     fn test_finding_face_vertex_intersections() {
         let mesh1 = create_simple_mesh_x_z();
-        let indices: Vec<u32> = vec![0, 1, 2];
-        let positions: Vec<f64> = vec![0.5, 0.0, 0.5, 0.5, 0.5, 0.75, 0.5, 0.5, 0.0];
-        let mesh2 = MeshBuilder::new()
-            .with_positions(positions)
-            .with_indices(indices)
-            .build()
-            .unwrap();
+        let mesh2 = create_single_triangle();
 
         let intersections = find_intersections(&mesh1, &mesh2);
         assert_eq!(intersections.len(), 1);
@@ -751,14 +748,7 @@ mod tests {
     #[test]
     fn test_finding_edge_vertex_intersections() {
         let mesh1 = create_simple_mesh_x_z();
-        let indices: Vec<u32> = vec![0, 1, 2];
-        let positions: Vec<f64> = vec![0.5, 0.0, 0.25, 0.5, 0.5, 0.75, 0.5, 0.5, 0.0];
-        let mesh2 = MeshBuilder::new()
-            .with_positions(positions)
-            .with_indices(indices)
-            .build()
-            .unwrap();
-
+        let mesh2 = create_single_triangle();
         let intersections = find_intersections(&mesh1, &mesh2);
         assert_eq!(intersections.len(), 1);
     }
@@ -766,13 +756,7 @@ mod tests {
     #[test]
     fn test_finding_vertex_vertex_intersections() {
         let mesh1 = create_simple_mesh_x_z();
-        let indices: Vec<u32> = vec![0, 1, 2];
-        let positions: Vec<f64> = vec![1.0, 0.0, 0.5, 0.5, 0.5, 0.75, 0.5, 0.5, 0.0];
-        let mesh2 = MeshBuilder::new()
-            .with_positions(positions)
-            .with_indices(indices)
-            .build()
-            .unwrap();
+        let mesh2 = create_single_triangle();
 
         let intersections = find_intersections(&mesh1, &mesh2);
         assert_eq!(intersections.len(), 1);
@@ -922,21 +906,25 @@ mod tests {
 
     #[test]
     fn test_face_face_splitting() {
-        let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
-        let mut mesh1 = MeshBuilder::new()
-            .with_positions(positions1)
-            .with_indices(indices1)
-            .build()
-            .unwrap();
+        let mut mesh1: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(-2.0, 0.0, -2.0),
+                vec3(-2.0, 0.0, 2.0),
+                vec3(2.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
-        let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f64> = vec![0.2, -0.2, 0.5, 0.5, 0.5, 0.75, 0.5, 0.5, 0.0];
-        let mut mesh2 = MeshBuilder::new()
-            .with_positions(positions2)
-            .with_indices(indices2)
-            .build()
-            .unwrap();
+        let mut mesh2: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.2, -0.2, 0.5),
+                vec3(0.5, 0.5, 0.75),
+                vec3(0.5, 0.5, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         mesh1.split_primitives_at_intersection(&mut mesh2);
 
@@ -971,6 +959,18 @@ mod tests {
 
         mesh1.is_valid().unwrap();
         mesh2.is_valid().unwrap();
+    }
+
+    fn create_single_triangle() -> Mesh {
+        RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.5, 0.0, 0.25),
+                vec3(0.5, 0.5, 0.75),
+                vec3(0.5, 0.5, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into()
     }
 
     fn create_simple_mesh_x_z() -> Mesh {
