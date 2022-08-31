@@ -399,12 +399,21 @@ mod tests {
 
     #[test]
     fn test_merge_overlapping_individual_faces() {
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -1.0, 0.0, -0.5, 0.0, 0.0, 0.0, -1.0, 0.0, -0.5, 0.0,
-            0.0, 1.0, 0.0, 0.0, 0.0, -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
-        ];
-
-        let mut mesh = Mesh::new((0..9).collect(), positions);
+        let mut mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(1.0, 0.0, -0.5),
+                vec3(-1.0, 0.0, -0.5),
+                vec3(0.0, 0.0, 0.0),
+                vec3(-1.0, 0.0, -0.5),
+                vec3(0.0, 0.0, 1.0),
+                vec3(0.0, 0.0, 0.0),
+                vec3(-1.0, 0.0, -0.5),
+                vec3(0.0, 0.0, 1.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         mesh.merge_overlapping_primitives().unwrap();
 
         assert_eq!(4, mesh.no_vertices());
@@ -415,13 +424,21 @@ mod tests {
 
     #[test]
     fn test_merge_two_overlapping_faces() {
-        let indices: Vec<u32> = vec![0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5];
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, -1.0, 0.0, 0.0, -0.5, 0.0, 1.0, -1.5, 0.0, 1.0, -1.0, 0.0, 0.0, -0.5,
-            0.0, 1.0, -1.5, 0.0, 1.0, -1.0, 0.0, 1.5,
-        ];
-
-        let mut mesh = Mesh::new(indices, positions);
+        let mut mesh: Mesh = RawMesh {
+            indices: Some(Indices::U8(vec![0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5])),
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(-1.0, 0.0, 0.0),
+                vec3(-0.5, 0.0, 1.0),
+                vec3(-1.5, 0.0, 1.0),
+                vec3(-1.0, 0.0, 0.0),
+                vec3(-0.5, 0.0, 1.0),
+                vec3(-1.5, 0.0, 1.0),
+                vec3(-1.0, 0.0, 1.5),
+            ]),
+            ..Default::default()
+        }
+        .into();
         mesh.merge_overlapping_primitives().unwrap();
 
         assert_eq!(5, mesh.no_vertices());
@@ -432,14 +449,26 @@ mod tests {
 
     #[test]
     fn test_merge_three_overlapping_faces() {
-        let indices: Vec<u32> = vec![0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5, 8, 10, 9];
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, -1.0, 0.0, 0.0, -0.5, 0.0, 1.0, -1.5, 0.0, 1.0, -1.0, 0.0, 0.0, -0.5,
-            0.0, 1.0, -1.5, 0.0, 1.0, -1.0, 0.0, 1.5, -1.0, 0.0, 0.0, -0.5, 0.0, 1.0, -1.5, 0.0,
-            1.0,
-        ];
-
-        let mut mesh = Mesh::new(indices, positions);
+        let mut mesh: Mesh = RawMesh {
+            indices: Some(Indices::U8(vec![
+                0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5, 8, 10, 9,
+            ])),
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(-1.0, 0.0, 0.0),
+                vec3(-0.5, 0.0, 1.0),
+                vec3(-1.5, 0.0, 1.0),
+                vec3(-1.0, 0.0, 0.0),
+                vec3(-0.5, 0.0, 1.0),
+                vec3(-1.5, 0.0, 1.0),
+                vec3(-1.0, 0.0, 1.5),
+                vec3(-1.0, 0.0, 0.0),
+                vec3(-0.5, 0.0, 1.0),
+                vec3(-1.5, 0.0, 1.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         mesh.merge_overlapping_primitives().unwrap();
 
         assert_eq!(5, mesh.no_vertices());
@@ -450,11 +479,18 @@ mod tests {
 
     #[test]
     fn test_merge_vertices() {
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -1.0, 0.0, -0.5, 0.0, 0.0, 0.0, -1.0, 0.0, -0.5, 0.0,
-            0.0, 1.0,
-        ];
-        let mut mesh = Mesh::new((0..6).collect(), positions);
+        let mut mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(1.0, 0.0, -0.5),
+                vec3(-1.0, 0.0, -0.5),
+                vec3(0.0, 0.0, 0.0),
+                vec3(-1.0, 0.0, -0.5),
+                vec3(0.0, 0.0, 1.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         let mut vertex_id1 = None;
         for vertex_id in mesh.vertex_iter() {
@@ -475,11 +511,18 @@ mod tests {
 
     #[test]
     fn test_merge_halfedges() {
-        let positions: Vec<f64> = vec![
-            1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-            1.0,
-        ];
-        let mut mesh = Mesh::new((0..6).collect(), positions);
+        let mut mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(1.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, -1.0),
+                vec3(0.0, 0.0, 0.0),
+                vec3(1.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         let mut heid1 = None;
         for halfedge_id in mesh.edge_iter() {
