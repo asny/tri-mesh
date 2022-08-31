@@ -975,8 +975,8 @@ mod tests {
 
     #[test]
     fn test_box_box_splitting() {
-        let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
-        let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
+        let mut mesh1: Mesh = three_d_asset::TriMesh::sphere(2).into();
+        let mut mesh2: Mesh = three_d_asset::TriMesh::sphere(2).into();
         mesh2.translate(vec3(0.5, 0.5, 0.5));
 
         mesh1.split_primitives_at_intersection(&mut mesh2);

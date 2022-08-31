@@ -135,27 +135,4 @@ impl MeshBuilder {
             3, 4, 0, 3, 4, 3, 7,
         ])
     }
-
-    /// Creates a triangle in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0` which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
-    pub fn triangle(self) -> Self {
-        self.with_positions(vec![-3.0, -1.0, 0.0, 3.0, -1.0, 0.0, 0.0, 2.0, 0.0])
-    }
-
-    /// Creates a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
-    pub fn square(self) -> Self {
-        self.with_indices(vec![0, 1, 2, 2, 1, 3])
-            .with_positions(vec![
-                -1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0,
-            ])
-    }
-
-    /// Creates a square in `x = [-1, 1]`, `z = [-1, 1]` and `y = 0`.
-    pub fn plane(self) -> Self {
-        let plane_positions: Vec<f64> = vec![
-            -1.0, 0.0, -1.0, 1.0, 0.0, -1.0, 1.0, 0.0, 1.0, -1.0, 0.0, 1.0,
-        ];
-        let plane_indices: Vec<u32> = vec![0, 2, 1, 0, 3, 2];
-        self.with_indices(plane_indices)
-            .with_positions(plane_positions)
-    }
 }
