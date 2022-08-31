@@ -381,7 +381,6 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mesh_builder::MeshBuilder;
 
     #[test]
     fn test_flip_edge() {

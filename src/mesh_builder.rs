@@ -109,22 +109,6 @@ impl MeshBuilder {
     ///
     /// Creates a cube.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use tri_mesh::*;
-    /// #
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
-    /// let mesh = MeshBuilder::new().cube().build()?;
-    ///
-    /// assert_eq!(mesh.no_faces(), 12);
-    /// assert_eq!(mesh.no_vertices(), 8);
-    ///
-    /// #   mesh.is_valid().unwrap();
-    /// #   Ok(())
-    /// # }
-    /// ```
-    ///
     pub fn cube(self) -> Self {
         self.with_positions(vec![
             1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0,

@@ -404,7 +404,7 @@ mod tests {
 
     #[test]
     fn test_is_closed_when_closed() {
-        let mesh = MeshBuilder::new().cube().build().unwrap();
+        let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
         assert!(mesh.is_closed());
     }
 }

@@ -72,8 +72,8 @@ use tri_mesh::*;
 
 fn main() {
     // Construct two meshes
-    let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
-    let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
+    let mut mesh1: Mesh = three_d_asset::TriMesh::sphere(2).into();
+    let mut mesh2: Mesh = three_d_asset::TriMesh::sphere(2).into();
     mesh2.translate(vec3(0.5, 0.5, 0.5));
 
     // Split the two meshes at their intersection creating two sets of sub meshes
@@ -91,8 +91,8 @@ fn main() {
 use tri_mesh::*;
 
 fn main() {
-    // Construct any mesh, for simplicity, let's use a cube mesh
-    let mesh = MeshBuilder::new().cube().build().unwrap();
+    // Construct any mesh, for simplicity, let's use a sphere mesh
+    let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     
     let mut curvature_measure = 0.0;
     // Let's say that the curvature measure is a sum of a curvature measure for each vertex
