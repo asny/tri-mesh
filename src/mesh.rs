@@ -258,8 +258,14 @@ impl std::fmt::Display for Mesh {
 }
 
 impl From<RawMesh> for Mesh {
-    fn from(tri_mesh: RawMesh) -> Self {
-        Self::from_raw(&tri_mesh)
+    fn from(mesh: RawMesh) -> Self {
+        Self::from_raw(&mesh)
+    }
+}
+
+impl From<Mesh> for RawMesh {
+    fn from(mesh: Mesh) -> Self {
+        mesh.to_raw()
     }
 }
 
