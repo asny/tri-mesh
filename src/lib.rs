@@ -20,7 +20,6 @@
 //! - And more..
 //!
 //! All functionality is implemented as methods on the [Mesh](crate::mesh::Mesh) struct, so take a look at that rather long list of methods for a complete overview.
-//! Also, to construct a new mesh, use the [Mesh builder](crate::mesh_builder::MeshBuilder).
 //!
 
 #![warn(missing_docs)]
@@ -33,9 +32,6 @@ pub use mesh::*;
 
 pub mod operations;
 pub use operations::*;
-
-pub mod mesh_builder;
-pub use mesh_builder::*;
 
 pub mod prelude;
 

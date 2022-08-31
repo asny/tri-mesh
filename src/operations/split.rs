@@ -434,7 +434,6 @@ fn find_intersections_between_edge_face(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MeshBuilder;
 
     #[test]
     fn test_clone_subset() {
