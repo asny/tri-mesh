@@ -377,7 +377,7 @@ mod tests {
 
     #[test]
     fn test_merge_overlapping_primitives_of_cube() {
-        let mut mesh: Mesh = three_d_asset::TriMesh::cube().into();
+        let mut mesh: Mesh = RawMesh::cube().into();
         mesh.merge_overlapping_primitives().unwrap();
 
         assert_eq!(8, mesh.no_vertices());

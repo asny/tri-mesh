@@ -55,7 +55,7 @@ use tri_mesh::*;
 
 fn main() {
     // Construct any mesh, this time, we will construct a simple sphere
-    let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
+    let mut mesh: Mesh = RawMesh::sphere(4).into();
 
     // Compute the extreme coordinates which defines the axis aligned bounding box..
     let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
@@ -72,8 +72,8 @@ use tri_mesh::*;
 
 fn main() {
     // Construct two meshes
-    let mut mesh1: Mesh = three_d_asset::TriMesh::sphere(2).into();
-    let mut mesh2: Mesh = three_d_asset::TriMesh::sphere(2).into();
+    let mut mesh1: Mesh = RawMesh::sphere(2).into();
+    let mut mesh2: Mesh = RawMesh::sphere(2).into();
     mesh2.translate(vec3(0.5, 0.5, 0.5));
 
     // Split the two meshes at their intersection creating two sets of sub meshes
@@ -92,7 +92,7 @@ use tri_mesh::*;
 
 fn main() {
     // Construct any mesh, for simplicity, let's use a sphere mesh
-    let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
+    let mesh: Mesh = RawMesh::sphere(4).into();
     
     let mut curvature_measure = 0.0;
     // Let's say that the curvature measure is a sum of a curvature measure for each vertex

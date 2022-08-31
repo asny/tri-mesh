@@ -56,6 +56,8 @@ pub enum MeshError {
     MeshIsInvalid(String),
 }
 
+pub use three_d_asset::TriMesh as RawMesh;
+
 ///
 /// Represents a triangle mesh. Use the [Mesh builder](crate::mesh_builder::MeshBuilder) to construct a new mesh.
 ///
@@ -84,6 +86,22 @@ pub struct Mesh {
 }
 
 impl Mesh {
+    pub fn from_raw(input: &RawMesh) -> Self {
+        Self::new(
+            input
+                .indices
+                .as_ref()
+                .map(|i| i.to_u32())
+                .unwrap_or((0..input.positions.len() as u32).collect::<Vec<_>>()),
+            input
+                .positions
+                .to_f64()
+                .into_iter()
+                .flat_map(|v| [v.x, v.y, v.z])
+                .collect::<Vec<_>>(),
+        )
+    }
+
     /// Constructs a new mesh. For more options to construct a mesh, see [MeshBuilder](crate::MeshBuilder) or the [io](crate::io) module.
     pub fn new(indices: Vec<u32>, positions: Vec<f64>) -> Mesh {
         let no_vertices = positions.len() / 3;
@@ -219,22 +237,9 @@ impl std::fmt::Display for Mesh {
     }
 }
 
-impl From<three_d_asset::TriMesh> for Mesh {
-    fn from(tri_mesh: three_d_asset::TriMesh) -> Self {
-        Self::new(
-            tri_mesh
-                .indices
-                .map(|i| i.into_u32())
-                .unwrap_or((0..tri_mesh.positions.len() as u32).collect::<Vec<_>>())
-                .into_iter()
-                .collect::<Vec<_>>(),
-            tri_mesh
-                .positions
-                .into_f64()
-                .into_iter()
-                .flat_map(|v| [v.x, v.y, v.z])
-                .collect::<Vec<_>>(),
-        )
+impl From<RawMesh> for Mesh {
+    fn from(tri_mesh: RawMesh) -> Self {
+        Self::from_raw(&tri_mesh)
     }
 }
 
@@ -323,7 +328,7 @@ mod tests {
 
     #[test]
     fn test_with_cube() {
-        let mut mesh: Mesh = three_d_asset::TriMesh::cube().into();
+        let mut mesh: Mesh = RawMesh::cube().into();
         mesh.merge_overlapping_primitives().unwrap();
         assert_eq!(mesh.no_faces(), 12);
         assert_eq!(mesh.no_vertices(), 8);
@@ -404,7 +409,7 @@ mod tests {
 
     #[test]
     fn test_is_closed_when_closed() {
-        let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
+        let mesh: Mesh = RawMesh::sphere(4).into();
         assert!(mesh.is_closed());
     }
 }
