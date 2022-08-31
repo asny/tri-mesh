@@ -556,8 +556,8 @@ mod tests {
 
     #[test]
     fn test_box_box_stitching() {
-        let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
-        let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
+        let mut mesh1 = crate::test_utility::cube();
+        let mut mesh2 = crate::test_utility::cube();
         mesh2.translate(vec3(0.5, 0.5, 0.5));
 
         let (meshes1, meshes2) = mesh1.split_at_intersection(&mut mesh2);
@@ -603,7 +603,7 @@ mod tests {
             mesh1.flip_edges(0.5);
         }
         mesh1.translate(vec3(0.0, 1.5, 0.0));
-        let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
+        let mut mesh2 = crate::test_utility::cube();
         mesh2.translate(vec3(0.5, 2.0, 0.5));
 
         let (meshes1, meshes2) = mesh1.split_at_intersection(&mut mesh2);
@@ -635,8 +635,8 @@ mod tests {
 
     #[test]
     fn test_is_at_intersection_cube_cube() {
-        let mesh1 = MeshBuilder::new().cube().build().unwrap();
-        let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
+        let mesh1 = crate::test_utility::cube();
+        let mut mesh2 = crate::test_utility::cube();
         mesh2.translate(vec3(0.0, 2.0, 0.0));
 
         let mut map = HashMap::new();
@@ -661,7 +661,7 @@ mod tests {
 
     #[test]
     fn test_is_at_intersection() {
-        let mesh1 = MeshBuilder::new().cube().build().unwrap();
+        let mesh1 = crate::test_utility::cube();
 
         let positions = vec![
             -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 0.0, 2.0, 0.0,
