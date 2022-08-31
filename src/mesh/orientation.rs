@@ -81,6 +81,8 @@ impl Mesh {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn test_flip_orientation_of_face() {
         let indices: Vec<u32> = vec![0, 1, 2, 1, 2, 3];
@@ -97,7 +99,7 @@ mod tests {
 
     #[test]
     fn test_flip_orientation() {
-        let mut mesh = crate::MeshBuilder::new().cube().build().unwrap();
+        let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 
         let mut map = std::collections::HashMap::new();
         for face_id in mesh.face_iter() {
@@ -107,7 +109,7 @@ mod tests {
 
         mesh.is_valid().unwrap();
         for face_id in mesh.face_iter() {
-            assert_eq!(mesh.face_normal(face_id), -*map.get(&face_id).unwrap());
+            assert!((mesh.face_normal(face_id) - -*map.get(&face_id).unwrap()).magnitude() < 0.001);
         }
     }
 }
