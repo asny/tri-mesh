@@ -59,7 +59,7 @@ pub enum MeshError {
 pub use three_d_asset::{Indices, Positions, TriMesh as RawMesh};
 
 ///
-/// Represents a triangle mesh. Use the [Mesh builder](crate::mesh_builder::MeshBuilder) to construct a new mesh.
+/// Represents a triangle mesh. Use [RawMesh] to construct a new mesh.
 ///
 /// ## Functionality:
 /// - [Traversal](#traversal)
