@@ -102,6 +102,26 @@ impl Mesh {
         )
     }
 
+    pub fn to_raw(&self) -> RawMesh {
+        RawMesh {
+            indices: Some(three_d_asset::Indices::U32(self.indices_buffer())),
+            positions: three_d_asset::Positions::F64(
+                self.vertex_iter()
+                    .map(|vertex_id| self.vertex_position(vertex_id))
+                    .collect::<Vec<_>>(),
+            ),
+            normals: Some(
+                self.vertex_iter()
+                    .map(|vertex_id| {
+                        let n = self.vertex_normal(vertex_id);
+                        three_d_asset::vec3(n.x as f32, n.y as f32, n.z as f32)
+                    })
+                    .collect::<Vec<_>>(),
+            ),
+            ..Default::default()
+        }
+    }
+
     /// Constructs a new mesh. For more options to construct a mesh, see [MeshBuilder](crate::MeshBuilder) or the [io](crate::io) module.
     pub fn new(indices: Vec<u32>, positions: Vec<f64>) -> Mesh {
         let no_vertices = positions.len() / 3;
