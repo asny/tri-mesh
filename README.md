@@ -36,11 +36,19 @@ tri-mesh = "0.5.0"
 use tri_mesh::*;
 
 fn main() {
-    // Construct a mesh from indices and positions buffers.
-    let indices: Vec<u32> = vec![0, 1, 2,  0, 2, 3,  0, 3, 1];
-    let positions: Vec<f64> = vec![0.0, 0.0, 0.0,  1.0, 0.0, -0.5,  -1.0, 0.0, -0.5, 0.0, 0.0, 1.0];
-    let mesh = MeshBuilder::new().with_indices(indices).with_positions(positions).build().unwrap();
-    
+    // Construct a mesh without normals.
+    let mesh: Mesh = RawMesh {
+        indices: Some(Indices::U8(vec![0, 1, 2, 0, 2, 3, 0, 3, 1])),
+        positions: Positions::F64(vec![
+            vec3(0.0, 0.0, 0.0),
+            vec3(1.0, 0.0, -0.5),
+            vec3(-1.0, 0.0, -0.5),
+            vec3(0.0, 0.0, 1.0),
+        ]),
+        ..Default::default()
+    }
+    .into();
+
     // Get the indices, positions and normal buffers
     let indices_out = mesh.indices_buffer();
     let positions_out = mesh.positions_buffer();

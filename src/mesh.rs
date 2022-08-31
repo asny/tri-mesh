@@ -272,7 +272,6 @@ impl From<Mesh> for RawMesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MeshBuilder;
 
     #[test]
     fn test_with_obj() {

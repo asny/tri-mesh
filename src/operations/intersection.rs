@@ -343,12 +343,15 @@ mod tests {
 
     #[test]
     fn test_edge_point_intersection() {
-        let positions: Vec<f64> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
-        let mut mesh = MeshBuilder::new()
-            .with_positions(positions)
-            .build()
-            .unwrap();
-        mesh.scale(3.0);
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 3.0),
+                vec3(3.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let mut edge_id = mesh.halfedge_iter().next().unwrap();
         let twin_id = mesh.walker_from_halfedge(edge_id).twin_id().unwrap();
         if twin_id < edge_id {
@@ -413,11 +416,15 @@ mod tests {
 
     #[test]
     fn test_face_line_piece_intersection_when_no_intersection() {
-        let mesh = MeshBuilder::new()
-            .with_indices((0..3).collect())
-            .with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
-            .build()
-            .unwrap();
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(1.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let face_id = mesh.face_iter().next().unwrap();
         let (p0, p1) = (vec3(1.0 + MARGIN, 0.0, 0.0), vec3(3.0, 0.0, 1.0));
 
@@ -427,11 +434,15 @@ mod tests {
 
     #[test]
     fn test_face_line_piece_intersection_when_face_end_point_intersects() {
-        let mesh = MeshBuilder::new()
-            .with_indices((0..3).collect())
-            .with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
-            .build()
-            .unwrap();
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(1.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let face_id = mesh.face_iter().next().unwrap();
         let point = vec3(0.1, 0.0, 0.1);
         let (p0, p1) = (point, vec3(0.0, 1.0, 0.0));
@@ -448,11 +459,15 @@ mod tests {
 
     #[test]
     fn test_face_line_piece_intersection_when_face_line_piece_intersects_at_point() {
-        let mesh = MeshBuilder::new()
-            .with_indices((0..3).collect())
-            .with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
-            .build()
-            .unwrap();
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(1.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let face_id = mesh.face_iter().next().unwrap();
         let point = vec3(0.1, 0.0, 0.1);
         let (p0, p1) = (vec3(0.1, 1.0, 0.1), vec3(0.1, -0.1, 0.1));
@@ -470,13 +485,11 @@ mod tests {
     #[test]
     fn test_face_line_piece_intersection_when_vertex_line_piece_intersects_at_point() {
         let point = vec3(0.1, 0.0, 0.1);
-        let mesh = MeshBuilder::new()
-            .with_indices((0..3).collect())
-            .with_positions(vec![
-                point.x, point.y, point.z, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
-            ])
-            .build()
-            .unwrap();
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![point, vec3(0.0, 0.0, 1.0), vec3(1.0, 0.0, 0.0)]),
+            ..Default::default()
+        }
+        .into();
         let face_id = mesh.face_iter().next().unwrap();
         let vertex_id = mesh
             .vertex_iter()
@@ -497,11 +510,15 @@ mod tests {
     #[test]
     fn test_face_line_piece_intersection_when_edge_line_piece_intersects_at_point() {
         let point = vec3(0.3, 0.0, 0.0);
-        let mesh = MeshBuilder::new()
-            .with_indices((0..3).collect())
-            .with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
-            .build()
-            .unwrap();
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(1.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let face_id = mesh.face_iter().next().unwrap();
         let halfedge_id = mesh
             .face_halfedge_iter(face_id)
@@ -521,11 +538,15 @@ mod tests {
 
     #[test]
     fn test_face_line_piece_intersection_when_face_line_piece_intersects_at_linepiece() {
-        let mesh = MeshBuilder::new()
-            .with_indices((0..3).collect())
-            .with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
-            .build()
-            .unwrap();
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(1.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let face_id = mesh.face_iter().next().unwrap();
         let (p0, p1) = (vec3(0.0, 0.0, 0.0), vec3(0.2, 0.0, 0.2));
         let vertex_id = mesh
@@ -548,11 +569,15 @@ mod tests {
     #[test]
     fn test_face_line_piece_intersection_when_face_line_piece_intersects_at_point_and_line_piece_is_in_plane(
     ) {
-        let mesh = MeshBuilder::new()
-            .with_indices((0..3).collect())
-            .with_positions(vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
-            .build()
-            .unwrap();
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(1.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let face_id = mesh.face_iter().next().unwrap();
         let point = vec3(0.1, 0.0, 0.1);
         let (p0, p1) = (point, vec3(1.2, 0.0, 0.2));

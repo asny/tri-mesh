@@ -84,16 +84,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_flip_orientation_of_face() {
-        let indices: Vec<u32> = vec![0, 1, 2, 1, 2, 3];
-        let positions: Vec<f64> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.0, 1.5];
-        let mut mesh = crate::MeshBuilder::new()
-            .with_indices(indices)
-            .with_positions(positions)
-            .build()
-            .unwrap();
+    fn test_fix_orientation() {
+        let mut mesh = crate::test_utility::subdivided_triangle();
 
         mesh.flip_orientation_of_face(mesh.face_iter().next().unwrap());
+        mesh.fix_orientation();
+
         mesh.is_valid().unwrap();
     }
 

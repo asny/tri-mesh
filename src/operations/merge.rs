@@ -24,25 +24,28 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MeshBuilder;
 
     #[test]
     fn test_face_face_merging_at_edge() {
-        let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
-        let mut mesh1 = MeshBuilder::new()
-            .with_indices(indices1)
-            .with_positions(positions1)
-            .build()
-            .unwrap();
+        let mut mesh1: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(-2.0, 0.0, -2.0),
+                vec3(-2.0, 0.0, 2.0),
+                vec3(2.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
-        let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f64> = vec![-2.0, 0.0, 2.0, -2.0, 0.0, -2.0, -2.0, 0.5, 0.0];
-        let mesh2 = MeshBuilder::new()
-            .with_indices(indices2)
-            .with_positions(positions2)
-            .build()
-            .unwrap();
+        let mesh2: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(-2.0, 0.0, 2.0),
+                vec3(-2.0, 0.0, -2.0),
+                vec3(-2.0, 0.5, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         mesh1.merge_with(&mesh2).unwrap();
 
