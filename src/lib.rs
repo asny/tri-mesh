@@ -90,4 +90,20 @@ mod test_utility {
         }
         .into()
     }
+
+    pub(crate) fn triangle_strip() -> Mesh {
+        RawMesh {
+            indices: Some(Indices::U8(vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5])),
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(1.0, 0.0, 0.5),
+                vec3(1.0, 0.0, 1.5),
+                vec3(0.0, 0.0, 2.0),
+                vec3(0.0, 0.0, 2.5),
+            ]),
+            ..Default::default()
+        }
+        .into()
+    }
 }
