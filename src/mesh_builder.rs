@@ -105,18 +105,4 @@ impl MeshBuilder {
             .unwrap_or((0..positions.len() as u32 / 3).collect());
         Ok(Mesh::new(indices, positions))
     }
-
-    ///
-    /// Creates a cube.
-    ///
-    pub fn cube(self) -> Self {
-        self.with_positions(vec![
-            1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0,
-            1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0,
-        ])
-        .with_indices(vec![
-            0, 1, 2, 0, 2, 3, 4, 7, 6, 4, 6, 5, 0, 4, 5, 0, 5, 1, 1, 5, 6, 1, 6, 2, 2, 6, 7, 2, 7,
-            3, 4, 0, 3, 4, 3, 7,
-        ])
-    }
 }
