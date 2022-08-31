@@ -86,8 +86,8 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn from_raw(input: &RawMesh) -> Self {
-        Self::new(
+    pub fn new(input: &RawMesh) -> Self {
+        Self::new_(
             input
                 .indices
                 .as_ref()
@@ -122,8 +122,7 @@ impl Mesh {
         }
     }
 
-    /// Constructs a new mesh. For more options to construct a mesh, see [MeshBuilder](crate::MeshBuilder) or the [io](crate::io) module.
-    pub fn new(indices: Vec<u32>, positions: Vec<f64>) -> Mesh {
+    fn new_(indices: Vec<u32>, positions: Vec<f64>) -> Mesh {
         let no_vertices = positions.len() / 3;
         let no_faces = indices.len() / 3;
         let mesh = Mesh {
@@ -259,7 +258,7 @@ impl std::fmt::Display for Mesh {
 
 impl From<RawMesh> for Mesh {
     fn from(mesh: RawMesh) -> Self {
-        Self::from_raw(&mesh)
+        Self::new(&mesh)
     }
 }
 
