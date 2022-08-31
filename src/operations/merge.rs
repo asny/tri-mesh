@@ -55,8 +55,8 @@ mod tests {
 
     #[test]
     fn test_box_box_merge() {
-        let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
-        let mut mesh2 = MeshBuilder::new().cube().build().unwrap();
+        let mut mesh1 = crate::test_utility::cube();
+        let mut mesh2 = crate::test_utility::cube();
         mesh2.translate(vec3(0.5, 0.5, 0.5));
 
         let (meshes1, meshes2) = mesh1.split_at_intersection(&mut mesh2);
