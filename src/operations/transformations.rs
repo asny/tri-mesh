@@ -23,7 +23,8 @@ impl Mesh {
     /// # use tri_mesh::*;
     /// #
     /// # fn main() -> tri_mesh::TriMeshResult<()> {
-    ///     let mut mesh = MeshBuilder::new().cube().build()?;
+    /// #   use tri_mesh::*;
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// #   let first_face_id = mesh.face_iter().next().unwrap();
     /// #   let face_area_before = mesh.face_area(first_face_id);
     ///     mesh.scale(2.0);
@@ -49,14 +50,22 @@ impl Mesh {
     /// # use tri_mesh::*;
     /// #
     /// # fn main() -> tri_mesh::TriMeshResult<()> {
-    ///     let mut mesh = MeshBuilder::new().cube().build()?;
-    /// #   let first_face_id = mesh.face_iter().find(|f| mesh.face_normal(*f) == vec3(0.0, 1.0, 0.0)).unwrap();
-    /// #   let second_face_id = mesh.face_iter().find(|f| mesh.face_normal(*f) == vec3(1.0, 0.0, 0.0)).unwrap();
-    /// #   let face_area_before1 = mesh.face_area(first_face_id);
-    /// #   let face_area_before2 = mesh.face_area(second_face_id);
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
+    /// #   let mut iter = mesh.vertex_iter();
+    /// #   iter.next();
+    /// #   let vertex0_pos = mesh.vertex_position(iter.next().unwrap());
+    /// #   let vertex1_pos = mesh.vertex_position(iter.next().unwrap());
     ///     mesh.non_uniform_scale(2.0, 1.0, 1.0);
-    /// #   assert_eq!(2.0 * face_area_before1, mesh.face_area(first_face_id));
-    /// #   assert_eq!(face_area_before2, mesh.face_area(second_face_id));
+    /// #   let mut iter = mesh.vertex_iter();
+    /// #   iter.next();
+    /// #   let vertex0_pos_new = mesh.vertex_position(iter.next().unwrap());
+    /// #   let vertex1_pos_new = mesh.vertex_position(iter.next().unwrap());
+    /// #   assert_eq!(vertex0_pos.x * 2.0, vertex0_pos_new.x);
+    /// #   assert_eq!(vertex0_pos.y, vertex0_pos_new.y);
+    /// #   assert_eq!(vertex0_pos.z, vertex0_pos_new.z);
+    /// #   assert_eq!(vertex1_pos.x * 2.0, vertex1_pos_new.x);
+    /// #   assert_eq!(vertex1_pos.y, vertex1_pos_new.y);
+    /// #   assert_eq!(vertex1_pos.z, vertex1_pos_new.z);
     /// #   mesh.is_valid().unwrap();
     /// #   Ok(())
     /// # }
@@ -77,7 +86,7 @@ impl Mesh {
     /// # use tri_mesh::*;
     /// #
     /// # fn main() -> tri_mesh::TriMeshResult<()> {
-    ///     let mut mesh = MeshBuilder::new().cube().build()?;
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
     ///     mesh.translate(vec3(2.5, -1.0, 0.0));
@@ -103,7 +112,7 @@ impl Mesh {
     /// # use tri_mesh::*;
     /// #
     /// # fn main() -> tri_mesh::TriMeshResult<()> {
-    ///     let mut mesh = MeshBuilder::new().cube().build()?;
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
     ///     mesh.apply_transformation(Mat4::from_angle_y(degrees(360.0)));
@@ -130,7 +139,7 @@ impl Mesh {
     /// # use tri_mesh::*;
     /// #
     /// # fn main() -> tri_mesh::TriMeshResult<()> {
-    ///     let mut mesh = MeshBuilder::new().cube().build()?;
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
     ///     mesh.apply_transformation(Mat4::from_translation(vec3(2.5, -1.0, 0.0)));
