@@ -78,22 +78,28 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::MeshBuilder;
 
     #[test]
-    fn test_box_sphere_append() {
-        let mut mesh1 = MeshBuilder::new().cube().build().unwrap();
+    fn test_sphere_sphere_append() {
+        let mut mesh1: Mesh = three_d_asset::TriMesh::sphere(4).into();
         let mut mesh2: Mesh = three_d_asset::TriMesh::sphere(3).into();
         mesh2.translate(vec3(0.5, 0.5, 0.5));
+
+        let prev_no_vertices = mesh1.no_vertices();
+        let prev_no_halfedges = mesh1.no_halfedges();
+        let prev_no_faces = mesh1.no_faces();
 
         mesh1.append(&mesh2);
 
         mesh1.is_valid().unwrap();
         mesh2.is_valid().unwrap();
 
-        assert_eq!(mesh1.no_vertices(), mesh2.no_vertices() + 8);
-        assert_eq!(mesh1.no_halfedges(), mesh2.no_halfedges() + 36);
-        assert_eq!(mesh1.no_faces(), mesh2.no_faces() + 12);
+        assert_eq!(mesh1.no_vertices(), mesh2.no_vertices() + prev_no_vertices);
+        assert_eq!(
+            mesh1.no_halfedges(),
+            mesh2.no_halfedges() + prev_no_halfedges
+        );
+        assert_eq!(mesh1.no_faces(), mesh2.no_faces() + prev_no_faces);
 
         for pos in mesh2.vertex_iter().map(|v| mesh2.vertex_position(v)) {
             assert!(mesh1
