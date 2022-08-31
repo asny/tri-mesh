@@ -361,12 +361,23 @@ mod tests {
 
     #[test]
     fn test_merge_overlapping_primitives() {
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -1.0, 0.0, -0.5, 0.0, 0.0, 0.0, -1.0, 0.0, -0.5, 0.0,
-            0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, -0.5,
+        let positions = vec![
+            vec3(0.0, 0.0, 0.0),
+            vec3(1.0, 0.0, -0.5),
+            vec3(-1.0, 0.0, -0.5),
+            vec3(0.0, 0.0, 0.0),
+            vec3(-1.0, 0.0, -0.5),
+            vec3(0.0, 0.0, 1.0),
+            vec3(0.0, 0.0, 0.0),
+            vec3(0.0, 0.0, 1.0),
+            vec3(1.0, 0.0, -0.5),
         ];
 
-        let mut mesh = Mesh::new((0..9).collect(), positions);
+        let mut mesh: Mesh = RawMesh {
+            positions: Positions::F64(positions),
+            ..Default::default()
+        }
+        .into();
         mesh.merge_overlapping_primitives().unwrap();
 
         assert_eq!(4, mesh.no_vertices());

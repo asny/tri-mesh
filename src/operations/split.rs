@@ -986,29 +986,56 @@ mod tests {
     }
 
     fn create_simple_mesh_x_z() -> Mesh {
-        let indices: Vec<u32> = vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5];
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.0, 1.5, 0.0, 0.0, 2.0, 1.0, 0.0,
-            2.5,
+        let indices = vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5];
+        let positions = vec![
+            vec3(0.0, 0.0, 0.0),
+            vec3(0.0, 0.0, 1.0),
+            vec3(1.0, 0.0, 0.5),
+            vec3(1.0, 0.0, 1.5),
+            vec3(0.0, 0.0, 2.0),
+            vec3(1.0, 0.0, 2.5),
         ];
-        Mesh::new(indices, positions)
+        RawMesh {
+            indices: Some(Indices::U32(indices)),
+            positions: Positions::F64(positions),
+            ..Default::default()
+        }
+        .into()
     }
 
     fn create_simple_mesh_y_z() -> Mesh {
-        let indices: Vec<u32> = vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5];
-        let positions: Vec<f64> = vec![
-            0.5, -0.5, 0.0, 0.5, -0.5, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 1.5, 0.5, -0.5, 2.0, 0.5, 0.5,
-            2.5,
+        let indices = vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5];
+        let positions = vec![
+            vec3(0.5, -0.5, 0.0),
+            vec3(0.5, -0.5, 1.0),
+            vec3(0.5, 0.5, 0.5),
+            vec3(0.5, 0.5, 1.5),
+            vec3(0.5, -0.5, 2.0),
+            vec3(0.5, 0.5, 2.5),
         ];
-        Mesh::new(indices, positions)
+        RawMesh {
+            indices: Some(Indices::U32(indices)),
+            positions: Positions::F64(positions),
+            ..Default::default()
+        }
+        .into()
     }
 
     fn create_shifted_simple_mesh_y_z() -> Mesh {
-        let indices: Vec<u32> = vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5];
-        let positions: Vec<f64> = vec![
-            0.5, -0.5, -0.2, 0.5, -0.5, 0.8, 0.5, 0.5, 0.3, 0.5, 0.5, 1.3, 0.5, -0.5, 1.8, 0.5,
-            0.5, 2.3,
+        let indices = vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5];
+        let positions = vec![
+            vec3(0.5, -0.5, -0.2),
+            vec3(0.5, -0.5, 0.8),
+            vec3(0.5, 0.5, 0.3),
+            vec3(0.5, 0.5, 1.3),
+            vec3(0.5, -0.5, 1.8),
+            vec3(0.5, 0.5, 2.3),
         ];
-        Mesh::new(indices, positions)
+        RawMesh {
+            indices: Some(Indices::U32(indices)),
+            positions: Positions::F64(positions),
+            ..Default::default()
+        }
+        .into()
     }
 }
