@@ -601,7 +601,7 @@ mod tests {
 
     #[test]
     fn test_sphere_box_stitching() {
-        let mut mesh1: Mesh = three_d_asset::TriMesh::sphere(3).into();
+        let mut mesh1: Mesh = RawMesh::sphere(3).into();
         for _ in 0..1 {
             for face_id in mesh1.face_iter() {
                 let p = mesh1.face_center(face_id).normalize();
@@ -975,8 +975,8 @@ mod tests {
 
     #[test]
     fn test_box_box_splitting() {
-        let mut mesh1: Mesh = three_d_asset::TriMesh::sphere(2).into();
-        let mut mesh2: Mesh = three_d_asset::TriMesh::sphere(2).into();
+        let mut mesh1: Mesh = RawMesh::sphere(2).into();
+        let mut mesh2: Mesh = RawMesh::sphere(2).into();
         mesh2.translate(vec3(0.5, 0.5, 0.5));
 
         mesh1.split_primitives_at_intersection(&mut mesh2);

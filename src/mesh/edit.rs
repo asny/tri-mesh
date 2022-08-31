@@ -416,7 +416,7 @@ mod tests {
     #[test]
     fn test_flip_multiple_edges() {
         let mut no_flips = 0;
-        let mut mesh: Mesh = three_d_asset::TriMesh::sphere(3).into();
+        let mut mesh: Mesh = RawMesh::sphere(3).into();
         let no_edges = mesh.no_halfedges();
         for halfedge_id in mesh.halfedge_iter() {
             let (v0, v1) = mesh.edge_vertices(halfedge_id);
