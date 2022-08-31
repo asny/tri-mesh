@@ -817,22 +817,26 @@ mod tests {
 
     #[test]
     fn test_split_face_two_times() {
-        let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
-        let mut mesh1 = MeshBuilder::new()
-            .with_positions(positions1)
-            .with_indices(indices1)
-            .build()
-            .unwrap();
+        let mut mesh1: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(-2.0, 0.0, -2.0),
+                vec3(-2.0, 0.0, 2.0),
+                vec3(2.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
         let area1 = mesh1.face_area(mesh1.face_iter().next().unwrap());
 
-        let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f64> = vec![0.2, -0.2, 0.5, 0.5, 0.5, 0.75, 0.5, 0.5, 0.0];
-        let mut mesh2 = MeshBuilder::new()
-            .with_positions(positions2)
-            .with_indices(indices2)
-            .build()
-            .unwrap();
+        let mut mesh2: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.2, -0.2, 0.5),
+                vec3(0.5, 0.5, 0.75),
+                vec3(0.5, 0.5, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         let intersections = find_intersections(&mesh1, &mesh2);
 
@@ -865,21 +869,24 @@ mod tests {
 
     #[test]
     fn test_split_edge_two_times() {
-        let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f64> = vec![0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 2.0, 0.0, 0.0];
-        let mut mesh1 = MeshBuilder::new()
-            .with_positions(positions1)
-            .with_indices(indices1)
-            .build()
-            .unwrap();
-
-        let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f64> = vec![0.0, -0.2, 0.5, 0.0, -0.2, 1.5, 0.0, 1.5, 0.0];
-        let mut mesh2 = MeshBuilder::new()
-            .with_positions(positions2)
-            .with_indices(indices2)
-            .build()
-            .unwrap();
+        let mut mesh1: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 2.0),
+                vec3(2.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
+        let mut mesh2: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, -0.2, 0.5),
+                vec3(0.0, -0.2, 1.5),
+                vec3(0.0, 1.5, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         let intersections = find_intersections(&mesh1, &mesh2);
 
