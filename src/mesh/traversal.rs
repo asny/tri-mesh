@@ -42,7 +42,8 @@ impl Mesh {
 /// ## \# 1
 ///
 /// ```
-/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # use tri_mesh::*;
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
 /// // Find the id of the vertex pointed to by a half-edge.
 /// let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
@@ -51,7 +52,8 @@ impl Mesh {
 /// ## \# 2
 ///
 /// ```
-/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # use tri_mesh::*;
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
 /// let mut walker = mesh.walker_from_halfedge(halfedge_id);
 /// // Walk around the three sides of a face..
@@ -62,7 +64,8 @@ impl Mesh {
 /// ## \# 3
 ///
 /// ```
-/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # use tri_mesh::*;
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let face_id = mesh.face_iter().next().unwrap();
 /// // Find one neighbouring face to the given face
 /// let neighbour_face_id = mesh.walker_from_face(face_id).into_twin().face_id().unwrap();
@@ -71,21 +74,22 @@ impl Mesh {
 /// ## \# 4
 ///
 /// ```
-/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # use tri_mesh::*;
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let face_id = mesh.face_iter().next().unwrap();
-/// // Find the circumference of the face
+/// // Find the circumference of a face
 /// let mut walker = mesh.walker_from_face(face_id);
 /// let mut circumference = mesh.edge_length(walker.halfedge_id().unwrap());
 /// walker.as_next();
 /// circumference += mesh.edge_length(walker.halfedge_id().unwrap());
 /// circumference += mesh.edge_length(walker.next_id().unwrap());
-/// # assert_eq!(circumference, 4.0f64 + 8.0f64.sqrt());
 /// ```
 ///
 /// ## \# 5
 ///
 /// ```
-/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # use tri_mesh::*;
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
 /// // Check if the half-edge is on the boundary of the mesh
 /// let mut walker = mesh.walker_from_halfedge(halfedge_id);
@@ -97,7 +101,7 @@ impl Mesh {
 ///
 /// ```
 /// # use tri_mesh::*;
-/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// // Compute the average edge length
 /// let mut avg_edge_length = 0.0f64;
 /// for halfedge_id in mesh.edge_iter()
