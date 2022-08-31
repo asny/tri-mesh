@@ -991,11 +991,7 @@ mod tests {
             0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.0, 1.5, 0.0, 0.0, 2.0, 1.0, 0.0,
             2.5,
         ];
-        MeshBuilder::new()
-            .with_positions(positions)
-            .with_indices(indices)
-            .build()
-            .unwrap()
+        Mesh::new(indices, positions)
     }
 
     fn create_simple_mesh_y_z() -> Mesh {
@@ -1004,11 +1000,7 @@ mod tests {
             0.5, -0.5, 0.0, 0.5, -0.5, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 1.5, 0.5, -0.5, 2.0, 0.5, 0.5,
             2.5,
         ];
-        MeshBuilder::new()
-            .with_positions(positions)
-            .with_indices(indices)
-            .build()
-            .unwrap()
+        Mesh::new(indices, positions)
     }
 
     fn create_shifted_simple_mesh_y_z() -> Mesh {
@@ -1017,10 +1009,6 @@ mod tests {
             0.5, -0.5, -0.2, 0.5, -0.5, 0.8, 0.5, 0.5, 0.3, 0.5, 0.5, 1.3, 0.5, -0.5, 1.8, 0.5,
             0.5, 2.3,
         ];
-        MeshBuilder::new()
-            .with_positions(positions)
-            .with_indices(indices)
-            .build()
-            .unwrap()
+        Mesh::new(indices, positions)
     }
 }
