@@ -56,7 +56,7 @@ pub enum MeshError {
     MeshIsInvalid(String),
 }
 
-pub use three_d_asset::TriMesh as RawMesh;
+pub use three_d_asset::{Indices, Positions, TriMesh as RawMesh};
 
 ///
 /// Represents a triangle mesh. Use the [Mesh builder](crate::mesh_builder::MeshBuilder) to construct a new mesh.
@@ -104,8 +104,8 @@ impl Mesh {
 
     pub fn to_raw(&self) -> RawMesh {
         RawMesh {
-            indices: Some(three_d_asset::Indices::U32(self.indices_buffer())),
-            positions: three_d_asset::Positions::F64(
+            indices: Some(Indices::U32(self.indices_buffer())),
+            positions: Positions::F64(
                 self.vertex_iter()
                     .map(|vertex_id| self.vertex_position(vertex_id))
                     .collect::<Vec<_>>(),
@@ -114,7 +114,7 @@ impl Mesh {
                 self.vertex_iter()
                     .map(|vertex_id| {
                         let n = self.vertex_normal(vertex_id);
-                        three_d_asset::vec3(n.x as f32, n.y as f32, n.z as f32)
+                        cgmath::Vector3::new(n.x as f32, n.y as f32, n.z as f32)
                     })
                     .collect::<Vec<_>>(),
             ),
