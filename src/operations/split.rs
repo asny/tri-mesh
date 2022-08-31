@@ -438,16 +438,7 @@ mod tests {
 
     #[test]
     fn test_clone_subset() {
-        let indices: Vec<u32> = vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5];
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.0, 1.5, 0.0, 0.0, 2.0, 1.0, 0.0,
-            2.5,
-        ];
-        let mesh = MeshBuilder::new()
-            .with_indices(indices)
-            .with_positions(positions)
-            .build()
-            .unwrap();
+        let mesh = crate::test_utility::triangle_strip();
 
         let mut faces = std::collections::HashSet::new();
         for face_id in mesh.face_iter() {
@@ -466,16 +457,7 @@ mod tests {
 
     #[test]
     fn test_split() {
-        let indices: Vec<u32> = vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5];
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.0, 1.5, 0.0, 0.0, 2.0, 1.0, 0.0,
-            2.5,
-        ];
-        let mesh = MeshBuilder::new()
-            .with_indices(indices)
-            .with_positions(positions)
-            .build()
-            .unwrap();
+        let mesh = crate::test_utility::triangle_strip();
 
         let meshes = mesh.split(&|mesh, he_id| {
             let (p0, p1) = mesh.edge_positions(he_id);
@@ -496,21 +478,24 @@ mod tests {
 
     #[test]
     fn test_face_face_stitching_at_edge() {
-        let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
-        let mut mesh1 = MeshBuilder::new()
-            .with_positions(positions1)
-            .with_indices(indices1)
-            .build()
-            .unwrap();
-
-        let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f64> = vec![-2.0, 0.0, 2.0, -2.0, 0.0, -2.0, -2.0, 0.5, 0.0];
-        let mut mesh2 = MeshBuilder::new()
-            .with_positions(positions2)
-            .with_indices(indices2)
-            .build()
-            .unwrap();
+        let mut mesh1: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(-2.0, 0.0, -2.0),
+                vec3(-2.0, 0.0, 2.0),
+                vec3(2.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
+        let mut mesh2: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(-2.0, 0.0, 2.0),
+                vec3(-2.0, 0.0, -2.0),
+                vec3(-2.0, 0.5, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         let (meshes1, meshes2) = mesh1.split_at_intersection(&mut mesh2);
         assert_eq!(meshes1.len(), 1);
@@ -532,21 +517,24 @@ mod tests {
 
     #[test]
     fn test_face_face_stitching_at_mid_edge() {
-        let indices1: Vec<u32> = vec![0, 1, 2];
-        let positions1: Vec<f64> = vec![-2.0, 0.0, -2.0, -2.0, 0.0, 2.0, 2.0, 0.0, 0.0];
-        let mut mesh1 = MeshBuilder::new()
-            .with_positions(positions1)
-            .with_indices(indices1)
-            .build()
-            .unwrap();
-
-        let indices2: Vec<u32> = vec![0, 1, 2];
-        let positions2: Vec<f64> = vec![-2.0, 0.0, 1.0, -2.0, 0.0, -1.0, -2.0, 0.5, 0.0];
-        let mut mesh2 = MeshBuilder::new()
-            .with_positions(positions2)
-            .with_indices(indices2)
-            .build()
-            .unwrap();
+        let mut mesh1: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(-2.0, 0.0, -2.0),
+                vec3(-2.0, 0.0, 2.0),
+                vec3(2.0, 0.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
+        let mut mesh2: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(-2.0, 0.0, 1.0),
+                vec3(-2.0, 0.0, -1.0),
+                vec3(-2.0, 0.5, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         let (meshes1, meshes2) = mesh1.split_at_intersection(&mut mesh2);
         assert_eq!(meshes1.len(), 1);
