@@ -12,13 +12,13 @@ use crate::prelude::*;
 /// ## Index based arrays
 ///
 /// ```
-/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # let mesh: tri_mesh::Mesh = tri_mesh::RawMesh::sphere(4).into();
 /// // Get face indices, vertex positions and vertex normals as float arrays..
 /// let indices = mesh.indices_buffer();
 /// let positions = mesh.positions_buffer();
 /// let normals = mesh.normals_buffer();
-/// # assert_eq!(positions.len(), 24);
-/// # assert_eq!(normals.len(), 24);
+/// # assert_eq!(positions.len(), mesh.no_vertices()*3);
+/// # assert_eq!(normals.len(), mesh.no_vertices()*3);
 ///
 /// // The vertex attributes are extracted by..
 /// for vertex in 0..positions.len()/3
@@ -49,7 +49,7 @@ use crate::prelude::*;
 /// ## Non-index based arrays
 ///
 /// ```
-/// # let mesh = tri_mesh::MeshBuilder::new().cube().build().unwrap();
+/// # let mesh: tri_mesh::Mesh = tri_mesh::RawMesh::sphere(4).into();
 /// // Get vertex positions and vertex normals for each corner of each face as float arrays..
 /// let positions = mesh.non_indexed_positions_buffer();
 /// let normals = mesh.non_indexed_normals_buffer();
