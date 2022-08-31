@@ -309,10 +309,7 @@ mod tests {
 
     #[test]
     fn test_one_face_connectivity() {
-        let mesh = Mesh::new(
-            vec![0, 1, 2],
-            vec![0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0],
-        );
+        let mesh: Mesh = crate::test_utility::triangle();
 
         let f1 = mesh.face_iter().next().unwrap();
         let v1 = mesh.walker_from_face(f1).vertex_id().unwrap();
@@ -393,12 +390,21 @@ mod tests {
 
     #[test]
     fn test_new_from_positions() {
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -1.0, 0.0, -0.5, 0.0, 0.0, 0.0, -1.0, 0.0, -0.5, 0.0,
-            0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, -0.5,
-        ];
-
-        let mesh = Mesh::new((0..9).collect(), positions);
+        let mesh: Mesh = RawMesh {
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(1.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(0.0, 1.0, 1.0),
+                vec3(1.0, 0.0, 1.0),
+                vec3(0.0, 1.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(1.0, 0.0, 1.0),
+                vec3(0.0, 1.0, 1.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         assert_eq!(9, mesh.no_vertices());
         assert_eq!(3, mesh.no_faces());
@@ -407,11 +413,17 @@ mod tests {
 
     #[test]
     fn test_extreme_coordinates() {
-        let indices: Vec<u32> = vec![0, 1, 2, 0, 2, 3, 0, 3, 1];
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
-        ];
-        let mesh = Mesh::new(indices, positions);
+        let mesh: Mesh = RawMesh {
+            indices: Some(Indices::U8(vec![0, 1, 2, 0, 2, 3, 0, 3, 1])),
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(1.0, 0.0, -0.5),
+                vec3(-1.0, 0.0, -0.5),
+                vec3(0.0, 0.0, 1.0),
+            ]),
+            ..Default::default()
+        }
+        .into();
 
         let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
 

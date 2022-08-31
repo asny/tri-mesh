@@ -44,34 +44,50 @@ pub type TriMeshResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[cfg(test)]
 mod test_utility {
-    use super::Mesh;
+    use super::*;
     /// Creates three connected triangles in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0`
     /// which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`
     /// and has a common vertex in `(0, 0, 0)`.
     pub(crate) fn subdivided_triangle() -> Mesh {
-        Mesh::new(
-            vec![0, 2, 3, 0, 3, 1, 0, 1, 2],
-            vec![
-                0.0, 0.0, 0.0, -3.0, -1.0, 0.0, 3.0, -1.0, 0.0, 0.0, 2.0, 0.0,
-            ],
-        )
+        RawMesh {
+            indices: Some(Indices::U8(vec![0, 2, 3, 0, 3, 1, 0, 1, 2])),
+            positions: Positions::F64(vec![
+                vec3(0.0, 0.0, 0.0),
+                vec3(-3.0, -1.0, 0.0),
+                vec3(3.0, -1.0, 0.0),
+                vec3(0.0, 2.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into()
     }
 
     /// Creates a triangle in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0` which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
     pub(crate) fn triangle() -> Mesh {
-        Mesh::new(
-            vec![0, 1, 2],
-            vec![-3.0, -1.0, 0.0, 3.0, -1.0, 0.0, 0.0, 2.0, 0.0],
-        )
+        RawMesh {
+            indices: Some(Indices::U8(vec![0, 1, 2])),
+            positions: Positions::F64(vec![
+                vec3(-3.0, -1.0, 0.0),
+                vec3(3.0, -1.0, 0.0),
+                vec3(0.0, 2.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into()
     }
 
     /// Creates a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
     pub(crate) fn square() -> Mesh {
-        Mesh::new(
-            vec![0, 1, 2, 2, 1, 3],
-            vec![
-                -1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0,
-            ],
-        )
+        RawMesh {
+            indices: Some(Indices::U8(vec![0, 1, 2, 2, 1, 3])),
+            positions: Positions::F64(vec![
+                vec3(-1.0, -1.0, 0.0),
+                vec3(1.0, -1.0, 0.0),
+                vec3(-1.0, 1.0, 0.0),
+                vec3(1.0, 1.0, 0.0),
+            ]),
+            ..Default::default()
+        }
+        .into()
     }
 }
