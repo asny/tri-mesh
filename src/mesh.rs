@@ -413,35 +413,17 @@ mod tests {
 
     #[test]
     fn test_extreme_coordinates() {
-        let mesh: Mesh = RawMesh {
-            indices: Some(Indices::U8(vec![0, 1, 2, 0, 2, 3, 0, 3, 1])),
-            positions: Positions::F64(vec![
-                vec3(0.0, 0.0, 0.0),
-                vec3(1.0, 0.0, -0.5),
-                vec3(-1.0, 0.0, -0.5),
-                vec3(0.0, 0.0, 1.0),
-            ]),
-            ..Default::default()
-        }
-        .into();
+        let mesh: Mesh = RawMesh::sphere(4).into();
 
         let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
 
-        assert_eq!(min_coordinates, vec3(-1.0, 0.0, -0.5));
-        assert_eq!(max_coordinates, vec3(1.0, 0.0, 1.0));
+        assert_eq!(min_coordinates, vec3(-1.0, -1.0, -1.0));
+        assert_eq!(max_coordinates, vec3(1.0, 1.0, 1.0));
     }
 
     #[test]
     fn test_is_closed_when_not_closed() {
-        let indices: Vec<u32> = vec![0, 1, 2, 0, 2, 3, 0, 3, 1];
-        let positions: Vec<f64> = vec![
-            0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -1.0, 0.0, -0.5, 0.0, 0.0, 1.0,
-        ];
-        let mesh = MeshBuilder::new()
-            .with_indices(indices)
-            .with_positions(positions)
-            .build()
-            .unwrap();
+        let mesh = crate::test_utility::subdivided_triangle();
         assert!(!mesh.is_closed());
     }
 
