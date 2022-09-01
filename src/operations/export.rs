@@ -48,12 +48,10 @@ impl Mesh {
     ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
-    pub fn normals_buffer(&self) -> Vec<f64> {
-        let mut normals = Vec::with_capacity(self.no_vertices() * 3);
-        for vertex_id in self.vertex_iter() {
-            push_vec3(&mut normals, self.vertex_normal(vertex_id));
-        }
-        normals
+    pub fn normals_buffer(&self) -> Vec<Vector3<f64>> {
+        self.vertex_iter()
+            .map(|vertex_id| self.vertex_normal(vertex_id))
+            .collect::<Vec<_>>()
     }
 
     ///
@@ -110,7 +108,7 @@ mod tests {
 
         assert_eq!(indices.len(), mesh.no_faces() * 3);
         assert_eq!(positions.len(), mesh.no_vertices());
-        assert_eq!(normals.len(), mesh.no_vertices() * 3);
+        assert_eq!(normals.len(), mesh.no_vertices());
 
         for face in 0..positions.len() / 3 {
             let vertices = (
@@ -127,21 +125,9 @@ mod tests {
                 .find(|face_id| (mesh.face_center(*face_id) - center).magnitude() < 0.00001);
             assert!(face_id.is_some());
 
-            let n0 = vec3(
-                normals[3 * vertices.0],
-                normals[3 * vertices.0 + 1],
-                normals[3 * vertices.0 + 2],
-            );
-            let n1 = vec3(
-                normals[3 * vertices.1],
-                normals[3 * vertices.1 + 1],
-                normals[3 * vertices.1 + 2],
-            );
-            let n2 = vec3(
-                normals[3 * vertices.2],
-                normals[3 * vertices.2 + 1],
-                normals[3 * vertices.2 + 2],
-            );
+            let n0 = normals[vertices.0];
+            let n1 = normals[vertices.1];
+            let n2 = normals[vertices.2];
 
             let (v0, v1, v2) = mesh.face_vertices(face_id.unwrap());
 
