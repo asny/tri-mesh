@@ -4,7 +4,7 @@
 
 use cgmath;
 pub use cgmath::prelude::*;
-use cgmath::{Deg, Matrix3, Matrix4, Rad, Vector3, Vector4};
+pub use cgmath::{Deg, Matrix3, Matrix4, Rad, Vector3, Vector4};
 
 /// Vector with three elements.
 pub type Vec3 = Vector3<f64>;
