@@ -11,7 +11,6 @@ impl Mesh {
     ///
     /// Returns the face indices in an array `(i0, i1, i2) = (indices[3*x], indices[3*x+1], indices[3*x+2])` which is meant to be used for visualisation.
     /// Use the `positions_buffer` method and `normals_buffer` method to get the positions and normals of the vertices.
-    /// See [this](#index-based-arrays) example.
     ///
     pub fn indices_buffer(&self) -> Vec<u32> {
         let vertices: Vec<VertexID> = self.vertex_iter().collect();
@@ -28,7 +27,6 @@ impl Mesh {
 
     ///
     /// Returns the positions of the vertices in an array which is meant to be used for visualisation.
-    /// See [this](#index-based-arrays) example.
     ///
     /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
     ///
@@ -40,7 +38,6 @@ impl Mesh {
 
     ///
     /// Returns the normals of the vertices in an array which is meant to be used for visualisation.
-    /// See [this](#index-based-arrays) example.
     ///
     /// **Note:** The connectivity of the vertices are attained by the `indices_buffer` method.
     ///
@@ -56,7 +53,6 @@ impl Mesh {
 
     ///
     /// Returns the positions of the face corners in an array which is meant to be used for visualisation.
-    /// See [this](#non-index-based-arrays) example.
     ///
     pub fn non_indexed_positions_buffer(&self) -> Vec<f64> {
         let mut positions = Vec::with_capacity(self.no_faces() * 3 * 3);
@@ -71,7 +67,6 @@ impl Mesh {
 
     ///
     /// Returns the normals of the face corners in an array which is meant to be used for visualisation.
-    /// See [this](#non-index-based-arrays) example.
     ///
     /// **Note:** The normal of a vertex is computed as the average of the normals of the adjacent faces.
     ///
