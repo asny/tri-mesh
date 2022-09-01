@@ -54,13 +54,13 @@ impl Mesh {
     ///
     /// Returns the positions of the face corners in an array which is meant to be used for visualisation.
     ///
-    pub fn non_indexed_positions_buffer(&self) -> Vec<f64> {
-        let mut positions = Vec::with_capacity(self.no_faces() * 3 * 3);
+    pub fn non_indexed_positions_buffer(&self) -> Vec<Vector3<f64>> {
+        let mut positions = Vec::with_capacity(self.no_faces() * 3);
         for face_id in self.face_iter() {
             let (p0, p1, p2) = self.face_positions(face_id);
-            push_vec3(&mut positions, p0);
-            push_vec3(&mut positions, p1);
-            push_vec3(&mut positions, p2);
+            positions.push(p0);
+            positions.push(p1);
+            positions.push(p2);
         }
         positions
     }
@@ -72,21 +72,15 @@ impl Mesh {
     ///
     /// **Note:** The normals are computed from the connectivity and positions each time this method is invoked.
     ///
-    pub fn non_indexed_normals_buffer(&self) -> Vec<f64> {
-        let mut normals = Vec::with_capacity(self.no_faces() * 3 * 3);
+    pub fn non_indexed_normals_buffer(&self) -> Vec<Vector3<f64>> {
+        let mut normals = Vec::with_capacity(self.no_faces() * 3);
         for face_id in self.face_iter() {
             let (v0, v1, v2) = self.face_vertices(face_id);
-            push_vec3(&mut normals, self.vertex_normal(v0));
-            push_vec3(&mut normals, self.vertex_normal(v1));
-            push_vec3(&mut normals, self.vertex_normal(v2));
+            normals.push(self.vertex_normal(v0));
+            normals.push(self.vertex_normal(v1));
+            normals.push(self.vertex_normal(v2));
         }
         normals
-    }
-}
-
-fn push_vec3(vec: &mut Vec<f64>, vec3: Vec3) {
-    for i in 0..3 {
-        vec.push(vec3[i]);
     }
 }
 
@@ -150,26 +144,14 @@ mod tests {
         let positions = mesh.non_indexed_positions_buffer();
         let normals = mesh.non_indexed_normals_buffer();
 
-        assert_eq!(positions.len(), mesh.no_faces() * 3 * 3);
-        assert_eq!(normals.len(), mesh.no_faces() * 3 * 3);
+        assert_eq!(positions.len(), mesh.no_faces() * 3);
+        assert_eq!(normals.len(), mesh.no_faces() * 3);
 
-        for face in 0..positions.len() / 9 {
-            let vertices = (9 * face, 9 * face + 3, 9 * face + 6);
-            let p0 = vec3(
-                positions[vertices.0],
-                positions[vertices.0 + 1],
-                positions[vertices.0 + 2],
-            );
-            let p1 = vec3(
-                positions[vertices.1],
-                positions[vertices.1 + 1],
-                positions[vertices.1 + 2],
-            );
-            let p2 = vec3(
-                positions[vertices.2],
-                positions[vertices.2 + 1],
-                positions[vertices.2 + 2],
-            );
+        for face in 0..positions.len() / 3 {
+            let vertices = (3 * face, 3 * face + 1, 3 * face + 2);
+            let p0 = positions[vertices.0];
+            let p1 = positions[vertices.1];
+            let p2 = positions[vertices.2];
             let center = (p0 + p1 + p2) / 3.0;
 
             let face_id = mesh
@@ -177,21 +159,9 @@ mod tests {
                 .find(|face_id| (mesh.face_center(*face_id) - center).magnitude() < 0.00001);
             assert!(face_id.is_some());
 
-            let n0 = vec3(
-                normals[vertices.0],
-                normals[vertices.0 + 1],
-                normals[vertices.0 + 2],
-            );
-            let n1 = vec3(
-                normals[vertices.1],
-                normals[vertices.1 + 1],
-                normals[vertices.1 + 2],
-            );
-            let n2 = vec3(
-                normals[vertices.2],
-                normals[vertices.2 + 1],
-                normals[vertices.2 + 2],
-            );
+            let n0 = normals[vertices.0];
+            let n1 = normals[vertices.1];
+            let n2 = normals[vertices.2];
 
             let (v0, v1, v2) = mesh.face_vertices(face_id.unwrap());
 
