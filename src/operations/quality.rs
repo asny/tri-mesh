@@ -1,6 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
-use crate::prelude::*;
+use crate::mesh::*;
 use std::collections::{HashMap, HashSet};
 
 /// # Quality

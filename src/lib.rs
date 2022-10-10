@@ -32,8 +32,6 @@ pub use mesh::*;
 pub mod operations;
 pub use operations::*;
 
-pub mod prelude;
-
 #[cfg(test)]
 mod test_utility {
     use super::*;
