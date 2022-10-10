@@ -1,6 +1,7 @@
 //! See [Mesh](crate::mesh::Mesh).
 
 use crate::mesh::*;
+use crate::Error;
 
 /// # Edit
 impl Mesh {

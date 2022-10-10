@@ -24,13 +24,27 @@
 #![warn(missing_docs)]
 
 pub mod math;
-pub use math::*;
 
-pub mod mesh;
+mod mesh;
 pub use mesh::*;
 
-pub mod operations;
+mod operations;
 pub use operations::*;
+
+use thiserror::Error;
+///
+/// Error when performing a mesh operation
+///
+#[derive(Debug, Error)]
+#[allow(missing_docs)]
+pub enum Error {
+    #[error("configuration is not valid: {0}")]
+    ActionWillResultInInvalidMesh(String),
+    #[error("action will produce a non-manifold mesh: {0}")]
+    ActionWillResultInNonManifoldMesh(String),
+    #[error("the mesh has ended up in an invalid state: {0}")]
+    MeshIsInvalid(String),
+}
 
 #[cfg(test)]
 mod test_utility {
