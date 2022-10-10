@@ -1,7 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
 use crate::mesh::*;
-use crate::Result;
 use std::collections::HashSet;
 
 /// # Merge
@@ -63,7 +62,7 @@ impl Mesh {
     ///
     /// Returns an error if the merging will result in a non-manifold mesh.
     ///
-    pub fn merge_overlapping_primitives(&mut self) -> Result<()> {
+    pub fn merge_overlapping_primitives(&mut self) -> Result<(), Error> {
         let set_of_vertices_to_merge = self.find_overlapping_vertices();
         let set_of_edges_to_merge = self.find_overlapping_edges(&set_of_vertices_to_merge);
         let set_of_faces_to_merge = self.find_overlapping_faces(&set_of_vertices_to_merge);
@@ -80,7 +79,7 @@ impl Mesh {
             let mut iter = vertices_to_merge.iter();
             let mut vertex_id1 = *iter.next().unwrap();
             for vertex_id2 in iter {
-                vertex_id1 = self.merge_vertices(vertex_id1, *vertex_id2)?;
+                vertex_id1 = self.merge_vertices(vertex_id1, *vertex_id2);
             }
         }
 
@@ -101,7 +100,7 @@ impl Mesh {
         &mut self,
         halfedge_id1: HalfEdgeID,
         halfedge_id2: HalfEdgeID,
-    ) -> Result<HalfEdgeID> {
+    ) -> Result<HalfEdgeID, Error> {
         let mut walker1 = self.walker_from_halfedge(halfedge_id1);
         let mut walker2 = self.walker_from_halfedge(halfedge_id2);
 
@@ -195,7 +194,7 @@ impl Mesh {
         Ok(halfedge_to_survive1.unwrap())
     }
 
-    fn merge_vertices(&mut self, vertex_id1: VertexID, vertex_id2: VertexID) -> Result<VertexID> {
+    fn merge_vertices(&mut self, vertex_id1: VertexID, vertex_id2: VertexID) -> VertexID {
         for halfedge_id in self.halfedge_iter() {
             let walker = self.walker_from_halfedge(halfedge_id);
             if walker.vertex_id().unwrap() == vertex_id2 {
@@ -205,7 +204,7 @@ impl Mesh {
         }
         self.connectivity_info.remove_vertex(vertex_id2);
 
-        Ok(vertex_id1)
+        vertex_id1
     }
 
     fn find_overlapping_vertices(&self) -> Vec<Vec<VertexID>> {
@@ -492,7 +491,7 @@ mod tests {
                 if vertex_id1.is_none() {
                     vertex_id1 = Some(vertex_id);
                 } else {
-                    mesh.merge_vertices(vertex_id1.unwrap(), vertex_id).unwrap();
+                    mesh.merge_vertices(vertex_id1.unwrap(), vertex_id);
                     break;
                 }
             }
@@ -527,8 +526,8 @@ mod tests {
                     heid1 = Some((halfedge_id, v0, v1));
                 } else {
                     let (halfedge_id1, v10, v11) = heid1.unwrap();
-                    mesh.merge_vertices(v0, v11).unwrap();
-                    mesh.merge_vertices(v1, v10).unwrap();
+                    mesh.merge_vertices(v0, v11);
+                    mesh.merge_vertices(v1, v10);
                     mesh.merge_halfedges(halfedge_id1, halfedge_id).unwrap();
                     break;
                 }
