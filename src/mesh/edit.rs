@@ -1,7 +1,7 @@
 //! See [Mesh](crate::mesh::Mesh).
 
 use crate::mesh::*;
-use crate::TriMeshResult;
+use crate::Result;
 
 /// # Edit
 impl Mesh {
@@ -21,7 +21,7 @@ impl Mesh {
     ///
     /// Returns an error if trying to flip an edge on the boundary or the flip will connect two vertices that are already connected by another edge.
     ///
-    pub fn flip_edge(&mut self, halfedge_id: HalfEdgeID) -> TriMeshResult<()> {
+    pub fn flip_edge(&mut self, halfedge_id: HalfEdgeID) -> Result<()> {
         let mut walker = self.walker_from_halfedge(halfedge_id);
         let face_id = walker
             .face_id()

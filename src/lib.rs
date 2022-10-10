@@ -35,7 +35,7 @@ pub use operations::*;
 pub mod prelude;
 
 /// Result returned from an `tri-mesh` operation.
-pub type TriMeshResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[cfg(test)]
 mod test_utility {

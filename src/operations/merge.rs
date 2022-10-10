@@ -1,7 +1,7 @@
 //! See [Mesh](crate::mesh::Mesh).
 
 use crate::mesh::*;
-use crate::TriMeshResult;
+use crate::Result;
 
 /// # Merge
 impl Mesh {
@@ -14,7 +14,7 @@ impl Mesh {
     ///
     /// Returns an error if the merging will result in a non-manifold mesh.
     ///
-    pub fn merge_with(&mut self, other: &Self) -> TriMeshResult<()> {
+    pub fn merge_with(&mut self, other: &Self) -> Result<()> {
         self.append(other);
         self.merge_overlapping_primitives()?;
         Ok(())
