@@ -9,14 +9,9 @@ impl Mesh {
     /// The `other` mesh primitives are copied to the current mesh (and `other` is therefore not changed)
     /// followed by merging of overlapping primitives.
     ///
-    /// # Error
-    ///
-    /// Returns an error if the merging will result in a non-manifold mesh.
-    ///
-    pub fn merge_with(&mut self, other: &Self) -> Result<(), Error> {
+    pub fn merge_with(&mut self, other: &Self) {
         self.append(other);
-        self.merge_overlapping_primitives()?;
-        Ok(())
+        self.merge_overlapping_primitives();
     }
 }
 
@@ -46,7 +41,7 @@ mod tests {
         }
         .into();
 
-        mesh1.merge_with(&mesh2).unwrap();
+        mesh1.merge_with(&mesh2);
 
         assert_eq!(mesh1.no_faces(), 2);
         assert_eq!(mesh1.no_vertices(), 4);
@@ -64,7 +59,7 @@ mod tests {
         let (meshes1, meshes2) = mesh1.split_at_intersection(&mut mesh2);
 
         let mut result = meshes1.first().unwrap().clone();
-        result.merge_with(meshes2.first().unwrap()).unwrap();
+        result.merge_with(meshes2.first().unwrap());
 
         mesh1.is_valid().unwrap();
         mesh2.is_valid().unwrap();

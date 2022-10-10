@@ -502,7 +502,7 @@ mod tests {
 
         let mut m1 = meshes1[0].clone();
         let m2 = meshes2[0].clone();
-        m1.merge_with(&m2).unwrap();
+        m1.merge_with(&m2);
 
         mesh1.is_valid().unwrap();
         mesh2.is_valid().unwrap();
@@ -541,7 +541,7 @@ mod tests {
 
         let mut m1 = meshes1[0].clone();
         let m2 = meshes2[0].clone();
-        m1.merge_with(&m2).unwrap();
+        m1.merge_with(&m2);
 
         mesh1.is_valid().unwrap();
         mesh2.is_valid().unwrap();
@@ -577,7 +577,7 @@ mod tests {
         m1.is_valid().unwrap();
         m2.is_valid().unwrap();
 
-        m1.merge_with(&m2).unwrap();
+        m1.merge_with(&m2);
 
         mesh1.is_valid().unwrap();
         mesh2.is_valid().unwrap();
@@ -623,7 +623,7 @@ mod tests {
         m1.is_valid().unwrap();
         m2.is_valid().unwrap();
 
-        m1.merge_with(&m2).unwrap();
+        m1.merge_with(&m2);
 
         mesh1.is_valid().unwrap();
         mesh2.is_valid().unwrap();

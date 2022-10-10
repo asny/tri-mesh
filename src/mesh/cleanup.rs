@@ -56,13 +56,9 @@ impl Mesh {
     }
 
     ///
-    /// Merges overlapping faces, edges and vertices.
+    /// Merges overlapping faces, edges and vertices if it is possible without creating a non-manifold mesh.
     ///
-    /// # Error
-    ///
-    /// Returns an error if the merging will result in a non-manifold mesh.
-    ///
-    pub fn merge_overlapping_primitives(&mut self) -> Result<(), Error> {
+    pub fn merge_overlapping_primitives(&mut self) {
         let set_of_vertices_to_merge = self.find_overlapping_vertices();
         let set_of_edges_to_merge = self.find_overlapping_edges(&set_of_vertices_to_merge);
         let set_of_faces_to_merge = self.find_overlapping_faces(&set_of_vertices_to_merge);
@@ -87,20 +83,20 @@ impl Mesh {
             let mut iter = edges_to_merge.iter();
             let mut edge_id1 = *iter.next().unwrap();
             for edge_id2 in iter {
-                edge_id1 = self.merge_halfedges(edge_id1, *edge_id2)?;
+                if let Some(e) = self.merge_halfedges(edge_id1, *edge_id2) {
+                    edge_id1 = e;
+                }
             }
         }
 
         self.fix_orientation();
-
-        Ok(())
     }
 
     fn merge_halfedges(
         &mut self,
         halfedge_id1: HalfEdgeID,
         halfedge_id2: HalfEdgeID,
-    ) -> Result<HalfEdgeID, Error> {
+    ) -> Option<HalfEdgeID> {
         let mut walker1 = self.walker_from_halfedge(halfedge_id1);
         let mut walker2 = self.walker_from_halfedge(halfedge_id2);
 
@@ -113,10 +109,8 @@ impl Mesh {
         let edge2_boundary = !edge2_alone && !edge2_interior;
 
         if edge1_interior && !edge2_alone || edge2_interior && !edge1_alone {
-            Err(Error::ActionWillResultInNonManifoldMesh(format!(
-                "Merging halfedges {} and {} will create a non-manifold mesh",
-                halfedge_id1, halfedge_id2
-            )))?;
+            // Skip since merging these halfedges will create a non-manifold mesh
+            return None;
         }
 
         let mut halfedge_to_remove1 = None;
@@ -191,7 +185,7 @@ impl Mesh {
             .set_vertex_halfedge(vertex_id1.unwrap(), halfedge_to_survive2);
         self.connectivity_info
             .set_vertex_halfedge(vertex_id2.unwrap(), halfedge_to_survive1);
-        Ok(halfedge_to_survive1.unwrap())
+        Some(halfedge_to_survive1.unwrap())
     }
 
     fn merge_vertices(&mut self, vertex_id1: VertexID, vertex_id2: VertexID) -> VertexID {
@@ -373,7 +367,7 @@ mod tests {
             ..Default::default()
         }
         .into();
-        mesh.merge_overlapping_primitives().unwrap();
+        mesh.merge_overlapping_primitives();
 
         assert_eq!(4, mesh.no_vertices());
         assert_eq!(12, mesh.no_halfedges());
@@ -384,7 +378,7 @@ mod tests {
     #[test]
     fn test_merge_overlapping_primitives_of_cube() {
         let mut mesh: Mesh = RawMesh::cube().into();
-        mesh.merge_overlapping_primitives().unwrap();
+        mesh.merge_overlapping_primitives();
 
         assert_eq!(8, mesh.no_vertices());
         assert_eq!(36, mesh.no_halfedges());
@@ -409,7 +403,7 @@ mod tests {
             ..Default::default()
         }
         .into();
-        mesh.merge_overlapping_primitives().unwrap();
+        mesh.merge_overlapping_primitives();
 
         assert_eq!(4, mesh.no_vertices());
         assert_eq!(10, mesh.no_halfedges());
@@ -434,7 +428,7 @@ mod tests {
             ..Default::default()
         }
         .into();
-        mesh.merge_overlapping_primitives().unwrap();
+        mesh.merge_overlapping_primitives();
 
         assert_eq!(5, mesh.no_vertices());
         assert_eq!(14, mesh.no_halfedges());
@@ -462,7 +456,7 @@ mod tests {
             ..Default::default()
         }
         .into();
-        mesh.merge_overlapping_primitives().unwrap();
+        mesh.merge_overlapping_primitives();
 
         assert_eq!(5, mesh.no_vertices());
         assert_eq!(14, mesh.no_halfedges());
