@@ -87,43 +87,13 @@ pub struct Mesh {
 
 impl Mesh {
     pub fn new(input: &RawMesh) -> Self {
-        Self::new_(
-            input
-                .indices
-                .as_ref()
-                .map(|i| i.to_u32())
-                .unwrap_or((0..input.positions.len() as u32).collect::<Vec<_>>()),
-            input
-                .positions
-                .to_f64()
-                .into_iter()
-                .flat_map(|v| [v.x, v.y, v.z])
-                .collect::<Vec<_>>(),
-        )
-    }
-
-    pub fn to_raw(&self) -> RawMesh {
-        RawMesh {
-            indices: Some(Indices::U32(self.indices_buffer())),
-            positions: Positions::F64(
-                self.vertex_iter()
-                    .map(|vertex_id| self.vertex_position(vertex_id))
-                    .collect::<Vec<_>>(),
-            ),
-            normals: Some(
-                self.vertex_iter()
-                    .map(|vertex_id| {
-                        let n = self.vertex_normal(vertex_id);
-                        cgmath::Vector3::new(n.x as f32, n.y as f32, n.z as f32)
-                    })
-                    .collect::<Vec<_>>(),
-            ),
-            ..Default::default()
-        }
-    }
-
-    fn new_(indices: Vec<u32>, positions: Vec<f64>) -> Mesh {
-        let no_vertices = positions.len() / 3;
+        let indices = input
+            .indices
+            .as_ref()
+            .map(|i| i.to_u32())
+            .unwrap_or((0..input.positions.len() as u32).collect::<Vec<_>>());
+        let positions = input.positions.to_f64();
+        let no_vertices = positions.len();
         let no_faces = indices.len() / 3;
         let mesh = Mesh {
             connectivity_info: ConnectivityInfo::new(no_vertices, no_faces),
@@ -131,11 +101,7 @@ impl Mesh {
 
         // Create vertices
         for i in 0..no_vertices {
-            mesh.connectivity_info.new_vertex(vec3(
-                positions[i * 3],
-                positions[i * 3 + 1],
-                positions[i * 3 + 2],
-            ));
+            mesh.connectivity_info.new_vertex(positions[i]);
         }
 
         let mut twins = HashMap::<(VertexID, VertexID), HalfEdgeID>::new();
@@ -195,6 +161,23 @@ impl Mesh {
         }
 
         mesh
+    }
+
+    pub fn to_raw(&self) -> RawMesh {
+        RawMesh {
+            indices: Some(Indices::U32(self.indices_buffer())),
+            positions: Positions::F64(
+                self.vertex_iter()
+                    .map(|vertex_id| self.vertex_position(vertex_id))
+                    .collect::<Vec<_>>(),
+            ),
+            normals: Some(
+                self.vertex_iter()
+                    .map(|vertex_id| self.vertex_normal(vertex_id).cast::<f32>().unwrap())
+                    .collect::<Vec<_>>(),
+            ),
+            ..Default::default()
+        }
     }
 
     fn new_internal(connectivity_info: ConnectivityInfo) -> Mesh {
