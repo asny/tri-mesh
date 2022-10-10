@@ -555,7 +555,7 @@ mod tests {
     #[test]
     fn test_collapse_edge_on_boundary1() {
         let mut mesh: Mesh = RawMesh {
-            indices: Some(Indices::U8(vec![0, 1, 2, 1, 3, 2, 2, 3, 4])),
+            indices: Indices::U8(vec![0, 1, 2, 1, 3, 2, 2, 3, 4]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(0.0, 0.0, 1.0),
@@ -589,7 +589,7 @@ mod tests {
     #[test]
     fn test_collapse_edge_on_boundary2() {
         let mut mesh: Mesh = RawMesh {
-            indices: Some(Indices::U8(vec![0, 2, 3, 0, 3, 1])),
+            indices: Indices::U8(vec![0, 2, 3, 0, 3, 1]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(0.0, 0.0, 1.0),
@@ -633,7 +633,7 @@ mod tests {
     #[test]
     fn test_recursive_collapse_edge() {
         let mut mesh: Mesh = RawMesh {
-            indices: Some(Indices::U8(vec![0, 1, 2, 1, 3, 2, 2, 3, 4])),
+            indices: Indices::U8(vec![0, 1, 2, 1, 3, 2, 2, 3, 4]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(0.0, 0.0, 1.0),

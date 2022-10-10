@@ -662,7 +662,7 @@ mod tests {
     fn test_is_at_intersection() {
         let mesh1 = crate::test_utility::cube();
         let mesh2: Mesh = RawMesh {
-            indices: Some(Indices::U8(vec![0, 1, 2, 0, 2, 3, 0, 3, 4])),
+            indices: Indices::U8(vec![0, 1, 2, 0, 2, 3, 0, 3, 4]),
             positions: Positions::F64(vec![
                 vec3(-1.0, 1.0, 1.0),
                 vec3(-1.0, -1.0, 1.0),
@@ -990,7 +990,7 @@ mod tests {
             vec3(1.0, 0.0, 2.5),
         ];
         RawMesh {
-            indices: Some(Indices::U32(indices)),
+            indices: Indices::U32(indices),
             positions: Positions::F64(positions),
             ..Default::default()
         }
@@ -1008,7 +1008,7 @@ mod tests {
             vec3(0.5, 0.5, 2.5),
         ];
         RawMesh {
-            indices: Some(Indices::U32(indices)),
+            indices: Indices::U32(indices),
             positions: Positions::F64(positions),
             ..Default::default()
         }
@@ -1026,7 +1026,7 @@ mod tests {
             vec3(0.5, 0.5, 2.3),
         ];
         RawMesh {
-            indices: Some(Indices::U32(indices)),
+            indices: Indices::U32(indices),
             positions: Positions::F64(positions),
             ..Default::default()
         }

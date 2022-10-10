@@ -425,7 +425,7 @@ mod tests {
     #[test]
     fn test_merge_two_overlapping_faces() {
         let mut mesh: Mesh = RawMesh {
-            indices: Some(Indices::U8(vec![0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5])),
+            indices: Indices::U8(vec![0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(-1.0, 0.0, 0.0),
@@ -450,9 +450,7 @@ mod tests {
     #[test]
     fn test_merge_three_overlapping_faces() {
         let mut mesh: Mesh = RawMesh {
-            indices: Some(Indices::U8(vec![
-                0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5, 8, 10, 9,
-            ])),
+            indices: Indices::U8(vec![0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5, 8, 10, 9]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(-1.0, 0.0, 0.0),
