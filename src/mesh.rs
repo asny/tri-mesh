@@ -1,5 +1,5 @@
 //!
-//! Module containing the [Mesh](crate::mesh::Mesh) definition and functionality.
+//! Module containing the [Mesh](crate::mesh::Mesh) definition and basic functionality.
 //!
 
 pub use crate::math::*;
