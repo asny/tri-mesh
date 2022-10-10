@@ -87,10 +87,13 @@ pub struct Mesh {
 
 impl Mesh {
     pub fn new(input: &RawMesh) -> Self {
-        let indices = input.indices.to_u32();
+        let no_vertices = input.vertex_count();
+        let no_faces = input.triangle_count();
+        let indices = input
+            .indices
+            .to_u32()
+            .unwrap_or((0..no_faces as u32 * 3).collect::<Vec<_>>());
         let positions = input.positions.to_f64();
-        let no_vertices = positions.len();
-        let no_faces = indices.len() / 3;
         let mesh = Mesh {
             connectivity_info: ConnectivityInfo::new(no_vertices, no_faces),
         };
