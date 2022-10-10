@@ -47,7 +47,7 @@ use thiserror::Error;
 ///
 #[derive(Debug, Error)]
 #[allow(missing_docs)]
-pub enum MeshError {
+pub enum Error {
     #[error("configuration is not valid: {0}")]
     ActionWillResultInInvalidMesh(String),
     #[error("action will produce a non-manifold mesh: {0}")]
