@@ -1,7 +1,7 @@
 //! See [Mesh](crate::mesh::Mesh).
 
 use crate::mesh::*;
-use crate::TriMeshResult;
+use crate::Result;
 use std::collections::HashSet;
 
 /// # Merge
@@ -63,7 +63,7 @@ impl Mesh {
     ///
     /// Returns an error if the merging will result in a non-manifold mesh.
     ///
-    pub fn merge_overlapping_primitives(&mut self) -> TriMeshResult<()> {
+    pub fn merge_overlapping_primitives(&mut self) -> Result<()> {
         let set_of_vertices_to_merge = self.find_overlapping_vertices();
         let set_of_edges_to_merge = self.find_overlapping_edges(&set_of_vertices_to_merge);
         let set_of_faces_to_merge = self.find_overlapping_faces(&set_of_vertices_to_merge);
@@ -101,7 +101,7 @@ impl Mesh {
         &mut self,
         halfedge_id1: HalfEdgeID,
         halfedge_id2: HalfEdgeID,
-    ) -> TriMeshResult<HalfEdgeID> {
+    ) -> Result<HalfEdgeID> {
         let mut walker1 = self.walker_from_halfedge(halfedge_id1);
         let mut walker2 = self.walker_from_halfedge(halfedge_id2);
 
@@ -195,11 +195,7 @@ impl Mesh {
         Ok(halfedge_to_survive1.unwrap())
     }
 
-    fn merge_vertices(
-        &mut self,
-        vertex_id1: VertexID,
-        vertex_id2: VertexID,
-    ) -> TriMeshResult<VertexID> {
+    fn merge_vertices(&mut self, vertex_id1: VertexID, vertex_id2: VertexID) -> Result<VertexID> {
         for halfedge_id in self.halfedge_iter() {
             let walker = self.walker_from_halfedge(halfedge_id);
             if walker.vertex_id().unwrap() == vertex_id2 {

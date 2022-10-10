@@ -22,7 +22,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::Result<()> {
     /// #   use tri_mesh::*;
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let first_face_id = mesh.face_iter().next().unwrap();
@@ -49,7 +49,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::Result<()> {
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let mut iter = mesh.vertex_iter();
     /// #   iter.next();
@@ -85,7 +85,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::Result<()> {
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
@@ -111,7 +111,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::Result<()> {
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
@@ -138,7 +138,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::TriMeshResult<()> {
+    /// # fn main() -> tri_mesh::Result<()> {
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
