@@ -76,7 +76,6 @@ pub use three_d_asset::{Indices, Positions, TriMesh as RawMesh};
 /// - [Intersection](#intersection)
 /// - [Merge](#merge)
 /// - [Split](#split)
-/// - [Export](#export)
 /// - [Connected components](#connected-components)
 /// - [Validity](#validity)
 ///
@@ -274,7 +273,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_with_obj() {
+    fn test_from_obj() {
         let source = b"o Cube
         v 1.000000 -1.000000 -1.000000
         v 1.000000 -1.000000 1.000000
@@ -304,6 +303,30 @@ mod tests {
         assert_eq!(mesh.no_faces(), 12);
         assert_eq!(mesh.no_vertices(), 8);
         mesh.is_valid().unwrap();
+    }
+
+    #[test]
+    fn test_indexed_export() {
+        let mesh: Mesh = RawMesh::cylinder(16).into();
+        let m: RawMesh = (&mesh).into();
+        m.validate().unwrap();
+
+        assert_eq!(m.triangle_count(), mesh.no_faces());
+        assert_eq!(m.vertex_count(), mesh.no_vertices());
+
+        let positions = m.positions.to_f64();
+        let normals = m.normals.as_ref().unwrap();
+        m.for_each_triangle(|i0, i1, i2| {
+            let id0 = unsafe { VertexID::new(i0 as u32) };
+            let id1 = unsafe { VertexID::new(i1 as u32) };
+            let id2 = unsafe { VertexID::new(i2 as u32) };
+            assert!(positions[i0].distance(mesh.vertex_position(id0)) < 0.001);
+            assert!(positions[i1].distance(mesh.vertex_position(id1)) < 0.001);
+            assert!(positions[i2].distance(mesh.vertex_position(id2)) < 0.001);
+            assert!(normals[i0].distance(mesh.vertex_normal(id0).cast::<f32>().unwrap()) < 0.001);
+            assert!(normals[i1].distance(mesh.vertex_normal(id1).cast::<f32>().unwrap()) < 0.001);
+            assert!(normals[i2].distance(mesh.vertex_normal(id2).cast::<f32>().unwrap()) < 0.001);
+        });
     }
 
     #[test]

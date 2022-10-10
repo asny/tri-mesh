@@ -14,10 +14,6 @@ mod edge_measures;
 #[doc(inline)]
 pub use edge_measures::*;
 
-mod export;
-#[doc(inline)]
-pub use export::*;
-
 mod face_measures;
 #[doc(inline)]
 pub use face_measures::*;
