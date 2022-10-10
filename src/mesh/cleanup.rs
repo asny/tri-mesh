@@ -114,7 +114,7 @@ impl Mesh {
         let edge2_boundary = !edge2_alone && !edge2_interior;
 
         if edge1_interior && !edge2_alone || edge2_interior && !edge1_alone {
-            Err(MeshError::ActionWillResultInNonManifoldMesh(format!(
+            Err(Error::ActionWillResultInNonManifoldMesh(format!(
                 "Merging halfedges {} and {} will create a non-manifold mesh",
                 halfedge_id1, halfedge_id2
             )))?;

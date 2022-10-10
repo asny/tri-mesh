@@ -25,7 +25,7 @@ impl Mesh {
         let mut walker = self.walker_from_halfedge(halfedge_id);
         let face_id = walker
             .face_id()
-            .ok_or(MeshError::ActionWillResultInInvalidMesh(format!(
+            .ok_or(Error::ActionWillResultInInvalidMesh(format!(
                 "Trying to flip edge on boundary"
             )))?;
         let next_id = walker.next_id().unwrap();
@@ -39,7 +39,7 @@ impl Mesh {
         let twin_id = walker.halfedge_id().unwrap();
         let twin_face_id = walker
             .face_id()
-            .ok_or(MeshError::ActionWillResultInInvalidMesh(format!(
+            .ok_or(Error::ActionWillResultInInvalidMesh(format!(
                 "Trying to flip edge on boundary"
             )))?;
         let twin_next_id = walker.next_id().unwrap();
@@ -48,7 +48,7 @@ impl Mesh {
         let v2 = walker.as_next().vertex_id().unwrap();
 
         if self.connecting_edge(v2, v3).is_some() {
-            Err(MeshError::ActionWillResultInInvalidMesh ( format!("Trying to flip edge which will connect two vertices that are already connected by another edge")))?;
+            Err(Error::ActionWillResultInInvalidMesh ( format!("Trying to flip edge which will connect two vertices that are already connected by another edge")))?;
         }
 
         self.connectivity_info
