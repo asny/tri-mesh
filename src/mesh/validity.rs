@@ -1,7 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
 use crate::prelude::*;
-use crate::Result;
 
 /// # Validity
 impl Mesh {
@@ -15,7 +14,7 @@ impl Mesh {
     ///
     /// If the mesh is not valid, an [Error::MeshIsInvalid] error with a description of the problem is returned.
     ///
-    pub fn is_valid(&self) -> Result<()> {
+    pub fn is_valid(&self) -> Result<(), Error> {
         for vertex_id in self.vertex_iter() {
             if let Some(halfedge_id) = self.walker_from_vertex(vertex_id).halfedge_id() {
                 if !self.halfedge_iter().any(|he_id| he_id == halfedge_id) {

@@ -22,7 +22,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::Result<()> {
+    /// # fn main() {
     /// #   use tri_mesh::*;
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let first_face_id = mesh.face_iter().next().unwrap();
@@ -31,7 +31,6 @@ impl Mesh {
     /// #   let face_area_after = mesh.face_area(first_face_id);
     /// #   assert_eq!(4.0 * face_area_before, face_area_after);
     /// #   mesh.is_valid().unwrap();
-    /// #   Ok(())
     /// # }
     /// ```
     ///
@@ -49,7 +48,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::Result<()> {
+    /// # fn main() {
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let mut iter = mesh.vertex_iter();
     /// #   iter.next();
@@ -67,7 +66,6 @@ impl Mesh {
     /// #   assert_eq!(vertex1_pos.y, vertex1_pos_new.y);
     /// #   assert_eq!(vertex1_pos.z, vertex1_pos_new.z);
     /// #   mesh.is_valid().unwrap();
-    /// #   Ok(())
     /// # }
     /// ```
     ///
@@ -85,7 +83,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::Result<()> {
+    /// # fn main() {
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
@@ -93,7 +91,6 @@ impl Mesh {
     /// #   let vertex_position_after = mesh.vertex_position(first_vertex_id);
     /// #   assert_eq!(vertex_position_before + vec3(2.5, -1.0, 0.0), vertex_position_after);
     /// #   mesh.is_valid().unwrap();
-    /// #   Ok(())
     /// # }
     /// ```
     ///
@@ -111,7 +108,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::Result<()> {
+    /// # fn main() {
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
@@ -119,7 +116,6 @@ impl Mesh {
     /// #   let vertex_position_after = mesh.vertex_position(first_vertex_id);
     /// #   assert!((vertex_position_before - vertex_position_after).magnitude() < 0.000001);
     /// #   mesh.is_valid().unwrap();
-    /// #   Ok(())
     /// # }
     /// ```
     ///
@@ -138,7 +134,7 @@ impl Mesh {
     /// ```
     /// # use tri_mesh::*;
     /// #
-    /// # fn main() -> tri_mesh::Result<()> {
+    /// # fn main() {
     ///     let mut mesh: Mesh = RawMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
@@ -146,7 +142,6 @@ impl Mesh {
     /// #   let vertex_position_after = mesh.vertex_position(first_vertex_id);
     /// #   assert_eq!(vertex_position_before + vec3(2.5, -1.0, 0.0), vertex_position_after);
     /// #   mesh.is_valid().unwrap();
-    /// #   Ok(())
     /// # }
     /// ```
     ///

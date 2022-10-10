@@ -1,7 +1,6 @@
 //! See [Mesh](crate::mesh::Mesh).
 
 use crate::mesh::*;
-use crate::Result;
 
 /// # Merge
 impl Mesh {
@@ -14,7 +13,7 @@ impl Mesh {
     ///
     /// Returns an error if the merging will result in a non-manifold mesh.
     ///
-    pub fn merge_with(&mut self, other: &Self) -> Result<()> {
+    pub fn merge_with(&mut self, other: &Self) -> Result<(), Error> {
         self.append(other);
         self.merge_overlapping_primitives()?;
         Ok(())
