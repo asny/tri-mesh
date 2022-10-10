@@ -374,7 +374,7 @@ mod tests {
     #[test]
     fn test_with_cube() {
         let mut mesh: Mesh = RawMesh::cube().into();
-        mesh.merge_overlapping_primitives().unwrap();
+        mesh.merge_overlapping_primitives();
         assert_eq!(mesh.no_faces(), 12);
         assert_eq!(mesh.no_vertices(), 8);
         mesh.is_valid().unwrap();
