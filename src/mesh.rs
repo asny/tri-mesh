@@ -87,11 +87,7 @@ pub struct Mesh {
 
 impl Mesh {
     pub fn new(input: &RawMesh) -> Self {
-        let indices = input
-            .indices
-            .as_ref()
-            .map(|i| i.to_u32())
-            .unwrap_or((0..input.positions.len() as u32).collect::<Vec<_>>());
+        let indices = input.indices.to_u32();
         let positions = input.positions.to_f64();
         let no_vertices = positions.len();
         let no_faces = indices.len() / 3;
@@ -164,8 +160,17 @@ impl Mesh {
     }
 
     pub fn to_raw(&self) -> RawMesh {
+        let vertices: Vec<VertexID> = self.vertex_iter().collect();
+        let mut indices = Vec::with_capacity(self.no_faces() * 3);
+        for face_id in self.face_iter() {
+            for halfedge_id in self.face_halfedge_iter(face_id) {
+                let vertex_id = self.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
+                let index = vertices.iter().position(|v| v == &vertex_id).unwrap();
+                indices.push(index as u32);
+            }
+        }
         RawMesh {
-            indices: Some(Indices::U32(self.indices_buffer())),
+            indices: Indices::U32(indices),
             positions: Positions::F64(
                 self.vertex_iter()
                     .map(|vertex_id| self.vertex_position(vertex_id))

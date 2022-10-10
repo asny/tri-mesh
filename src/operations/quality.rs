@@ -163,7 +163,7 @@ mod tests {
     #[test]
     fn test_collapse_small_faces() {
         let mut mesh: Mesh = RawMesh {
-            indices: Some(Indices::U8(vec![0, 2, 3, 0, 3, 1, 0, 1, 2])),
+            indices: Indices::U8(vec![0, 2, 3, 0, 3, 1, 0, 1, 2]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(0.0, 0.0, 0.1),
