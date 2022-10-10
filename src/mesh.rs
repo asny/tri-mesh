@@ -185,10 +185,6 @@ impl Mesh {
         }
     }
 
-    fn new_internal(connectivity_info: ConnectivityInfo) -> Mesh {
-        Mesh { connectivity_info }
-    }
-
     /// Returns the vertex position.
     pub fn vertex_position(&self, vertex_id: VertexID) -> Vec3 {
         self.connectivity_info.position(vertex_id)
@@ -232,7 +228,9 @@ impl Mesh {
 
 impl Clone for Mesh {
     fn clone(&self) -> Mesh {
-        Mesh::new_internal(self.connectivity_info.clone())
+        Mesh {
+            connectivity_info: self.connectivity_info.clone(),
+        }
     }
 }
 
@@ -250,8 +248,20 @@ impl From<RawMesh> for Mesh {
     }
 }
 
+impl From<&RawMesh> for Mesh {
+    fn from(mesh: &RawMesh) -> Self {
+        Self::new(mesh)
+    }
+}
+
 impl From<Mesh> for RawMesh {
     fn from(mesh: Mesh) -> Self {
+        mesh.to_raw()
+    }
+}
+
+impl From<&Mesh> for RawMesh {
+    fn from(mesh: &Mesh) -> Self {
         mesh.to_raw()
     }
 }
