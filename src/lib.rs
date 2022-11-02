@@ -1,9 +1,9 @@
 //!
-//! A triangle mesh data structure including basic operations.
+//! The main struct of this crate is [Mesh](crate::mesh::Mesh) which represents a triangle mesh.
+//! Use the [Mesh::new] method to create a new mesh and [Mesh::export] to export it into a representation which can be visualized.
 //!
 //! # Features
 //!
-//! - The main struct [Mesh](crate::mesh::Mesh) implements the half-edge mesh data structure for easy and efficient traversal
 //! - Half-edge [Walker] to traverse the mesh
 //! - [Iterators](mesh/struct.Mesh.html#iterators) over primitives (vertices, half-edges, edges, faces)
 //! - Convenient [connectivity](mesh/struct.Mesh.html#connectivity) functionality (e.g. vertices of a face, edge between two vertices)
