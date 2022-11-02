@@ -4,6 +4,15 @@ use crate::mesh::*;
 
 /// # Connectivity
 impl Mesh {
+    /// Returns whether or not the mesh is closed, ie. contains no holes.
+    pub fn is_closed(&self) -> bool {
+        for halfedge_id in self.edge_iter() {
+            if self.is_edge_on_boundary(halfedge_id) {
+                return false;
+            }
+        }
+        true
+    }
     ///
     /// Returns the connecting edge between the two vertices or `None` if no edge is found.
     ///

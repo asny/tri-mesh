@@ -222,16 +222,6 @@ impl Mesh {
     pub fn no_faces(&self) -> usize {
         self.connectivity_info.no_faces()
     }
-
-    /// Returns whether or not the mesh is closed, ie. contains no holes.
-    pub fn is_closed(&self) -> bool {
-        for halfedge_id in self.edge_iter() {
-            if self.is_edge_on_boundary(halfedge_id) {
-                return false;
-            }
-        }
-        true
-    }
 }
 
 impl Clone for Mesh {
