@@ -5,14 +5,14 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::Deref;
 
-/// A unique ID
+/// A unique ID.
 pub trait ID: Clone + Eq + Copy + Ord + Hash + Debug + Deref<Target = u32> {
     /// Constructs a new ID from an integer. Should only be used for testing or similar.
     unsafe fn new(val: u32) -> Self;
 }
 
 ///
-/// An unique ID for a vertex
+/// A unique ID for a vertex.
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct VertexID(u32);
@@ -37,7 +37,7 @@ impl fmt::Display for VertexID {
 }
 
 ///
-/// An unique ID for a halfedge
+/// A unique ID for a halfedge.
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct HalfEdgeID(u32);
@@ -62,7 +62,7 @@ impl fmt::Display for HalfEdgeID {
 }
 
 ///
-/// An unique ID for a face
+/// A unique ID for a face.
 ///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct FaceID(u32);
