@@ -18,7 +18,7 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use three_d_asset::{Indices, Positions, TriMesh};
+    use three_d_asset::{Positions, TriMesh};
 
     #[test]
     fn test_face_face_merging_at_edge() {

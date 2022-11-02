@@ -39,7 +39,7 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use three_d_asset::{Indices, Positions, TriMesh};
+    use three_d_asset::TriMesh;
 
     #[test]
     fn test_axis_aligned_bounding_box() {

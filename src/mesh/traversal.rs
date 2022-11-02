@@ -43,7 +43,7 @@ impl Mesh {
 ///
 /// ```
 /// # use tri_mesh::*;
-/// # let mesh: Mesh = TriMesh::sphere(4).into();
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
 /// // Find the id of the vertex pointed to by a half-edge.
 /// let vertex_id = mesh.walker_from_halfedge(halfedge_id).vertex_id().unwrap();
@@ -53,7 +53,7 @@ impl Mesh {
 ///
 /// ```
 /// # use tri_mesh::*;
-/// # let mesh: Mesh = TriMesh::sphere(4).into();
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
 /// let mut walker = mesh.walker_from_halfedge(halfedge_id);
 /// // Walk around the three sides of a face..
@@ -65,7 +65,7 @@ impl Mesh {
 ///
 /// ```
 /// # use tri_mesh::*;
-/// # let mesh: Mesh = TriMesh::sphere(4).into();
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let face_id = mesh.face_iter().next().unwrap();
 /// // Find one neighbouring face to the given face
 /// let neighbour_face_id = mesh.walker_from_face(face_id).into_twin().face_id().unwrap();
@@ -75,7 +75,7 @@ impl Mesh {
 ///
 /// ```
 /// # use tri_mesh::*;
-/// # let mesh: Mesh = TriMesh::sphere(4).into();
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let face_id = mesh.face_iter().next().unwrap();
 /// // Find the circumference of a face
 /// let mut walker = mesh.walker_from_face(face_id);
@@ -89,7 +89,7 @@ impl Mesh {
 ///
 /// ```
 /// # use tri_mesh::*;
-/// # let mesh: Mesh = TriMesh::sphere(4).into();
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// # let halfedge_id = mesh.halfedge_iter().next().unwrap();
 /// // Check if the half-edge is on the boundary of the mesh
 /// let mut walker = mesh.walker_from_halfedge(halfedge_id);
@@ -101,7 +101,7 @@ impl Mesh {
 ///
 /// ```
 /// # use tri_mesh::*;
-/// # let mesh: Mesh = TriMesh::sphere(4).into();
+/// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
 /// // Compute the average edge length
 /// let mut avg_edge_length = 0.0f64;
 /// for halfedge_id in mesh.edge_iter()

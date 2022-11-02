@@ -78,6 +78,7 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::TriMesh;
 
     #[test]
     fn test_sphere_sphere_append() {

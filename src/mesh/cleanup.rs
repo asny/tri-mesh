@@ -5,7 +5,7 @@ use std::collections::HashSet;
 
 /// # Merge
 impl Mesh {
-    /// Removes edges and vertices that are not connected to a face.
+    /// Removes edges and vertices that are not connected to any face.
     pub fn remove_lonely_primitives(&mut self) {
         let edges: Vec<HalfEdgeID> = self.edge_iter().collect();
         for halfedge_id in edges {
@@ -52,6 +52,12 @@ impl Mesh {
                     .set_vertex_halfedge(vertex_id2, new_edge);
                 self.remove_vertex_if_lonely(vertex_id2);
             }
+        }
+    }
+
+    fn remove_vertex_if_lonely(&mut self, vertex_id: VertexID) {
+        if self.connectivity_info.vertex_halfedge(vertex_id).is_none() {
+            self.connectivity_info.remove_vertex(vertex_id);
         }
     }
 
@@ -330,6 +336,7 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::{Indices, Positions, TriMesh};
 
     #[test]
     fn test_remove_lonely_vertices() {
