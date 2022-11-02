@@ -16,10 +16,6 @@ mod edit;
 #[doc(inline)]
 pub use edit::*;
 
-mod validity;
-#[doc(inline)]
-pub use validity::*;
-
 mod orientation;
 #[doc(inline)]
 pub use orientation::*;
