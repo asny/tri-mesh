@@ -2,6 +2,10 @@
 //! Module containing advanced functionality working on the [Mesh](crate::Mesh) struct.
 //!
 
+mod validity;
+#[doc(inline)]
+pub use validity::*;
+
 mod bounding_box;
 #[doc(inline)]
 pub use bounding_box::*;
