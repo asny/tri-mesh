@@ -2,37 +2,18 @@
 
 use crate::mesh::*;
 
+pub use three_d_asset::AxisAlignedBoundingBox;
+
 /// # Bounding box
 impl Mesh {
-    /// Returns minimum and maximum coordinates of the axis aligned bounding box of the mesh.
-    pub fn extreme_coordinates(&self) -> (Vec3, Vec3) {
-        let mut min_coordinates = vec3(std::f64::MAX, std::f64::MAX, std::f64::MAX);
-        let mut max_coordinates = vec3(std::f64::MIN, std::f64::MIN, std::f64::MIN);
-        for vertex_id in self.vertex_iter() {
-            let position = self.vertex_position(vertex_id);
-            for i in 0..3 {
-                min_coordinates[i] = min_coordinates[i].min(position[i]);
-                max_coordinates[i] = max_coordinates[i].max(position[i]);
-            }
-        }
-        (min_coordinates, max_coordinates)
-    }
-
-    /// Returns the center of the smallest axis aligned box which contains the entire mesh, ie. the axis aligned bounding box.
-    pub fn axis_aligned_bounding_box_center(&self) -> Vec3 {
-        let (min_coord, max_coord) = self.extreme_coordinates();
-        0.5 * (max_coord + min_coord)
-    }
-
     /// Returns the smallest axis aligned box which contains the entire mesh, ie. the axis aligned bounding box.
-    pub fn axis_aligned_bounding_box(&self) -> Mesh {
-        let (min_coord, max_coord) = self.extreme_coordinates();
-        let mut mesh: Mesh = three_d_asset::TriMesh::cube().into();
-        let scale = 0.5 * (max_coord - min_coord);
-        mesh.non_uniform_scale(scale.x, scale.y, scale.z);
-        let translation = 0.5 * (max_coord + min_coord);
-        mesh.translate(translation);
-        mesh
+    pub fn axis_aligned_bounding_box(&self) -> AxisAlignedBoundingBox {
+        AxisAlignedBoundingBox::new_with_positions(
+            &self
+                .vertex_iter()
+                .map(|v| self.position(v).cast::<f32>().unwrap())
+                .collect::<Vec<_>>(),
+        )
     }
 }
 
@@ -49,16 +30,15 @@ mod tests {
 
         let bb = mesh.axis_aligned_bounding_box();
 
-        assert_eq!(bb.extreme_coordinates(), mesh.extreme_coordinates());
+        assert_eq!(bb.min(), Vector3::new(-1.5, 3.6, 4.6));
+        assert_eq!(bb.max(), Vector3::new(3.0, 3.8, 13.6));
     }
 
     #[test]
     fn test_extreme_coordinates() {
         let mesh: Mesh = TriMesh::sphere(4).into();
-
-        let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
-
-        assert_eq!(min_coordinates, vec3(-1.0, -1.0, -1.0));
-        assert_eq!(max_coordinates, vec3(1.0, 1.0, 1.0));
+        let bb = mesh.axis_aligned_bounding_box();
+        assert_eq!(bb.min(), Vector3::new(-1.0, -1.0, -1.0));
+        assert_eq!(bb.max(), Vector3::new(1.0, 1.0, 1.0));
     }
 }
