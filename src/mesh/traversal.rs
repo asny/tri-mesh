@@ -276,3 +276,80 @@ impl<'a> Walker<'a> {
         self.current = halfedge_id;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_one_face_connectivity() {
+        let mesh: Mesh = crate::test_utility::triangle();
+
+        let f1 = mesh.face_iter().next().unwrap();
+        let v1 = mesh.walker_from_face(f1).vertex_id().unwrap();
+        let v2 = mesh.walker_from_face(f1).as_next().vertex_id().unwrap();
+        let v3 = mesh.walker_from_face(f1).as_previous().vertex_id().unwrap();
+
+        let t1 = mesh.walker_from_vertex(v1).vertex_id();
+        assert_eq!(t1, Some(v2));
+
+        let t2 = mesh.walker_from_vertex(v1).as_twin().vertex_id();
+        assert_eq!(t2, Some(v1));
+
+        let t3 = mesh.walker_from_vertex(v2).as_next().as_next().vertex_id();
+        assert_eq!(t3, Some(v2));
+
+        let t4 = mesh.walker_from_face(f1).as_twin().face_id();
+        assert!(t4.is_none());
+
+        let t5 = mesh.walker_from_face(f1).as_twin().next_id();
+        assert!(t5.is_none());
+
+        let t6 = mesh
+            .walker_from_face(f1)
+            .as_previous()
+            .as_previous()
+            .as_twin()
+            .as_twin()
+            .face_id();
+        assert_eq!(t6, Some(f1));
+
+        let t7 = mesh.walker_from_vertex(v2).as_next().as_next().next_id();
+        assert_eq!(t7, mesh.walker_from_vertex(v2).halfedge_id());
+
+        let t8 = mesh.walker_from_vertex(v3).face_id();
+        assert_eq!(t8, Some(f1));
+
+        mesh.is_valid().unwrap();
+    }
+
+    #[test]
+    fn test_three_face_connectivity() {
+        let mesh = crate::test_utility::subdivided_triangle();
+        let mut id = None;
+        for vertex_id in mesh.vertex_iter() {
+            let mut round = true;
+            for halfedge_id in mesh.vertex_halfedge_iter(vertex_id) {
+                if mesh.walker_from_halfedge(halfedge_id).face_id().is_none() {
+                    round = false;
+                    break;
+                }
+            }
+            if round {
+                id = Some(vertex_id);
+                break;
+            }
+        }
+        let mut walker = mesh.walker_from_vertex(id.unwrap());
+        let start_edge = walker.halfedge_id().unwrap();
+        let one_round_edge = walker
+            .as_previous()
+            .as_twin()
+            .as_previous()
+            .as_twin()
+            .as_previous()
+            .twin_id()
+            .unwrap();
+        assert_eq!(start_edge, one_round_edge);
+    }
+}

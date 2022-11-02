@@ -1,6 +1,7 @@
 use crate::mesh::*;
 use std::collections::HashMap;
 
+/// # Append
 impl Mesh {
     /// Appends the `other` mesh to this mesh without creating a connection between them.
     /// Use `merge_with` if merging of overlapping primitives is desired, thereby creating a connection.

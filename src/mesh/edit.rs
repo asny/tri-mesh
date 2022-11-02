@@ -5,6 +5,11 @@ use crate::Error;
 
 /// # Edit
 impl Mesh {
+    /// Moves the vertex to the specified position.
+    pub fn set_vertex_position(&mut self, vertex_id: VertexID, value: Vec3) {
+        self.connectivity_info.set_position(vertex_id, value);
+    }
+
     /// Flip the given edge such that the edge after the flip is connected to the
     /// other pair of the four vertices connected to the two adjacent faces.
     ///

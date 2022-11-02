@@ -2,21 +2,14 @@
 //! Module containing advanced functionality working on the [Mesh](crate::Mesh) struct.
 //!
 
-mod validity;
-#[doc(inline)]
-pub use validity::*;
-
-mod bounding_box;
-#[doc(inline)]
-pub use bounding_box::*;
-
-mod connected_components;
-#[doc(inline)]
-pub use connected_components::*;
-
+// Simple
 mod connectivity;
 #[doc(inline)]
 pub use connectivity::*;
+
+mod vertex_measures;
+#[doc(inline)]
+pub use vertex_measures::*;
 
 mod edge_measures;
 #[doc(inline)]
@@ -26,21 +19,30 @@ mod face_measures;
 #[doc(inline)]
 pub use face_measures::*;
 
-mod intersection;
-#[doc(inline)]
-pub use intersection::*;
-
-mod quality;
-#[doc(inline)]
-pub use quality::*;
-
 mod transformations;
 #[doc(inline)]
 pub use transformations::*;
 
-mod vertex_measures;
+mod bounding_box;
 #[doc(inline)]
-pub use vertex_measures::*;
+pub use bounding_box::*;
+
+mod validity;
+#[doc(inline)]
+pub use validity::*;
+
+// Advanced
+mod quality;
+#[doc(inline)]
+pub use quality::*;
+
+mod connected_components;
+#[doc(inline)]
+pub use connected_components::*;
+
+mod intersection;
+#[doc(inline)]
+pub use intersection::*;
 
 mod merge;
 #[doc(inline)]
