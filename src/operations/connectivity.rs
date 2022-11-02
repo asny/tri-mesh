@@ -113,3 +113,20 @@ impl Mesh {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use three_d_asset::TriMesh;
+    #[test]
+    fn test_is_closed_when_not_closed() {
+        let mesh = crate::test_utility::subdivided_triangle();
+        assert!(!mesh.is_closed());
+    }
+
+    #[test]
+    fn test_is_closed_when_closed() {
+        let mesh: Mesh = TriMesh::sphere(4).into();
+        assert!(mesh.is_closed());
+    }
+}
