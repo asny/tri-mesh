@@ -126,7 +126,7 @@ impl Mesh {
     ///
     /// ```
     /// # use tri_mesh::*;
-    /// # let mesh: Mesh = TriMesh::sphere(4).into();
+    /// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// let mut sum_vertex_positions = Vec3::zero();
     /// for vertex_id in mesh.vertex_iter() {
     ///     sum_vertex_positions += mesh.vertex_position(vertex_id);
@@ -146,7 +146,7 @@ impl Mesh {
     ///
     /// ```
     /// # use tri_mesh::*;
-    /// # let mesh: Mesh = TriMesh::sphere(4).into();
+    /// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// let mut halfedge_length_average = 0.0;
     /// let mut i = 0;
     /// for halfedge_id in mesh.halfedge_iter() {
@@ -169,7 +169,7 @@ impl Mesh {
     ///
     /// ```
     /// # use tri_mesh::*;
-    /// # let mesh: Mesh = TriMesh::sphere(4).into();
+    /// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// let mut edge_length_average = 0.0;
     /// let mut i = 0;
     /// for halfedge_id in mesh.edge_iter() {
@@ -190,7 +190,7 @@ impl Mesh {
     ///
     /// ```
     /// # use tri_mesh::*;
-    /// # let mesh: Mesh = TriMesh::sphere(4).into();
+    /// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// let mut sum_face_area = 0.0;
     /// for face_id in mesh.face_iter() {
     ///     sum_face_area += mesh.face_area(face_id);
@@ -212,7 +212,7 @@ impl Mesh {
     ///
     /// ```
     /// # use tri_mesh::*;
-    /// # let mesh: Mesh = TriMesh::sphere(4).into();
+    /// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// # let vertex_id = mesh.vertex_iter().next().unwrap();
     /// let mut one_ring_average_position = Vec3::zero();
     /// let mut i = 0;
@@ -235,7 +235,7 @@ impl Mesh {
     ///
     /// ```
     /// # use tri_mesh::*;
-    /// # let mesh: Mesh = TriMesh::sphere(4).into();
+    /// # let mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// # let face_id = mesh.face_iter().next().unwrap();
     /// let mut face_circumference = 0.0f64;
     /// for halfedge_id in mesh.face_halfedge_iter(face_id) {
@@ -251,6 +251,7 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::{Indices, Positions, TriMesh};
 
     #[test]
     fn test_vertex_iterator() {

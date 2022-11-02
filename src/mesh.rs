@@ -41,10 +41,9 @@ mod connectivity_info;
 use crate::mesh::connectivity_info::ConnectivityInfo;
 use std::collections::HashMap;
 
-use three_d_asset::{Indices, Positions, TriMesh};
-
 ///
-/// Represents a triangle mesh. Use [three_d_asset::TriMesh] to construct a new mesh.
+/// Represents a triangle mesh.
+/// Use [Mesh::new] to construct a new mesh.
 ///
 /// ## Functionality:
 /// - [Traversal](#traversal)
@@ -70,7 +69,31 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn new(input: &TriMesh) -> Self {
+    ///
+    /// Constructs a new [Mesh] from a [three_d_asset::TriMesh] which can either be manually constructed or loaded via the [three_d_asset::io] module.
+    ///
+    /// # Examples
+    /// ```no_run
+    /// # use tri_mesh::*;
+    /// let model: three_d_asset::Model =
+    ///     three_d_asset::io::load_and_deserialize("cube.obj").expect("Failed loading asset");
+    /// let mesh = Mesh::new(&model.geometries[0]);
+    /// ```
+    ///
+    /// ```
+    /// # use tri_mesh::*;
+    /// let mesh = Mesh::new(&three_d_asset::TriMesh::sphere(4));
+    /// ```
+    ///
+    /// ```
+    /// # use tri_mesh::*;
+    /// let mesh = Mesh::new(&three_d_asset::TriMesh {
+    ///     positions: three_d_asset::Positions::F64(vec![vec3(0.0, 0.0, 0.0), vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0)]),
+    ///     ..Default::default()
+    /// });
+    /// ```
+    ///
+    pub fn new(input: &three_d_asset::TriMesh) -> Self {
         let no_vertices = input.vertex_count();
         let no_faces = input.triangle_count();
         let indices = input
@@ -146,7 +169,12 @@ impl Mesh {
         mesh
     }
 
-    pub fn to_raw(&self) -> TriMesh {
+    ///
+    /// Exports the [Mesh] into a [three_d_asset::TriMesh] that contain the raw buffer data.
+    /// The [three_d_asset::TriMesh] can then for example be visualized or saved to disk (using the [three_d_asset::io] module).
+    ///
+    pub fn export(&self) -> three_d_asset::TriMesh {
+        use three_d_asset::{Indices, Positions, TriMesh};
         let vertices: Vec<VertexID> = self.vertex_iter().collect();
         let mut indices = Vec::with_capacity(self.no_faces() * 3);
         for face_id in self.face_iter() {
@@ -229,33 +257,34 @@ impl std::fmt::Display for Mesh {
     }
 }
 
-impl From<TriMesh> for Mesh {
-    fn from(mesh: TriMesh) -> Self {
+impl From<three_d_asset::TriMesh> for Mesh {
+    fn from(mesh: three_d_asset::TriMesh) -> Self {
         Self::new(&mesh)
     }
 }
 
-impl From<&TriMesh> for Mesh {
-    fn from(mesh: &TriMesh) -> Self {
+impl From<&three_d_asset::TriMesh> for Mesh {
+    fn from(mesh: &three_d_asset::TriMesh) -> Self {
         Self::new(mesh)
     }
 }
 
-impl From<Mesh> for TriMesh {
+impl From<Mesh> for three_d_asset::TriMesh {
     fn from(mesh: Mesh) -> Self {
-        mesh.to_raw()
+        mesh.export()
     }
 }
 
-impl From<&Mesh> for TriMesh {
+impl From<&Mesh> for three_d_asset::TriMesh {
     fn from(mesh: &Mesh) -> Self {
-        mesh.to_raw()
+        mesh.export()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::{Positions, TriMesh};
 
     #[test]
     fn test_from_obj() {

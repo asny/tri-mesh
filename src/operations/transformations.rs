@@ -24,7 +24,7 @@ impl Mesh {
     /// #
     /// # fn main() {
     /// #   use tri_mesh::*;
-    ///     let mut mesh: Mesh = TriMesh::sphere(4).into();
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// #   let first_face_id = mesh.face_iter().next().unwrap();
     /// #   let face_area_before = mesh.face_area(first_face_id);
     ///     mesh.scale(2.0);
@@ -49,7 +49,7 @@ impl Mesh {
     /// # use tri_mesh::*;
     /// #
     /// # fn main() {
-    ///     let mut mesh: Mesh = TriMesh::sphere(4).into();
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// #   let mut iter = mesh.vertex_iter();
     /// #   iter.next();
     /// #   let vertex0_pos = mesh.vertex_position(iter.next().unwrap());
@@ -84,7 +84,7 @@ impl Mesh {
     /// # use tri_mesh::*;
     /// #
     /// # fn main() {
-    ///     let mut mesh: Mesh = TriMesh::sphere(4).into();
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
     ///     mesh.translate(vec3(2.5, -1.0, 0.0));
@@ -109,7 +109,7 @@ impl Mesh {
     /// # use tri_mesh::*;
     /// #
     /// # fn main() {
-    ///     let mut mesh: Mesh = TriMesh::sphere(4).into();
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
     ///     mesh.apply_transformation(Mat4::from_angle_y(degrees(360.0)));
@@ -135,7 +135,7 @@ impl Mesh {
     /// # use tri_mesh::*;
     /// #
     /// # fn main() {
-    ///     let mut mesh: Mesh = TriMesh::sphere(4).into();
+    ///     let mut mesh: Mesh = three_d_asset::TriMesh::sphere(4).into();
     /// #   let first_vertex_id = mesh.vertex_iter().next().unwrap();
     /// #   let vertex_position_before = mesh.vertex_position(first_vertex_id);
     ///     mesh.apply_transformation(Mat4::from_translation(vec3(2.5, -1.0, 0.0)));

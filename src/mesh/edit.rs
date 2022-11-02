@@ -317,10 +317,18 @@ impl Mesh {
         walker.as_twin();
     }
 
+    ///
+    /// Adds a vertex to the mesh which is not connected to anything.
+    /// Usually used in combination with [Mesh::add_face].
+    ///
     pub fn add_vertex(&mut self, position: Vec3) -> VertexID {
         self.connectivity_info.new_vertex(position)
     }
 
+    ///
+    /// Adds a face to the mesh and connects it to the given vertices which can be created using the [Mesh::add_vertex] method.
+    /// Also creates edges between the vertices if they do not already exist.
+    ///
     pub fn add_face(
         &mut self,
         vertex_id1: VertexID,
@@ -343,13 +351,9 @@ impl Mesh {
         face_id
     }
 
-    pub fn remove_vertex_if_lonely(&mut self, vertex_id: VertexID) {
-        if self.connectivity_info.vertex_halfedge(vertex_id).is_none() {
-            self.connectivity_info.remove_vertex(vertex_id);
-        }
-    }
-
-    /// Removes the given face and the adjacent edges if they are then not connected to any face.
+    ///
+    /// Removes the given face and also the adjacent edges and vertices if they are not connected to any other face.
+    ///
     pub fn remove_face(&mut self, face_id: FaceID) {
         let edges: Vec<HalfEdgeID> = self.face_halfedge_iter(face_id).collect();
         self.remove_face_unsafe(face_id);
@@ -381,6 +385,7 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::{Indices, Positions, TriMesh};
 
     #[test]
     fn test_flip_edge() {
