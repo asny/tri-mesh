@@ -49,11 +49,12 @@ pub enum Error {
 #[cfg(test)]
 mod test_utility {
     use super::*;
+    use three_d_asset::{Indices, Positions, TriMesh};
     /// Creates three connected triangles in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0`
     /// which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`
     /// and has a common vertex in `(0, 0, 0)`.
     pub(crate) fn subdivided_triangle() -> Mesh {
-        RawMesh {
+        TriMesh {
             indices: Indices::U8(vec![0, 2, 3, 0, 3, 1, 0, 1, 2]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
@@ -68,7 +69,7 @@ mod test_utility {
 
     /// Creates a triangle in `x = [-3, 3]`, `y = [-1, 2]` and `z = 0` which covers a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
     pub(crate) fn triangle() -> Mesh {
-        RawMesh {
+        TriMesh {
             indices: Indices::U8(vec![0, 1, 2]),
             positions: Positions::F64(vec![
                 vec3(-3.0, -1.0, 0.0),
@@ -82,7 +83,7 @@ mod test_utility {
 
     /// Creates a square in `x = [-1, 1]`, `y = [-1, 1]` and `z = 0`.
     pub(crate) fn square() -> Mesh {
-        RawMesh {
+        TriMesh {
             indices: Indices::U8(vec![0, 1, 2, 2, 1, 3]),
             positions: Positions::F64(vec![
                 vec3(-1.0, -1.0, 0.0),
@@ -96,7 +97,7 @@ mod test_utility {
     }
 
     pub(crate) fn triangle_strip() -> Mesh {
-        RawMesh {
+        TriMesh {
             indices: Indices::U8(vec![0, 1, 2, 2, 1, 3, 3, 1, 4, 3, 4, 5]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
@@ -112,7 +113,7 @@ mod test_utility {
     }
 
     pub(crate) fn cube() -> Mesh {
-        RawMesh {
+        TriMesh {
             indices: Indices::U8(vec![
                 0, 1, 2, 0, 2, 3, 4, 7, 6, 4, 6, 5, 0, 4, 5, 0, 5, 1, 1, 5, 6, 1, 6, 2, 2, 6, 7, 2,
                 7, 3, 4, 0, 3, 4, 3, 7,

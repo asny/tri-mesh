@@ -416,7 +416,7 @@ mod tests {
     #[test]
     fn test_flip_multiple_edges() {
         let mut no_flips = 0;
-        let mut mesh: Mesh = RawMesh::sphere(3).into();
+        let mut mesh: Mesh = TriMesh::sphere(3).into();
         let no_edges = mesh.no_halfedges();
         for halfedge_id in mesh.halfedge_iter() {
             let (v0, v1) = mesh.edge_vertices(halfedge_id);
@@ -554,7 +554,7 @@ mod tests {
 
     #[test]
     fn test_collapse_edge_on_boundary1() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             indices: Indices::U8(vec![0, 1, 2, 1, 3, 2, 2, 3, 4]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
@@ -588,7 +588,7 @@ mod tests {
 
     #[test]
     fn test_collapse_edge_on_boundary2() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             indices: Indices::U8(vec![0, 2, 3, 0, 3, 1]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
@@ -632,7 +632,7 @@ mod tests {
 
     #[test]
     fn test_recursive_collapse_edge() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             indices: Indices::U8(vec![0, 1, 2, 1, 3, 2, 2, 3, 4]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
@@ -661,7 +661,7 @@ mod tests {
 
     #[test]
     fn test_remove_face_when_unconnected() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(1.0, 0.0, 0.0),
                 vec3(0.0, 0.0, 0.0),

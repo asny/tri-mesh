@@ -81,8 +81,8 @@ mod tests {
 
     #[test]
     fn test_sphere_sphere_append() {
-        let mut mesh1: Mesh = RawMesh::sphere(4).into();
-        let mut mesh2: Mesh = RawMesh::sphere(3).into();
+        let mut mesh1: Mesh = TriMesh::sphere(4).into();
+        let mut mesh2: Mesh = TriMesh::sphere(3).into();
         mesh2.translate(vec3(0.5, 0.5, 0.5));
 
         let prev_no_vertices = mesh1.no_vertices();

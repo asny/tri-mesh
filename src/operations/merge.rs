@@ -18,10 +18,11 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::{Indices, Positions, TriMesh};
 
     #[test]
     fn test_face_face_merging_at_edge() {
-        let mut mesh1: Mesh = RawMesh {
+        let mut mesh1: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(-2.0, 0.0, -2.0),
                 vec3(-2.0, 0.0, 2.0),
@@ -31,7 +32,7 @@ mod tests {
         }
         .into();
 
-        let mesh2: Mesh = RawMesh {
+        let mesh2: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(-2.0, 0.0, 2.0),
                 vec3(-2.0, 0.0, -2.0),
