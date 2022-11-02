@@ -246,7 +246,7 @@ impl Mesh {
     /// which position is the average of the original vertex positions.
     /// Returns the merged vertex.
     ///
-    /// **Note:** This might make some faces degenerate.
+    /// **Note:** This might make some faces degenerate or produce edges and vertices that are not connected.
     ///
     pub fn collapse_edge(&mut self, halfedge_id: HalfEdgeID) -> VertexID {
         let mut walker = self.walker_from_halfedge(halfedge_id);
