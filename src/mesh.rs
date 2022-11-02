@@ -1,7 +1,3 @@
-//!
-//! Module containing the [Mesh](crate::mesh::Mesh) definition and basic functionality.
-//!
-
 pub use crate::math::*;
 
 mod ids;
@@ -42,8 +38,9 @@ use crate::mesh::connectivity_info::ConnectivityInfo;
 use std::collections::HashMap;
 
 ///
-/// Represents a triangle mesh.
+/// A representation of a triangle mesh which is efficient for calculating on and making changes to a mesh.
 /// Use [Mesh::new] to construct a new mesh.
+/// Use [Mesh::export] to export the mesh to a format that is efficient for visualization.
 ///
 /// ## Functionality:
 /// - [Traversal](#traversal)
