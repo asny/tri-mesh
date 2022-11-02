@@ -66,7 +66,7 @@ use std::collections::HashMap;
 /// - [Merge](#merge)
 /// - [Split](#split)
 ///
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Mesh {
     connectivity_info: ConnectivityInfo,
 }
@@ -95,13 +95,5 @@ impl Mesh {
     /// Returns the number of faces in the mesh.
     pub fn no_faces(&self) -> usize {
         self.connectivity_info.no_faces()
-    }
-}
-
-impl Clone for Mesh {
-    fn clone(&self) -> Mesh {
-        Mesh {
-            connectivity_info: self.connectivity_info.clone(),
-        }
     }
 }
