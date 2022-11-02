@@ -51,4 +51,14 @@ mod tests {
 
         assert_eq!(bb.extreme_coordinates(), mesh.extreme_coordinates());
     }
+
+    #[test]
+    fn test_extreme_coordinates() {
+        let mesh: Mesh = TriMesh::sphere(4).into();
+
+        let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
+
+        assert_eq!(min_coordinates, vec3(-1.0, -1.0, -1.0));
+        assert_eq!(max_coordinates, vec3(1.0, 1.0, 1.0));
+    }
 }

@@ -429,26 +429,4 @@ mod tests {
         assert_eq!(3, mesh.no_faces());
         mesh.is_valid().unwrap();
     }
-
-    #[test]
-    fn test_extreme_coordinates() {
-        let mesh: Mesh = TriMesh::sphere(4).into();
-
-        let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
-
-        assert_eq!(min_coordinates, vec3(-1.0, -1.0, -1.0));
-        assert_eq!(max_coordinates, vec3(1.0, 1.0, 1.0));
-    }
-
-    #[test]
-    fn test_is_closed_when_not_closed() {
-        let mesh = crate::test_utility::subdivided_triangle();
-        assert!(!mesh.is_closed());
-    }
-
-    #[test]
-    fn test_is_closed_when_closed() {
-        let mesh: Mesh = TriMesh::sphere(4).into();
-        assert!(mesh.is_closed());
-    }
 }
