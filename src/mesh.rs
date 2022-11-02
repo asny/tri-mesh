@@ -4,6 +4,18 @@ mod io;
 #[doc(inline)]
 pub use io::*;
 
+mod utility;
+#[doc(inline)]
+pub use utility::*;
+
+mod append;
+#[doc(inline)]
+pub use append::*;
+
+mod cleanup;
+#[doc(inline)]
+pub use cleanup::*;
+
 mod ids;
 #[doc(inline)]
 pub use ids::*;
@@ -24,14 +36,6 @@ mod orientation;
 #[doc(inline)]
 pub use orientation::*;
 
-mod cleanup;
-#[doc(inline)]
-pub use cleanup::*;
-
-mod append;
-#[doc(inline)]
-pub use append::*;
-
 mod connectivity_info;
 
 use crate::mesh::connectivity_info::ConnectivityInfo;
@@ -47,8 +51,6 @@ use std::collections::HashMap;
 /// - [Traversal](#traversal)
 /// - [Edit](#edit)
 /// - [Orientation](#orientation)
-/// - [Clean-up](#clean-up)
-/// - [Append](#append)
 ///
 /// ## Simple operations
 /// - [Connectivity](#connectivity)
@@ -69,31 +71,4 @@ use std::collections::HashMap;
 #[derive(Debug, Clone)]
 pub struct Mesh {
     connectivity_info: ConnectivityInfo,
-}
-
-impl Mesh {
-    /// Returns the vertex position.
-    pub fn vertex_position(&self, vertex_id: VertexID) -> Vec3 {
-        self.connectivity_info.position(vertex_id)
-    }
-
-    /// Returns the number of vertices in the mesh.
-    pub fn no_vertices(&self) -> usize {
-        self.connectivity_info.no_vertices()
-    }
-
-    /// Returns the number of edges in the mesh.
-    pub fn no_edges(&self) -> usize {
-        self.connectivity_info.no_halfedges() / 2
-    }
-
-    /// Returns the number of half-edges in the mesh.
-    pub fn no_halfedges(&self) -> usize {
-        self.connectivity_info.no_halfedges()
-    }
-
-    /// Returns the number of faces in the mesh.
-    pub fn no_faces(&self) -> usize {
-        self.connectivity_info.no_faces()
-    }
 }

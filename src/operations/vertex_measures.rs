@@ -4,6 +4,11 @@ use crate::mesh::*;
 
 /// # Vertex measures
 impl Mesh {
+    /// Returns the vertex position.
+    pub fn vertex_position(&self, vertex_id: VertexID) -> Vec3 {
+        self.position(vertex_id)
+    }
+
     /// Returns the normal of the vertex given as the average of the normals of the neighbouring faces.
     pub fn vertex_normal(&self, vertex_id: VertexID) -> Vec3 {
         let mut normal = Vec3::zero();

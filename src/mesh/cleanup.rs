@@ -3,7 +3,6 @@
 use crate::mesh::*;
 use std::collections::HashSet;
 
-/// # Clean-up
 impl Mesh {
     ///
     /// Merges overlapping faces, edges and vertices if it is possible without creating a non-manifold mesh.
