@@ -3,7 +3,7 @@
 use crate::mesh::*;
 use std::collections::HashSet;
 
-/// # Merge
+/// # Clean-up
 impl Mesh {
     ///
     /// Merges overlapping faces, edges and vertices if it is possible without creating a non-manifold mesh.
@@ -482,5 +482,14 @@ mod tests {
         assert_eq!(4, mesh.no_vertices());
         assert_eq!(10, mesh.no_halfedges());
         assert_eq!(2, mesh.no_faces());
+    }
+
+    #[test]
+    fn test_merge_overlapping_primitives_with_cube() {
+        let mut mesh: Mesh = TriMesh::cube().into();
+        mesh.merge_overlapping_primitives();
+        assert_eq!(mesh.no_faces(), 12);
+        assert_eq!(mesh.no_vertices(), 8);
+        mesh.is_valid().unwrap();
     }
 }

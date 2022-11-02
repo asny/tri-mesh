@@ -2,7 +2,7 @@ use crate::math::*;
 use crate::mesh::ids::*;
 use std::cell::RefCell;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub(super) struct ConnectivityInfo {
     vertices: RefCell<IDMap<VertexID, Vertex>>,
     halfedges: RefCell<IDMap<HalfEdgeID, HalfEdge>>,
@@ -221,7 +221,7 @@ impl ConnectivityInfo {
     }
 }
 
-impl std::fmt::Display for ConnectivityInfo {
+impl std::fmt::Debug for ConnectivityInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         writeln!(f, "**** VERTICES: ****")?;
         let vertices = RefCell::borrow(&self.vertices);
