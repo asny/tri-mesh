@@ -1,24 +1,8 @@
 //!
-//! The main struct of this crate is [Mesh](crate::mesh::Mesh) which represents a triangle mesh.
-//! Use the [Mesh::new] method to create a new mesh and [Mesh::export] to export it into a representation which can be visualized.
-//!
-//! # Features
-//!
-//! - Half-edge [Walker] to traverse the mesh
-//! - [Iterators](mesh/struct.Mesh.html#iterators) over primitives (vertices, half-edges, edges, faces)
-//! - Convenient [connectivity](mesh/struct.Mesh.html#connectivity) functionality (e.g. vertices of a face, edge between two vertices)
-//! - Measures on [vertices](mesh/struct.Mesh.html#vertex-measures), [edges](mesh/struct.Mesh.html#edge-measures) and [faces](mesh/struct.Mesh.html#face-measures) (e.g. position of vertex, area of face)
-//! - [Bounding box](mesh/struct.Mesh.html#bounding-box) functionality (e.g. constructing the axis aligned bounding box)
-//! - [Edit](mesh/struct.Mesh.html#edit) functionality (e.g. split edge, collapse edge, flip edge)
-//! - [Quality](mesh/struct.Mesh.html#quality) functionality (e.g. flip edges recursively to improve triangle quality, collapse small faces)
-//! - [Orientation](mesh/struct.Mesh.html#orientation) functionality (e.g. flip orientation of all faces)
-//! - [Transformations](mesh/struct.Mesh.html#transformations) affecting the vertex positions (e.g. moving a single vertex or rotate the entire mesh)
-//! - [Intersection](mesh/struct.Mesh.html#intersection) functionality (e.g. face/ray intersection, edge/point intersection)
-//! - [Merge](mesh/struct.Mesh.html#merge) used for merging of entire meshes (e.g. append one mesh to another or merge overlapping primitives in a mesh)
-//! - [Split](mesh/struct.Mesh.html#split) functionality (e.g. clone a subset of a mesh or split two meshes at their intersection)
-//! - And more..
-//!
-//! All functionality is implemented as methods on the [Mesh](crate::mesh::Mesh) struct, so take a look at that rather long list of methods for a complete overview.
+//! This crate contains a [Mesh] struct which represents a triangle mesh.
+//! It is implemented using a half-edge data structure which is efficient for creating, editing, traversing and computing on that mesh.
+//! Also, the mesh can easily be created from and exported into a format that is efficient for visualization.
+//! Finally, operations on the mesh is implemented as methods on the [Mesh] struct, so take a look at that rather long list of methods for a complete overview.
 //!
 
 #![warn(missing_docs)]

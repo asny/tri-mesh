@@ -1,12 +1,10 @@
-//! Defines a [Walker] for easy and efficient traversal of the mesh.
-//! See [Mesh](crate::mesh::Mesh) for how to construct a walker.
-
 use crate::mesh::connectivity_info::{ConnectivityInfo, HalfEdge};
 use crate::mesh::*;
 
 /// # Traversal
 /// Methods to construct a [Walker] which is used for easy and efficient traversal of the mesh.
 /// See [Walker] for more information and examples.
+/// Also see [Connectivity](#connectivity) for common connectivity utility functionality.
 impl Mesh {
     /// Creates an 'empty' [Walker], ie. a walker that is associated with any half-edge.
     pub(super) fn walker(&self) -> Walker {
@@ -31,7 +29,9 @@ impl Mesh {
 
 ///
 /// Used for easy and efficient traversal of the mesh.
-/// See [Mesh](../struct.Mesh.html#traversal) for how to construct a walker
+/// Also see [Connectivity](Mesh#connectivity) for common connectivity utility functionality.
+///
+/// Use [Mesh::walker_from_vertex], [Mesh::walker_from_halfedge] or [Mesh::walker_from_face] to construct a walker
 /// and the examples below for instructions on how to use a walker.
 ///
 /// **Note:** If you walk outside the mesh at some point, no error will be returned,
