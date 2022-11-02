@@ -71,6 +71,7 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::{Indices, Positions, TriMesh};
 
     #[test]
     fn test_one_connected_component() {
@@ -93,7 +94,7 @@ mod tests {
     }
 
     fn create_connected_test_object() -> Mesh {
-        RawMesh {
+        TriMesh {
             positions: Positions::F64(vec![
                 vec3(1.0, -1.0, -1.0),
                 vec3(1.0, -1.0, 1.0),
@@ -114,7 +115,7 @@ mod tests {
     }
 
     fn create_unconnected_test_object() -> Mesh {
-        RawMesh {
+        TriMesh {
             positions: Positions::F64(vec![
                 vec3(1.0, -1.0, -1.0),
                 vec3(1.0, -1.0, 1.0),

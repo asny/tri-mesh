@@ -27,7 +27,7 @@ impl Mesh {
     /// Returns the smallest axis aligned box which contains the entire mesh, ie. the axis aligned bounding box.
     pub fn axis_aligned_bounding_box(&self) -> Mesh {
         let (min_coord, max_coord) = self.extreme_coordinates();
-        let mut mesh: Mesh = RawMesh::cube().into();
+        let mut mesh: Mesh = three_d_asset::TriMesh::cube().into();
         let scale = 0.5 * (max_coord - min_coord);
         mesh.non_uniform_scale(scale.x, scale.y, scale.z);
         let translation = 0.5 * (max_coord + min_coord);
@@ -39,10 +39,11 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::{Indices, Positions, TriMesh};
 
     #[test]
     fn test_axis_aligned_bounding_box() {
-        let mut mesh: Mesh = RawMesh::cylinder(16).into();
+        let mut mesh: Mesh = TriMesh::cylinder(16).into();
         mesh.non_uniform_scale(4.5, 0.1, -4.5);
         mesh.translate(vec3(-1.5, 3.7, 9.1));
 

@@ -434,6 +434,7 @@ fn find_intersections_between_edge_face(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::{Indices, Positions, TriMesh};
 
     #[test]
     fn test_clone_subset() {
@@ -477,7 +478,7 @@ mod tests {
 
     #[test]
     fn test_face_face_stitching_at_edge() {
-        let mut mesh1: Mesh = RawMesh {
+        let mut mesh1: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(-2.0, 0.0, -2.0),
                 vec3(-2.0, 0.0, 2.0),
@@ -486,7 +487,7 @@ mod tests {
             ..Default::default()
         }
         .into();
-        let mut mesh2: Mesh = RawMesh {
+        let mut mesh2: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(-2.0, 0.0, 2.0),
                 vec3(-2.0, 0.0, -2.0),
@@ -516,7 +517,7 @@ mod tests {
 
     #[test]
     fn test_face_face_stitching_at_mid_edge() {
-        let mut mesh1: Mesh = RawMesh {
+        let mut mesh1: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(-2.0, 0.0, -2.0),
                 vec3(-2.0, 0.0, 2.0),
@@ -525,7 +526,7 @@ mod tests {
             ..Default::default()
         }
         .into();
-        let mut mesh2: Mesh = RawMesh {
+        let mut mesh2: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(-2.0, 0.0, 1.0),
                 vec3(-2.0, 0.0, -1.0),
@@ -588,7 +589,7 @@ mod tests {
 
     #[test]
     fn test_sphere_box_stitching() {
-        let mut mesh1: Mesh = RawMesh::sphere(3).into();
+        let mut mesh1: Mesh = TriMesh::sphere(3).into();
         for _ in 0..1 {
             for face_id in mesh1.face_iter() {
                 let p = mesh1.face_center(face_id).normalize();
@@ -661,7 +662,7 @@ mod tests {
     #[test]
     fn test_is_at_intersection() {
         let mesh1 = crate::test_utility::cube();
-        let mesh2: Mesh = RawMesh {
+        let mesh2: Mesh = TriMesh {
             indices: Indices::U8(vec![0, 1, 2, 0, 2, 3, 0, 3, 4]),
             positions: Positions::F64(vec![
                 vec3(-1.0, 1.0, 1.0),
@@ -721,7 +722,7 @@ mod tests {
     #[test]
     fn test_finding_face_edge_intersections() {
         let mesh1 = create_simple_mesh_x_z();
-        let mesh2: Mesh = RawMesh {
+        let mesh2: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(0.5, -0.5, 0.0),
                 vec3(0.5, 0.5, 0.75),
@@ -816,7 +817,7 @@ mod tests {
 
     #[test]
     fn test_split_face_two_times() {
-        let mut mesh1: Mesh = RawMesh {
+        let mut mesh1: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(-2.0, 0.0, -2.0),
                 vec3(-2.0, 0.0, 2.0),
@@ -827,7 +828,7 @@ mod tests {
         .into();
         let area1 = mesh1.face_area(mesh1.face_iter().next().unwrap());
 
-        let mut mesh2: Mesh = RawMesh {
+        let mut mesh2: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(0.2, -0.2, 0.5),
                 vec3(0.5, 0.5, 0.75),
@@ -868,7 +869,7 @@ mod tests {
 
     #[test]
     fn test_split_edge_two_times() {
-        let mut mesh1: Mesh = RawMesh {
+        let mut mesh1: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(0.0, 0.0, 2.0),
@@ -877,7 +878,7 @@ mod tests {
             ..Default::default()
         }
         .into();
-        let mut mesh2: Mesh = RawMesh {
+        let mut mesh2: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(0.0, -0.2, 0.5),
                 vec3(0.0, -0.2, 1.5),
@@ -912,7 +913,7 @@ mod tests {
 
     #[test]
     fn test_face_face_splitting() {
-        let mut mesh1: Mesh = RawMesh {
+        let mut mesh1: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(-2.0, 0.0, -2.0),
                 vec3(-2.0, 0.0, 2.0),
@@ -922,7 +923,7 @@ mod tests {
         }
         .into();
 
-        let mut mesh2: Mesh = RawMesh {
+        let mut mesh2: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(0.2, -0.2, 0.5),
                 vec3(0.5, 0.5, 0.75),
@@ -957,8 +958,8 @@ mod tests {
 
     #[test]
     fn test_box_box_splitting() {
-        let mut mesh1: Mesh = RawMesh::sphere(2).into();
-        let mut mesh2: Mesh = RawMesh::sphere(2).into();
+        let mut mesh1: Mesh = TriMesh::sphere(2).into();
+        let mut mesh2: Mesh = TriMesh::sphere(2).into();
         mesh2.translate(vec3(0.5, 0.5, 0.5));
 
         mesh1.split_primitives_at_intersection(&mut mesh2);
@@ -968,7 +969,7 @@ mod tests {
     }
 
     fn create_single_triangle() -> Mesh {
-        RawMesh {
+        TriMesh {
             positions: Positions::F64(vec![
                 vec3(0.5, 0.0, 0.25),
                 vec3(0.5, 0.5, 0.75),
@@ -989,7 +990,7 @@ mod tests {
             vec3(0.0, 0.0, 2.0),
             vec3(1.0, 0.0, 2.5),
         ];
-        RawMesh {
+        TriMesh {
             indices: Indices::U32(indices),
             positions: Positions::F64(positions),
             ..Default::default()
@@ -1007,7 +1008,7 @@ mod tests {
             vec3(0.5, -0.5, 2.0),
             vec3(0.5, 0.5, 2.5),
         ];
-        RawMesh {
+        TriMesh {
             indices: Indices::U32(indices),
             positions: Positions::F64(positions),
             ..Default::default()
@@ -1025,7 +1026,7 @@ mod tests {
             vec3(0.5, -0.5, 1.8),
             vec3(0.5, 0.5, 2.3),
         ];
-        RawMesh {
+        TriMesh {
             indices: Indices::U32(indices),
             positions: Positions::F64(positions),
             ..Default::default()

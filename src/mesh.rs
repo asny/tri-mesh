@@ -41,10 +41,10 @@ mod connectivity_info;
 use crate::mesh::connectivity_info::ConnectivityInfo;
 use std::collections::HashMap;
 
-pub use three_d_asset::{Indices, Positions, TriMesh as RawMesh};
+use three_d_asset::{Indices, Positions, TriMesh};
 
 ///
-/// Represents a triangle mesh. Use [RawMesh] to construct a new mesh.
+/// Represents a triangle mesh. Use [three_d_asset::TriMesh] to construct a new mesh.
 ///
 /// ## Functionality:
 /// - [Traversal](#traversal)
@@ -70,7 +70,7 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn new(input: &RawMesh) -> Self {
+    pub fn new(input: &TriMesh) -> Self {
         let no_vertices = input.vertex_count();
         let no_faces = input.triangle_count();
         let indices = input
@@ -146,7 +146,7 @@ impl Mesh {
         mesh
     }
 
-    pub fn to_raw(&self) -> RawMesh {
+    pub fn to_raw(&self) -> TriMesh {
         let vertices: Vec<VertexID> = self.vertex_iter().collect();
         let mut indices = Vec::with_capacity(self.no_faces() * 3);
         for face_id in self.face_iter() {
@@ -156,7 +156,7 @@ impl Mesh {
                 indices.push(index as u32);
             }
         }
-        RawMesh {
+        TriMesh {
             indices: Indices::U32(indices),
             positions: Positions::F64(
                 self.vertex_iter()
@@ -229,25 +229,25 @@ impl std::fmt::Display for Mesh {
     }
 }
 
-impl From<RawMesh> for Mesh {
-    fn from(mesh: RawMesh) -> Self {
+impl From<TriMesh> for Mesh {
+    fn from(mesh: TriMesh) -> Self {
         Self::new(&mesh)
     }
 }
 
-impl From<&RawMesh> for Mesh {
-    fn from(mesh: &RawMesh) -> Self {
+impl From<&TriMesh> for Mesh {
+    fn from(mesh: &TriMesh) -> Self {
         Self::new(mesh)
     }
 }
 
-impl From<Mesh> for RawMesh {
+impl From<Mesh> for TriMesh {
     fn from(mesh: Mesh) -> Self {
         mesh.to_raw()
     }
 }
 
-impl From<&Mesh> for RawMesh {
+impl From<&Mesh> for TriMesh {
     fn from(mesh: &Mesh) -> Self {
         mesh.to_raw()
     }
@@ -292,8 +292,8 @@ mod tests {
 
     #[test]
     fn test_indexed_export() {
-        let mesh: Mesh = RawMesh::cylinder(16).into();
-        let m: RawMesh = (&mesh).into();
+        let mesh: Mesh = TriMesh::cylinder(16).into();
+        let m: TriMesh = (&mesh).into();
         m.validate().unwrap();
 
         assert_eq!(m.triangle_count(), mesh.no_faces());
@@ -358,7 +358,7 @@ mod tests {
 
     #[test]
     fn test_with_cube() {
-        let mut mesh: Mesh = RawMesh::cube().into();
+        let mut mesh: Mesh = TriMesh::cube().into();
         mesh.merge_overlapping_primitives();
         assert_eq!(mesh.no_faces(), 12);
         assert_eq!(mesh.no_vertices(), 8);
@@ -397,7 +397,7 @@ mod tests {
 
     #[test]
     fn test_new_from_positions() {
-        let mesh: Mesh = RawMesh {
+        let mesh: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(1.0, 0.0, 0.0),
@@ -420,7 +420,7 @@ mod tests {
 
     #[test]
     fn test_extreme_coordinates() {
-        let mesh: Mesh = RawMesh::sphere(4).into();
+        let mesh: Mesh = TriMesh::sphere(4).into();
 
         let (min_coordinates, max_coordinates) = mesh.extreme_coordinates();
 
@@ -436,7 +436,7 @@ mod tests {
 
     #[test]
     fn test_is_closed_when_closed() {
-        let mesh: Mesh = RawMesh::sphere(4).into();
+        let mesh: Mesh = TriMesh::sphere(4).into();
         assert!(mesh.is_closed());
     }
 }

@@ -362,7 +362,7 @@ mod tests {
             vec3(1.0, 0.0, -0.5),
         ];
 
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             positions: Positions::F64(positions),
             ..Default::default()
         }
@@ -377,7 +377,7 @@ mod tests {
 
     #[test]
     fn test_merge_overlapping_primitives_of_cube() {
-        let mut mesh: Mesh = RawMesh::cube().into();
+        let mut mesh: Mesh = TriMesh::cube().into();
         mesh.merge_overlapping_primitives();
 
         assert_eq!(8, mesh.no_vertices());
@@ -388,7 +388,7 @@ mod tests {
 
     #[test]
     fn test_merge_overlapping_individual_faces() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(1.0, 0.0, -0.5),
@@ -413,7 +413,7 @@ mod tests {
 
     #[test]
     fn test_merge_two_overlapping_faces() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             indices: Indices::U8(vec![0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
@@ -438,7 +438,7 @@ mod tests {
 
     #[test]
     fn test_merge_three_overlapping_faces() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             indices: Indices::U8(vec![0, 1, 2, 1, 3, 2, 4, 6, 5, 6, 7, 5, 8, 10, 9]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
@@ -466,7 +466,7 @@ mod tests {
 
     #[test]
     fn test_merge_vertices() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
                 vec3(1.0, 0.0, -0.5),
@@ -498,7 +498,7 @@ mod tests {
 
     #[test]
     fn test_merge_halfedges() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             positions: Positions::F64(vec![
                 vec3(1.0, 0.0, 0.0),
                 vec3(0.0, 0.0, 0.0),

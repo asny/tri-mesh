@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn test_flip_orientation() {
-        let mut mesh: Mesh = RawMesh::sphere(4).into();
+        let mut mesh: Mesh = TriMesh::sphere(4).into();
 
         let mut map = std::collections::HashMap::new();
         for face_id in mesh.face_iter() {

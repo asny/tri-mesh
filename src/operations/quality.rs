@@ -159,10 +159,11 @@ fn triangle_quality(p0: &Vec3, p1: &Vec3, p2: &Vec3) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use three_d_asset::{Indices, Positions, TriMesh};
 
     #[test]
     fn test_collapse_small_faces() {
-        let mut mesh: Mesh = RawMesh {
+        let mut mesh: Mesh = TriMesh {
             indices: Indices::U8(vec![0, 2, 3, 0, 3, 1, 0, 1, 2]),
             positions: Positions::F64(vec![
                 vec3(0.0, 0.0, 0.0),
