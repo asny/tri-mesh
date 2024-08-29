@@ -13,18 +13,18 @@ pub type FaceIter = Box<dyn Iterator<Item = FaceID>>;
 /// An iterator over the half-edges starting in a given vertex created by [Mesh::vertex_halfedge_iter].
 pub struct VertexHalfedgeIter<'a> {
     walker: Walker<'a>,
-    start: HalfEdgeID,
+    start: Option<HalfEdgeID>,
     is_done: bool,
 }
 
 impl<'a> VertexHalfedgeIter<'a> {
     fn new(vertex_id: VertexID, connectivity_info: &'a ConnectivityInfo) -> VertexHalfedgeIter<'a> {
         let walker = Walker::new(connectivity_info).into_vertex_halfedge_walker(vertex_id);
-        let start = walker.halfedge_id().unwrap();
+        let start = walker.halfedge_id();
         VertexHalfedgeIter {
             walker,
             start,
-            is_done: false,
+            is_done: start.is_none(),
         }
     }
 }
@@ -51,7 +51,10 @@ impl<'a> Iterator for VertexHalfedgeIter<'a> {
                 self.walker.as_twin();
             }
         }
-        self.is_done = self.walker.halfedge_id().unwrap() == self.start;
+        self.is_done = self
+            .start
+            .map(|start| self.walker.halfedge_id().unwrap() == start)
+            .unwrap_or(true);
         Some(curr)
     }
 }
