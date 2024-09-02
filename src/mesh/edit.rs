@@ -332,19 +332,29 @@ impl Mesh {
 
     ///
     /// Adds a face to the mesh and connects it to the given vertices which can be created using the [Mesh::add_vertex] method.
-    /// Also creates edges between the vertices if they do not already exist.
+    /// Also creates edges between the vertices if they do not already exist. Returns an error if the action results in a non-manifold mesh.
     ///
     pub fn add_face(
         &mut self,
         vertex_id1: VertexID,
         vertex_id2: VertexID,
         vertex_id3: VertexID,
-    ) -> FaceID {
+    ) -> Result<FaceID, Error> {
         let edges = [
             self.connecting_edge(vertex_id1, vertex_id2),
             self.connecting_edge(vertex_id2, vertex_id3),
             self.connecting_edge(vertex_id3, vertex_id1),
         ];
+
+        for edge in edges {
+            if let Some(edge) = edge {
+                if self.walker_from_halfedge(edge).face_id().is_some() {
+                    return Err(Error::ActionWillResultInNonManifoldMesh(
+                        "add_face".to_string(),
+                    ));
+                }
+            }
+        }
 
         let face_id = self
             .connectivity_info
@@ -374,7 +384,7 @@ impl Mesh {
             };
             self.connectivity_info.set_halfedge_twin(twin, halfedge);
         }
-        face_id
+        Ok(face_id)
     }
 
     ///
@@ -806,11 +816,12 @@ mod tests {
             let vertex_id1 = mesh.add_vertex(vec3(1.0, i as f64, 0.0));
             let vertex_id2 = mesh.add_vertex(vec3(0.0, i as f64, 0.0));
             let vertex_id3 = mesh.add_vertex(vec3(0.0, i as f64, 1.0));
-            mesh.add_face(vertex_id1, vertex_id2, vertex_id3);
+            mesh.add_face(vertex_id1, vertex_id2, vertex_id3).unwrap();
             let vertex_id4 = mesh.add_vertex(vec3(1.0, i as f64, 1.0));
-            mesh.add_face(vertex_id1, vertex_id3, vertex_id4);
+            mesh.add_face(vertex_id1, vertex_id3, vertex_id4).unwrap();
             let vertex_id5 = mesh.add_vertex(vec3(2.0, i as f64, 2.0));
-            mesh.add_face(vertex_id1, vertex_id4, vertex_id5);
+            assert!(mesh.add_face(vertex_id1, vertex_id5, vertex_id4).is_err());
+            mesh.add_face(vertex_id1, vertex_id4, vertex_id5).unwrap();
         }
 
         assert_eq!(mesh.no_vertices(), 15);

@@ -24,7 +24,7 @@ use thiserror::Error;
 pub enum Error {
     #[error("configuration is not valid: {0}")]
     ActionWillResultInInvalidMesh(String),
-    #[error("action will produce a non-manifold mesh: {0}")]
+    #[error("action {0} will produce a non-manifold mesh")]
     ActionWillResultInNonManifoldMesh(String),
     #[error("the mesh has ended up in an invalid state: {0}")]
     MeshIsInvalid(String),
