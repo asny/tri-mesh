@@ -1,20 +1,12 @@
 pub use crate::math::*;
 
 mod io;
-#[doc(inline)]
-pub use io::*;
 
 mod utility;
-#[doc(inline)]
-pub use utility::*;
 
 mod append;
-#[doc(inline)]
-pub use append::*;
 
 mod cleanup;
-#[doc(inline)]
-pub use cleanup::*;
 
 mod ids;
 #[doc(inline)]
@@ -29,12 +21,8 @@ mod traversal;
 pub use traversal::*;
 
 mod edit;
-#[doc(inline)]
-pub use edit::*;
 
 mod orientation;
-#[doc(inline)]
-pub use orientation::*;
 
 mod connectivity_info;
 
