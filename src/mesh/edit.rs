@@ -340,18 +340,39 @@ impl Mesh {
         vertex_id2: VertexID,
         vertex_id3: VertexID,
     ) -> FaceID {
+        let edges = [
+            self.connecting_edge(vertex_id1, vertex_id2),
+            self.connecting_edge(vertex_id2, vertex_id3),
+            self.connecting_edge(vertex_id3, vertex_id1),
+        ];
+
         let face_id = self
             .connectivity_info
             .create_face(vertex_id1, vertex_id2, vertex_id3);
-        for halfedge in self.halfedge_iter() {
-            let walker = self.walker_from_halfedge(halfedge);
-            let new_halfedge = self.connectivity_info.new_halfedge(
-                walker.into_next().into_next().vertex_id(),
-                None,
-                None,
-            );
-            self.connectivity_info
-                .set_halfedge_twin(new_halfedge, halfedge);
+
+        for halfedge in self.face_halfedge_iter(face_id) {
+            let target_vertex = self.walker_from_halfedge(halfedge).vertex_id().unwrap();
+            let i = if target_vertex == vertex_id2 {
+                0
+            } else if target_vertex == vertex_id3 {
+                1
+            } else {
+                2
+            };
+            let twin = if let Some(old_halfedge) = edges[i] {
+                let twin = self.walker_from_halfedge(old_halfedge).twin_id().unwrap();
+                self.connectivity_info.remove_halfedge(old_halfedge);
+                twin
+            } else {
+                let walker = self.walker_from_halfedge(halfedge);
+                let new_halfedge = self.connectivity_info.new_halfedge(
+                    walker.into_next().into_next().vertex_id(),
+                    None,
+                    None,
+                );
+                new_halfedge
+            };
+            self.connectivity_info.set_halfedge_twin(twin, halfedge);
         }
         face_id
     }
@@ -776,5 +797,26 @@ mod tests {
         assert_eq!(10, mesh.no_halfedges());
         assert_eq!(2, mesh.no_faces());
         mesh.is_valid().unwrap();
+    }
+
+    #[test]
+    fn test_add_face() {
+        let mut mesh = Mesh::new(&three_d_asset::TriMesh::default());
+        for i in 0..3 {
+            let vertex_id1 = mesh.add_vertex(vec3(1.0, i as f64, 0.0));
+            let vertex_id2 = mesh.add_vertex(vec3(0.0, i as f64, 0.0));
+            let vertex_id3 = mesh.add_vertex(vec3(0.0, i as f64, 1.0));
+            mesh.add_face(vertex_id1, vertex_id2, vertex_id3);
+            let vertex_id4 = mesh.add_vertex(vec3(1.0, i as f64, 1.0));
+            mesh.add_face(vertex_id1, vertex_id3, vertex_id4);
+            let vertex_id5 = mesh.add_vertex(vec3(2.0, i as f64, 2.0));
+            mesh.add_face(vertex_id1, vertex_id4, vertex_id5);
+        }
+
+        assert_eq!(mesh.no_vertices(), 15);
+        assert_eq!(mesh.no_edges(), 21);
+        assert_eq!(mesh.no_halfedges(), 42);
+        assert_eq!(mesh.no_faces(), 9);
+        mesh.is_valid().unwrap()
     }
 }
